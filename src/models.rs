@@ -3,12 +3,14 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// User details.
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
+#[derive(Debug, Clone, Serialize, Selectable, Deserialize, Queryable, Insertable)]
 #[diesel(table_name = orgs)]
 pub struct Org {
     pub id: String,
     pub name: String,
     pub public: bool,
+    pub contact_email: Option<String>,
+    pub contact_phone: Option<String>,
 }
 
 /// New user details.

@@ -36,6 +36,21 @@ async fn get_org(
     })
 }
 
+/// List orgs
+#[get("/orgs")]
+async fn get_orgs(pool: web::Data<DbPool>) -> actix_web::Result<impl Responder> {
+    let orgs = web::block(move || {
+        let mut conn = pool.get()?;
+
+        actions::list_org(&mut conn)
+    })
+    .await?
+    // map diesel query errors to a 500 error response
+    .map_err(error::ErrorInternalServerError)?;
+
+    Ok(HttpResponse::Ok().json(orgs))
+}
+
 /// Creates new org.
 ///
 /// Extracts:
@@ -80,6 +95,7 @@ async fn main() -> std::io::Result<()> {
             // add route handlers
             .service(get_org)
             .service(add_org)
+            .service(get_orgs)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

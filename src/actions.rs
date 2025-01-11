@@ -20,6 +20,14 @@ pub fn find_org_by_uid(
     Ok(user)
 }
 
+pub fn list_org(conn: &mut SqliteConnection) -> Result<Vec<models::Org>, DbError> {
+    use crate::schema::orgs::dsl::*;
+
+    let user = orgs.select(models::Org::as_select()).load(conn)?;
+
+    Ok(user)
+}
+
 /// Run query using Diesel to insert a new database row and return the result.
 pub fn insert_new_org(
     conn: &mut SqliteConnection,
@@ -34,6 +42,8 @@ pub fn insert_new_org(
         id: Uuid::new_v4().to_string(),
         name: nm.to_owned(),
         public: false,
+        contact_email: None,
+        contact_phone: None,
     };
 
     diesel::insert_into(orgs).values(&new_org).execute(conn)?;
