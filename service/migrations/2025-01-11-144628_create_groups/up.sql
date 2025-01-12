@@ -1,0 +1,4 @@
+CREATE TABLE groups (
+  id TEXT NOT NULL PRIMARY KEY,
+  name VARCHAR NOT NULL
+);
