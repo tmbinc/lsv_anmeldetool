@@ -3,12 +3,9 @@ use crate::{actions, DbPool, ErrorResponse};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
 use apistos::api_operation;
-use apistos::ApiComponent;
-use diesel::prelude::*;
 use uuid::Uuid;
 
 /// Finds org by UID.
-///
 #[api_operation(summary = "get one org by ID")]
 pub async fn get_org(
     pool: web::Data<DbPool>,
@@ -16,12 +13,10 @@ pub async fn get_org(
 ) -> Result<Json<Org>, ErrorResponse> {
     let user_uid = user_uid.into_inner();
 
-    // use web::block to offload blocking Diesel queries without blocking server thread
     let user = web::block(move || {
-        // note that obtaining a connection from the pool is also potentially blocking
         let mut conn = pool.get()?;
 
-        actions::find_org_by_uid(&mut conn, user_uid)
+        actions::orgs::find_org_by_uid(&mut conn, user_uid)
     })
     .await
     .unwrap() // fixme
@@ -46,13 +41,10 @@ pub async fn update_org(
     user_uid: Path<Uuid>,
     data: Json<Org>,
 ) -> Result<Json<Org>, ErrorResponse> {
-    println!("update!");
-    // use web::block to offload blocking Diesel queries without blocking server thread
     let user = web::block(move || {
-        // note that obtaining a connection from the pool is also potentially blocking
         let mut conn = pool.get()?;
 
-        actions::update_org(&mut conn, *user_uid, data.into_inner())
+        actions::orgs::update_org(&mut conn, *user_uid, data.into_inner())
     })
     .await
     .unwrap() // fixme
@@ -60,15 +52,6 @@ pub async fn update_org(
     .map_err(error::ErrorInternalServerError)
     .unwrap(); // fixme
 
-    // match user {
-    //     // user was found; return 200 response with JSON formatted user object
-    //     Some(user) => Ok(Json(user)),
-
-    //     // user was not found; return 404 response with error message
-    //     None => Err(ErrorResponse::NotFound(format!(
-    //         "No user found with UID: {user_uid}"
-    //     ))),
-    // }
     Ok(Json(user))
 }
 
@@ -78,7 +61,7 @@ pub async fn get_orgs(pool: web::Data<DbPool>) -> Result<Json<Vec<Org>>, ErrorRe
     let orgs = web::block(move || {
         let mut conn = pool.get()?;
 
-        actions::list_org(&mut conn)
+        actions::orgs::list_org(&mut conn)
     })
     .await?
     // map diesel query errors to a 500 error response
@@ -97,7 +80,7 @@ pub async fn add_org(
         // note that obtaining a connection from the pool is also potentially blocking
         let mut conn = pool.get()?;
 
-        actions::insert_new_org(&mut conn, &form.name)
+        actions::orgs::insert_new_org(&mut conn, &form.name)
     })
     .await?
     // map diesel query errors to a 500 error response

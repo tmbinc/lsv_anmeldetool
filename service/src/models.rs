@@ -1,5 +1,6 @@
-use crate::schema::{orgs, teams};
+use crate::schema::{events, orgs, teams};
 use apistos::ApiComponent;
+use chrono::NaiveDate;
 use diesel::prelude::*;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -69,4 +70,26 @@ impl NewTeam {
             org: org.into(),
         }
     }
+}
+
+/// Event details
+#[derive(
+    Debug,
+    Clone,
+    Serialize,
+    Selectable,
+    Deserialize,
+    Queryable,
+    Insertable,
+    JsonSchema,
+    ApiComponent,
+    AsChangeset,
+    Identifiable,
+)]
+#[diesel(table_name = events)]
+pub struct Event {
+    pub id: String,
+    pub name: String,
+    pub public: bool,
+    pub begin: Option<NaiveDate>,
 }

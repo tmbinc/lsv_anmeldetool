@@ -95,7 +95,14 @@ async fn main() -> std::io::Result<()> {
                             .route(put().to(api::orgs::update_org)),
                     )
                     .service(resource("orgs").route(get().to(api::orgs::get_orgs)))
-                    .service(resource("org").route(post().to(api::orgs::add_org))),
+                    .service(resource("org").route(post().to(api::orgs::add_org)))
+                    .service(
+                        resource("event/{event}")
+                            .route(get().to(api::events::get_event))
+                            .route(put().to(api::events::update_event)),
+                    )
+                    .service(resource("events").route(get().to(api::events::get_events)))
+                    .service(resource("event").route(post().to(api::events::add_event))),
             )
             .build("/openapi.json")
     })
