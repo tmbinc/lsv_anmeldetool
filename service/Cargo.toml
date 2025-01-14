@@ -13,3 +13,6 @@ r2d2 = "0.8.10"
 serde = { version = "1.0.217", features = ["derive"] }
 uid = "0.1.8"
 uuid = { version = "1.6", features = ["v4", "v7", "serde"] }
+schemars = { package = "apistos-schemars", version = "0.8" }
+apistos = { version = "0.4", features = ["uuid"] }
+actix-cors = "0.7.0"

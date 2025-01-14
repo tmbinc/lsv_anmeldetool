@@ -1,9 +1,23 @@
 use crate::schema::{orgs, teams};
+use apistos::ApiComponent;
 use diesel::prelude::*;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Org details.
-#[derive(Debug, Clone, Serialize, Selectable, Deserialize, Queryable, Insertable)]
+#[derive(
+    Debug,
+    Clone,
+    Serialize,
+    Selectable,
+    Deserialize,
+    Queryable,
+    Insertable,
+    JsonSchema,
+    ApiComponent,
+    AsChangeset,
+    Identifiable,
+)]
 #[diesel(table_name = orgs)]
 pub struct Org {
     pub id: String,
@@ -14,7 +28,7 @@ pub struct Org {
 }
 
 /// New org details.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
 pub struct NewOrg {
     pub name: String,
 }

@@ -20,6 +20,15 @@ pub fn find_org_by_uid(
     Ok(user)
 }
 
+pub fn update_org(
+    conn: &mut SqliteConnection,
+    uid: Uuid,
+    data: models::Org,
+) -> Result<models::Org, DbError> {
+    diesel::update(&data).set(&data).execute(conn);
+    Ok(data)
+}
+
 pub fn list_org(conn: &mut SqliteConnection) -> Result<Vec<models::Org>, DbError> {
     use crate::schema::orgs::dsl::*;
 

@@ -1,79 +1,70 @@
-use actix_web::{error, get, middleware, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_cors::Cors;
+use actix_web::http::StatusCode;
+use actix_web::middleware::Logger;
+use actix_web::web::{Json, Path};
+use actix_web::ResponseError;
+use actix_web::{error, middleware, web, App, HttpResponse, HttpServer, Responder};
+use apistos::actix::CreatedJson;
+use apistos::api_operation;
+use apistos::app::OpenApiWrapper;
+use apistos::info::Info;
+use apistos::spec::Spec;
+use apistos::web::{get, post, put, resource, scope};
+use apistos::ApiComponent;
+use apistos::ApiErrorComponent;
+use core::fmt::Formatter;
 use diesel::{prelude::*, r2d2};
+use models::Org;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::fmt::Display;
+use std::net::Ipv4Addr;
 use uuid::Uuid;
 
 mod actions;
+mod api;
 mod models;
 mod schema;
 
 type DbPool = r2d2::Pool<r2d2::ConnectionManager<SqliteConnection>>;
 
-/// Finds org by UID.
-#[get("/org/{org_id}")]
-async fn get_org(
-    pool: web::Data<DbPool>,
-    user_uid: web::Path<Uuid>,
-) -> actix_web::Result<impl Responder> {
-    let user_uid = user_uid.into_inner();
-
-    // use web::block to offload blocking Diesel queries without blocking server thread
-    let user = web::block(move || {
-        // note that obtaining a connection from the pool is also potentially blocking
-        let mut conn = pool.get()?;
-
-        actions::find_org_by_uid(&mut conn, user_uid)
-    })
-    .await?
-    // map diesel query errors to a 500 error response
-    .map_err(error::ErrorInternalServerError)?;
-
-    Ok(match user {
-        // user was found; return 200 response with JSON formatted user object
-        Some(user) => HttpResponse::Ok().json(user),
-
-        // user was not found; return 404 response with error message
-        None => HttpResponse::NotFound().body(format!("No user found with UID: {user_uid}")),
-    })
+#[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
+#[openapi_error(
+    status(code = 403),
+    status(code = 404),
+    status(code = 405, description = "Invalid input"),
+    status(code = 409)
+)]
+pub enum ErrorResponse {
+    MethodNotAllowed(String),
+    NotFound(String),
+    Conflict(String),
+    Unauthorized(String),
+    Other,
 }
 
-/// List orgs
-#[get("/orgs")]
-async fn get_orgs(pool: web::Data<DbPool>) -> actix_web::Result<impl Responder> {
-    let orgs = web::block(move || {
-        let mut conn = pool.get()?;
-
-        actions::list_org(&mut conn)
-    })
-    .await?
-    // map diesel query errors to a 500 error response
-    .map_err(error::ErrorInternalServerError)?;
-
-    Ok(HttpResponse::Ok().json(orgs))
+impl Display for ErrorResponse {
+    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
 }
 
-/// Creates new org.
-///
-/// Extracts:
-/// - the database pool handle from application data
-/// - a JSON form containing new user info from the request body
-#[post("/org")]
-async fn add_org(
-    pool: web::Data<DbPool>,
-    form: web::Json<models::NewOrg>,
-) -> actix_web::Result<impl Responder> {
-    // use web::block to offload blocking Diesel queries without blocking server thread
-    let org = web::block(move || {
-        // note that obtaining a connection from the pool is also potentially blocking
-        let mut conn = pool.get()?;
+impl ResponseError for ErrorResponse {
+    fn status_code(&self) -> StatusCode {
+        todo!()
+    }
+}
 
-        actions::insert_new_org(&mut conn, &form.name)
-    })
-    .await?
-    // map diesel query errors to a 500 error response
-    .map_err(error::ErrorInternalServerError)?;
-
-    // user was added successfully; return 201 response with new user info
-    Ok(HttpResponse::Created().json(org))
+impl From<actix_web::Error> for ErrorResponse {
+    fn from(_value: actix_web::Error) -> Self {
+        Self::Other
+    }
+}
+impl From<error::BlockingError> for ErrorResponse {
+    fn from(_value: error::BlockingError) -> Self {
+        Self::Other
+    }
 }
 
 #[actix_web::main]
@@ -87,15 +78,36 @@ async fn main() -> std::io::Result<()> {
     log::info!("starting HTTP server at http://localhost:8080");
 
     HttpServer::new(move || {
+        let spec = Spec {
+            info: Info {
+                title: "An API".to_string(),
+                version: "1.0.0".to_string(),
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let cors = Cors::permissive();
+
         App::new()
+            .wrap(cors)
+            .document(spec)
             // add DB pool handle to app data; enables use of `web::Data<DbPool>` extractor
             .app_data(web::Data::new(pool.clone()))
             // add request logger middleware
             .wrap(middleware::Logger::default())
             // add route handlers
-            .service(get_org)
-            .service(add_org)
-            .service(get_orgs)
+            .service(
+                scope("/api/v1")
+                    .service(
+                        resource("org/{org}")
+                            .route(get().to(api::orgs::get_org))
+                            .route(put().to(api::orgs::update_org)),
+                    )
+                    .service(resource("orgs").route(get().to(api::orgs::get_orgs)))
+                    .service(resource("org").route(post().to(api::orgs::add_org))),
+            )
+            .build("/openapi.json")
     })
     .bind(("127.0.0.1", 8080))?
     .run()
