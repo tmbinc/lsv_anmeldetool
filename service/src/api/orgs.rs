@@ -1,26 +1,10 @@
 use crate::models::{self, Org};
 use crate::{actions, DbPool, ErrorResponse};
-use actix_cors::Cors;
-use actix_web::http::StatusCode;
-use actix_web::middleware::Logger;
 use actix_web::web::{Json, Path};
-use actix_web::ResponseError;
-use actix_web::{error, middleware, web, App, HttpResponse, HttpServer, Responder};
-use apistos::actix::CreatedJson;
+use actix_web::{error, web};
 use apistos::api_operation;
-use apistos::app::OpenApiWrapper;
-use apistos::info::Info;
-use apistos::spec::Spec;
-use apistos::web::{get, post, put, resource, scope};
 use apistos::ApiComponent;
-use apistos::ApiErrorComponent;
-use core::fmt::Formatter;
-use diesel::{prelude::*, r2d2};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
-use std::error::Error;
-use std::fmt::Display;
-use std::net::Ipv4Addr;
+use diesel::prelude::*;
 use uuid::Uuid;
 
 /// Finds org by UID.
