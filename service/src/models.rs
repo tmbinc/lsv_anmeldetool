@@ -93,3 +93,9 @@ pub struct Event {
     pub public: bool,
     pub begin: Option<NaiveDate>,
 }
+
+/// New event details.
+#[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+pub struct NewEvent {
+    pub name: String,
+}

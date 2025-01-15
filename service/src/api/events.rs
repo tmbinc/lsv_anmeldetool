@@ -1,4 +1,4 @@
-use crate::models::Event;
+use crate::models::{Event, NewEvent};
 use crate::{actions, DbPool, ErrorResponse};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
@@ -73,7 +73,7 @@ pub async fn get_events(pool: web::Data<DbPool>) -> Result<Json<Vec<Event>>, Err
 #[api_operation(summary = "add an event")]
 pub async fn add_event(
     pool: web::Data<DbPool>,
-    form: web::Json<Event>,
+    form: web::Json<NewEvent>,
 ) -> Result<Json<Event>, ErrorResponse> {
     // use web::block to offload blocking Diesel queries without blocking server thread
     let org = web::block(move || {

@@ -45,7 +45,7 @@ pub fn insert_new_event(
 
     let new_event = models::Event {
         id: Uuid::new_v4().to_string(),
-        name: "name".into(),
+        name: nm.to_string(),
         public: false,
         begin: None,
     };

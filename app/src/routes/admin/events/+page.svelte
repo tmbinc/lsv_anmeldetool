@@ -1,6 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { listOrgs, getOrg, type Org, updateOrg } from "../../../api/api";
+  import {
+    listEvents,
+    getEvent,
+    type Event,
+    updateEvent,
+    addEvent,
+  } from "../../../api/api";
   import {
     Button,
     Checkbox,
@@ -15,31 +21,35 @@
   import type { components } from "../../../api/api.d";
 
   let loading = false;
-  let orgs: Event[] = $state([]);
+  let events: Event[] = $state([]);
+  let event_changed: Set<string> = $state(new Set<string>());
 
   onMount(async () => {
-    const request = listOrgs(undefined);
+    const request = listEvents(undefined);
     const resp = await request.result;
     if (resp.ok) {
-      orgs = resp.data;
+      events = resp.data;
     }
   });
 
-  function add() {
-    orgs.push({
-      name: "new",
-      id: "",
-      public: false,
-    });
-    console.log(orgs);
+  const add = async () => {
+    const request = addEvent({ name: "new" });
+    const resp = await request.result;
+    if (resp.ok) {
+      events.push(resp.data);
+    }
+  };
+
+  function update(id: string) {
+    let event_to_update = events.find((event) => event.id == id);
+    if (event_to_update) {
+      updateEvent({ ...event_to_update, event: event_to_update.id });
+      event_changed.delete(id);
+    }
   }
 
-  function update(id: String) {
-    let org_to_update = orgs.find((org) => org.id == id);
-    if (org_to_update) {
-      console.log("updating", org_to_update.id);
-      updateOrg({ ...org_to_update, org: org_to_update.id });
-    }
+  function changed(event: Event) {
+    event_changed.add(event.id);
   }
 </script>
 
@@ -56,38 +66,38 @@
     <Table>
       <TableHead>
         <TableHeadCell>Name</TableHeadCell>
-        <TableHeadCell>Contact Email</TableHeadCell>
-        <TableHeadCell>Contact Phone</TableHeadCell>
+        <TableHeadCell>Date</TableHeadCell>
         <TableHeadCell>Public</TableHeadCell>
         <TableHeadCell>Edit</TableHeadCell>
       </TableHead>
 
       <TableBody>
-        {#each orgs as org}
+        {#each events as event}
+          {event_changed.has(event.id)}
           <TableBodyRow>
             <TableBodyCell
               ><div
                 contenteditable="true"
-                bind:innerText={org.name}
+                onchange={() => changed(event)}
+                bind:innerText={event.name}
               ></div></TableBodyCell
             >
             <TableBodyCell
               ><div
                 contenteditable="true"
-                bind:innerText={org.contact_email}
-              ></div></TableBodyCell
-            >
-            <TableBodyCell
-              ><div
-                contenteditable="true"
-                bind:innerText={org.contact_phone}
+                onchange={() => changed(event)}
+                bind:innerText={event.begin}
               ></div></TableBodyCell
             >
             <TableBodyCell>
-              <Checkbox bind:checked={org.public}></Checkbox>
+              <Checkbox
+                bind:checked={event.public}
+                onchange={() => changed(event)}
+              ></Checkbox>
             </TableBodyCell>
             <TableBodyCell
-              ><Button on:click={() => update(org.id)}>Update</Button
+              ><Button on:click={() => update(event.id)}>Update</Button>
+              <Button href="/admin/event/{event.id}">Edit Details</Button
               ></TableBodyCell
             >
           </TableBodyRow>
