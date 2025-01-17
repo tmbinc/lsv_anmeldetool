@@ -3,558 +3,338 @@
  * Do not make direct changes to the file.
  */
 
+
 export interface paths {
-    "/api/v1/org/{org}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** get one org by ID */
-        get: operations["get_api-v1-org-e5659494460fbdef2fe5e110ad7644e8"];
-        /** update org */
-        put: operations["put_api-v1-org-e5659494460fbdef2fe5e110ad7644e8"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/orgs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** get list of orgs */
-        get: operations["get_api-v1-orgs-4bb4bb74212e29d1e33641b38d211873"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/org": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** add an org */
-        post: operations["post_api-v1-org-4d6e7ea32cc332b1579e5eb57812ec6c"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/event/{event}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** get one event by ID */
-        get: operations["get_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
-        /** update event */
-        put: operations["put_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/events": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** get list of events */
-        get: operations["get_api-v1-events-bc4c42038b2c2f0b5c7deb650fb28842"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/event": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** add an event */
-        post: operations["post_api-v1-event-28122581fdbc5bd19bb7de68ab3a43f6"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
+  "/api/v1/org/{org}": {
+    /** get one org by ID */
+    get: operations["get_api-v1-org-e5659494460fbdef2fe5e110ad7644e8"];
+    /** update org */
+    put: operations["put_api-v1-org-e5659494460fbdef2fe5e110ad7644e8"];
+  };
+  "/api/v1/orgs": {
+    /** get list of orgs */
+    get: operations["get_api-v1-orgs-4bb4bb74212e29d1e33641b38d211873"];
+  };
+  "/api/v1/org": {
+    /** add an org */
+    post: operations["post_api-v1-org-4d6e7ea32cc332b1579e5eb57812ec6c"];
+  };
+  "/api/v1/event/{event}": {
+    /** get one event by ID */
+    get: operations["get_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
+    /** update event */
+    put: operations["put_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
+  };
+  "/api/v1/events": {
+    /** get list of events */
+    get: operations["get_api-v1-events-bc4c42038b2c2f0b5c7deb650fb28842"];
+  };
+  "/api/v1/event": {
+    /** add an event */
+    post: operations["post_api-v1-event-28122581fdbc5bd19bb7de68ab3a43f6"];
+  };
 }
+
 export type webhooks = Record<string, never>;
+
 export interface components {
-    schemas: {
-        /**
-         * Event
-         * @description Event details
-         */
-        Event: {
-            /** Format: date */
-            begin?: string | null;
-            id: string;
-            name: string;
-            public: boolean;
-        };
-        /**
-         * NewEvent
-         * @description New event details.
-         */
-        NewEvent: {
-            name: string;
-        };
-        /**
-         * NewOrg
-         * @description New org details.
-         */
-        NewOrg: {
-            name: string;
-        };
-        /**
-         * Org
-         * @description Org details.
-         */
-        Org: {
-            contact_email?: string | null;
-            contact_phone?: string | null;
-            id: string;
-            name: string;
-            public: boolean;
-        };
+  schemas: {
+    /**
+     * Event
+     * @description Event details
+     */
+    Event: {
+      /** Format: date */
+      begin?: string | null;
+      id: string;
+      name: string;
+      public: boolean;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /**
+     * NewEvent
+     * @description New event details.
+     */
+    NewEvent: {
+      name: string;
+    };
+    /**
+     * NewOrg
+     * @description New org details.
+     */
+    NewOrg: {
+      name: string;
+    };
+    /**
+     * Org
+     * @description Org details.
+     */
+    Org: {
+      contact_email?: string | null;
+      contact_phone?: string | null;
+      id: string;
+      name: string;
+      public: boolean;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
+
 export type $defs = Record<string, never>;
+
+export type external = Record<string, never>;
+
 export interface operations {
-    "get_api-v1-org-e5659494460fbdef2fe5e110ad7644e8": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                org: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Org"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid input */
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+
+  /** get one org by ID */
+  "get_api-v1-org-e5659494460fbdef2fe5e110ad7644e8": {
+    parameters: {
+      path: {
+        org: string;
+      };
     };
-    "put_api-v1-org-e5659494460fbdef2fe5e110ad7644e8": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                org: string;
-            };
-            cookie?: never;
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Org"];
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Org"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Org"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid input */
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
     };
-    "get_api-v1-orgs-4bb4bb74212e29d1e33641b38d211873": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Org"][];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid input */
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  /** update org */
+  "put_api-v1-org-e5659494460fbdef2fe5e110ad7644e8": {
+    parameters: {
+      path: {
+        org: string;
+      };
     };
-    "post_api-v1-org-4d6e7ea32cc332b1579e5eb57812ec6c": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["NewOrg"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Org"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid input */
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Org"];
+      };
     };
-    "get_api-v1-event-616b52a3214d1d1a472d3a61bef77f20": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                event: string;
-            };
-            cookie?: never;
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Org"];
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Event"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid input */
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
     };
-    "put_api-v1-event-616b52a3214d1d1a472d3a61bef77f20": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                event: string;
-            };
-            cookie?: never;
+  };
+  /** get list of orgs */
+  "get_api-v1-orgs-4bb4bb74212e29d1e33641b38d211873": {
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Org"][];
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Event"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Event"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid input */
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
     };
-    "get_api-v1-events-bc4c42038b2c2f0b5c7deb650fb28842": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Event"][];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid input */
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  /** add an org */
+  "post_api-v1-org-4d6e7ea32cc332b1579e5eb57812ec6c": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewOrg"];
+      };
     };
-    "post_api-v1-event-28122581fdbc5bd19bb7de68ab3a43f6": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Org"];
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["NewEvent"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Event"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid input */
-            405: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
     };
+  };
+  /** get one event by ID */
+  "get_api-v1-event-616b52a3214d1d1a472d3a61bef77f20": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Event"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** update event */
+  "put_api-v1-event-616b52a3214d1d1a472d3a61bef77f20": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Event"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Event"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get list of events */
+  "get_api-v1-events-bc4c42038b2c2f0b5c7deb650fb28842": {
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Event"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** add an event */
+  "post_api-v1-event-28122581fdbc5bd19bb7de68ab3a43f6": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewEvent"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Event"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
 }

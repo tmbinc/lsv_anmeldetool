@@ -14,15 +14,17 @@
   import type { ApiRequest } from "@cocreators-ee/apity";
   import type { components } from "../../../api/api.d";
 
-  let loading = false;
+  let loading = $state(false);
   let orgs: Org[] = $state([]);
+  let changed: string[] = $state([]);
 
   onMount(async () => {
     loading = true;
-    const request = listOrgs(undefined);
+    const request = listOrgs({});
     const resp = await request.result;
     if (resp.ok) {
       orgs = resp.data;
+      changed = [];
     }
     loading = false;
   });
@@ -41,6 +43,25 @@
     if (org_to_update) {
       console.log("updating", org_to_update.id);
       updateOrg({ ...org_to_update, org: org_to_update.id });
+      changed = changed.filter((item) => item != id);
+    }
+  }
+
+  async function revert(id: String) {
+    let i = orgs.findIndex((org) => org.id == id);
+    if (i != -1) {
+      console.log("revert", orgs[i].id);
+      let resp = await getOrg({ org: orgs[i].id }).result;
+      if (resp.ok) {
+        orgs[i] = resp.data;
+        changed = changed.filter((item) => item != id);
+      }
+    }
+  }
+
+  function change(id: string) {
+    if (!changed.includes(id)) {
+      changed.push(id);
     }
   }
 </script>
@@ -66,32 +87,43 @@
 
       <TableBody>
         {#each orgs as org}
-          <TableBodyRow>
+          <TableBodyRow
+            class="org {changed.includes(org.id) ? 'changed' : 'unchanged'}"
+          >
             <TableBodyCell
-              ><div
-                contenteditable="true"
-                bind:innerText={org.name}
-              ></div></TableBodyCell
+              ><input
+                oninput={() => change(org.id)}
+                bind:value={org.name}
+              /></TableBodyCell
             >
             <TableBodyCell
-              ><div
-                contenteditable="true"
-                bind:innerText={org.contact_email}
-              ></div></TableBodyCell
+              ><input
+                oninput={() => change(org.id)}
+                bind:value={org.contact_email}
+              /></TableBodyCell
             >
             <TableBodyCell
-              ><div
-                contenteditable="true"
-                bind:innerText={org.contact_phone}
-              ></div></TableBodyCell
+              ><input
+                oninput={() => change(org.id)}
+                bind:value={org.contact_phone}
+              /></TableBodyCell
             >
             <TableBodyCell>
-              <Checkbox bind:checked={org.public}></Checkbox>
+              <Checkbox oninput={() => change(org.id)} bind:checked={org.public}
+              ></Checkbox>
             </TableBodyCell>
-            <TableBodyCell
-              ><Button on:click={() => update(org.id)}>Update</Button
-              ></TableBodyCell
-            >
+            <TableBodyCell>
+              <Button
+                on:click={() => update(org.id)}
+                class="px-3 py-2 text-xs font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                disabled={!changed.includes(org.id)}>Save</Button
+              >
+              <Button
+                class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+                disabled={!changed.includes(org.id)}
+                on:click={() => revert(org.id)}>Undo</Button
+              >
+            </TableBodyCell>
           </TableBodyRow>
         {/each}
       </TableBody>
@@ -107,3 +139,12 @@
     Reload orgs
   </Button> -->
 </main>
+
+<style>
+  .changed {
+    background-color: "red";
+  }
+  .unchanged {
+    background-color: "blue";
+  }
+</style>
