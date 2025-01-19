@@ -100,6 +100,13 @@ async fn main() -> std::io::Result<()> {
                             .route(get().to(api::orgs::get_org))
                             .route(put().to(api::orgs::update_org)),
                     )
+                    .service(
+                        resource("org/{org}/events").route(get().to(api::orgs::get_org_events)),
+                    )
+                    .service(
+                        resource("org/{org}/{event}/teams")
+                            .route(get().to(api::teams::get_org_teams)),
+                    )
                     .service(resource("orgs").route(get().to(api::orgs::get_orgs)))
                     .service(resource("org").route(post().to(api::orgs::add_org)))
                     .service(
@@ -109,6 +116,11 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(
                         resource("event/{event}/orgs").route(get().to(api::events::get_event_orgs)),
+                    )
+                    .service(
+                        resource("team")
+                            .route(post().to(api::teams::add_team))
+                            .route(put().to(api::teams::update_team)),
                     )
                     .service(
                         resource("event/{event}/org/{org}")

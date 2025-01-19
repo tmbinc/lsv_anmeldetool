@@ -11,6 +11,14 @@ export interface paths {
     /** update org */
     put: operations["put_api-v1-org-e5659494460fbdef2fe5e110ad7644e8"];
   };
+  "/api/v1/org/{org}/events": {
+    /** get event list for a org */
+    get: operations["get_api-v1-org-7dc929bdfbe96d14e91c23f78cd42f84"];
+  };
+  "/api/v1/org/{org}/{event}/teams": {
+    /** get team list for an org + event */
+    get: operations["get_api-v1-org-640c441034f7cd1e205777f7f2c464b4"];
+  };
   "/api/v1/orgs": {
     /** get list of orgs */
     get: operations["get_api-v1-orgs-4bb4bb74212e29d1e33641b38d211873"];
@@ -28,6 +36,12 @@ export interface paths {
   "/api/v1/event/{event}/orgs": {
     /** get org list for a given event */
     get: operations["get_api-v1-event-45c1132012c55c1196f21c335b92f888"];
+  };
+  "/api/v1/team": {
+    /** update team */
+    put: operations["put_api-v1-team-1d85c5df18ae253cffeaa9339e9ed5cb"];
+    /** create a new team */
+    post: operations["post_api-v1-team-1d85c5df18ae253cffeaa9339e9ed5cb"];
   };
   "/api/v1/event/{event}/org/{org}": {
     /** set status for event per org */
@@ -87,6 +101,15 @@ export interface components {
     NewOrg: {
       name: string;
     };
+    /**
+     * NewTeam
+     * @description New org details.
+     */
+    NewTeam: {
+      event: string;
+      name: string;
+      org: string;
+    };
     /** @description Org details. */
     Org: {
       contact_email?: string | null;
@@ -95,7 +118,19 @@ export interface components {
       name: string;
       public: boolean;
     };
-    /** @description Team details. */
+    /** OrgEvent */
+    OrgEvent: {
+      /** @description Event details */
+      event: components["schemas"]["Event"];
+      /** @description org state for this event */
+      state: components["schemas"]["EventOrgState"];
+      /** @description teams for this event */
+      teams: components["schemas"]["Team"][];
+    };
+    /**
+     * Team
+     * @description Team details.
+     */
     Team: {
       event: string;
       id: string;
@@ -163,6 +198,69 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Org"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get event list for a org */
+  "get_api-v1-org-7dc929bdfbe96d14e91c23f78cd42f84": {
+    parameters: {
+      path: {
+        org: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrgEvent"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get team list for an org + event */
+  "get_api-v1-org-640c441034f7cd1e205777f7f2c464b4": {
+    parameters: {
+      path: {
+        org: string;
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Team"][];
         };
       };
       /** @description Forbidden */
@@ -318,6 +416,68 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["EventOrg"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** update team */
+  "put_api-v1-team-1d85c5df18ae253cffeaa9339e9ed5cb": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Team"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** create a new team */
+  "post_api-v1-team-1d85c5df18ae253cffeaa9339e9ed5cb": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewTeam"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Team"];
         };
       };
       /** @description Forbidden */

@@ -1,9 +1,23 @@
-use crate::models::{self, Org};
+use crate::actions::DbError;
+use crate::models::{self, Event, EventOrgState, Org, Team};
 use crate::{actions, DbPool, ErrorResponse};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
-use apistos::api_operation;
+use apistos::{api_operation, ApiComponent};
+use schemars::JsonSchema;
+use serde::Serialize;
 use uuid::Uuid;
+
+// Org-specific information for an event
+#[derive(Debug, Clone, Serialize, ApiComponent, JsonSchema)]
+pub struct OrgEvent {
+    /// Event details
+    pub event: Event,
+    /// org state for this event
+    pub state: EventOrgState,
+    /// teams for this event
+    pub teams: Vec<Team>,
+}
 
 /// Finds org by UID.
 #[api_operation(summary = "get one org by ID")]
@@ -88,4 +102,42 @@ pub async fn add_org(
 
     // user was added successfully; return 201 response with new user info
     Ok(Json(org))
+}
+
+#[api_operation(summary = "get event list for a org")]
+pub async fn get_org_events(
+    pool: web::Data<DbPool>,
+    org_uid: Path<Uuid>,
+) -> Result<Json<Vec<OrgEvent>>, ErrorResponse> {
+    let org_uid = org_uid.into_inner();
+
+    let event_org = web::block(move || -> Result<Option<Vec<OrgEvent>>, DbError> {
+        let mut conn = pool.get()?;
+
+        let events = actions::org_event::list_org_events(&mut conn, org_uid)?;
+
+        Ok(match events {
+            Some(events) => Some(
+                events
+                    .into_iter()
+                    .map(|event| OrgEvent {
+                        event: event,
+                        state: EventOrgState::Created,
+                        teams: [].into(),
+                    })
+                    .collect(),
+            ),
+            None => None,
+        })
+    })
+    .await;
+
+    let event_org = event_org?.map_err(error::ErrorInternalServerError)?;
+
+    match event_org {
+        Some(event_org) => Ok(Json(event_org)),
+        None => Err(ErrorResponse::NotFound(format!(
+            "No org found with UID: {org_uid}"
+        ))),
+    }
 }

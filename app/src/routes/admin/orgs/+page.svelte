@@ -17,6 +17,7 @@
   let loading = $state(false);
   let orgs: Org[] = $state([]);
   let changed: string[] = $state([]);
+  let edit_mode = $state(false);
 
   onMount(async () => {
     loading = true;
@@ -92,27 +93,35 @@
           >
             <TableBodyCell
               ><input
+                disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.name}
               /></TableBodyCell
             >
             <TableBodyCell
               ><input
+                disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.contact_email}
               /></TableBodyCell
             >
             <TableBodyCell
               ><input
+                disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.contact_phone}
               /></TableBodyCell
             >
             <TableBodyCell>
-              <Checkbox oninput={() => change(org.id)} bind:checked={org.public}
+              <Checkbox
+                disabled={!edit_mode}
+                oninput={() => change(org.id)}
+                bind:checked={org.public}
               ></Checkbox>
             </TableBodyCell>
             <TableBodyCell>
+              <Button href="/admin/org/{org.id}/">Details</Button>
+
               <Button
                 on:click={() => update(org.id)}
                 class="px-3 py-2 text-xs font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
@@ -130,6 +139,13 @@
     </Table>
     <Button onclick={add}>Add new...</Button>
   {/if}
+
+  <Button
+    disabled={edit_mode}
+    onclick={() => {
+      edit_mode = true;
+    }}>Edit</Button
+  >
 
   <!-- <Button
     on:click={() => {

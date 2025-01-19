@@ -90,7 +90,10 @@
       {#if event_orgs != null}
         {#each event_orgs as event_org}
           <TableBodyRow>
-            <TableBodyCell>{event_org.org.name}</TableBodyCell>
+            <TableBodyCell
+              ><a href="/admin/org/{event_org.org.id}">{event_org.org.name}</a
+              ></TableBodyCell
+            >
             <TableBodyCell>{event_org.state}</TableBodyCell>
             <TableBodyCell
               ><Button onclick={() => remove(event_org.org)}>Remove</Button

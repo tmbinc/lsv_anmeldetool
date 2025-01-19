@@ -34,6 +34,13 @@ export const updateEvent = apity.path('/api/v1/event/{event}').method('put').cre
 export const addEvent = apity.path('/api/v1/event').method('post').create();
 export const getEventOrgs = apity.path('/api/v1/event/{event}/orgs').method('get').create();
 export const setEventOrgState = apity.path('/api/v1/event/{event}/org/{org}').method('put').create();
+export const getOrgEvents = apity.path('/api/v1/org/{org}/events').method('get').create();
+export const getTeamsForOrgEvent = apity.path('/api/v1/org/{org}/{event}/teams').method('get').create();
+export const createTeam = apity.path('/api/v1/team').method('post').create();
+
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];
 export type EventOrg = components["schemas"]["EventOrg"];
+export type OrgEvent = components["schemas"]["OrgEvent"];
+export type Team = components["schemas"]["Team"];
+export type NewTeam = components["schemas"]["NewTeam"];

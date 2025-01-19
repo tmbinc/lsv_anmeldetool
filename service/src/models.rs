@@ -53,6 +53,7 @@ impl NewOrg {
     Insertable,
     ApiComponent,
     JsonSchema,
+    AsChangeset,
 )]
 #[diesel(table_name = teams)]
 pub struct Team {
@@ -136,17 +137,6 @@ impl EventOrgState {
             _ => None,
         }
     }
-}
-
-// Event-specific information for an org
-#[derive(Debug, Clone, Serialize, ApiComponent, JsonSchema)]
-pub struct EventOrg {
-    /// Org details
-    pub org: Org,
-    /// org state for this event
-    pub state: EventOrgState,
-    /// teams for this event
-    pub teams: Vec<Team>,
 }
 
 /// New event details.

@@ -1,10 +1,23 @@
 use crate::actions::DbError;
-use crate::models::{Event, EventOrg, EventOrgState, EventOrgStateUpdate, NewEvent, OrgEvent};
+use crate::models::{self, Event, EventOrgState, EventOrgStateUpdate, NewEvent, Org, Team};
 use crate::{actions, DbPool, ErrorResponse};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
-use apistos::api_operation;
+use apistos::{api_operation, ApiComponent};
+use schemars::JsonSchema;
+use serde::Serialize;
 use uuid::Uuid;
+
+// Event-specific information for an org
+#[derive(Debug, Clone, Serialize, ApiComponent, JsonSchema)]
+pub struct EventOrg {
+    /// Org details
+    pub org: Org,
+    /// org state for this event
+    pub state: EventOrgState,
+    /// teams for this event
+    pub teams: Vec<Team>,
+}
 
 /// Get event details
 #[api_operation(summary = "get one event by ID")]
@@ -135,7 +148,7 @@ pub async fn set_event_org_state(
         let mut conn = pool.get()?;
 
         let state_update = state_update.into_inner();
-        let org_event = OrgEvent {
+        let org_event = models::OrgEvent {
             event_id: event_uid.to_string(),
             org_id: org_uid.to_string(),
             state: state_update.state.to_db().to_string(),
@@ -151,9 +164,7 @@ pub async fn set_event_org_state(
     })
     .await;
 
-    println!("event_org {:?}", event_org);
-
-    let event_org = event_org?.map_err(error::ErrorInternalServerError)?;
+    let _event_org = event_org?.map_err(error::ErrorInternalServerError)?;
 
     Ok(Json("ok".to_string()))
 }
