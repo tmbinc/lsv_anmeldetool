@@ -1,4 +1,4 @@
-use crate::schema::{events, orgs, teams};
+use crate::schema::{events, org_event, orgs, teams};
 use apistos::ApiComponent;
 use chrono::NaiveDate;
 use diesel::prelude::*;
@@ -43,7 +43,17 @@ impl NewOrg {
 }
 
 /// Team details.
-#[derive(Debug, Clone, Serialize, Selectable, Deserialize, Queryable, Insertable)]
+#[derive(
+    Debug,
+    Clone,
+    Serialize,
+    Selectable,
+    Deserialize,
+    Queryable,
+    Insertable,
+    ApiComponent,
+    JsonSchema,
+)]
 #[diesel(table_name = teams)]
 pub struct Team {
     pub id: String,
@@ -53,7 +63,7 @@ pub struct Team {
 }
 
 /// New org details.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
 pub struct NewTeam {
     pub name: String,
     pub event: String,
@@ -94,8 +104,78 @@ pub struct Event {
     pub begin: Option<NaiveDate>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+pub enum EventOrgState {
+    NotEnlisted,
+    Created,
+    Updated,
+    Submitted,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+pub struct EventOrgStateUpdate {
+    pub state: EventOrgState,
+}
+
+impl EventOrgState {
+    pub fn to_db(&self) -> &'static str {
+        match self {
+            Self::NotEnlisted => "not_enlisted",
+            Self::Created => "created",
+            Self::Updated => "updated",
+            Self::Submitted => "submitted",
+        }
+    }
+
+    pub fn from_db(s: &str) -> Option<Self> {
+        match s {
+            "not_enlisted" => Some(Self::NotEnlisted),
+            "created" => Some(Self::Created),
+            "updated" => Some(Self::Updated),
+            "submitted" => Some(Self::Submitted),
+            _ => None,
+        }
+    }
+}
+
+// Event-specific information for an org
+#[derive(Debug, Clone, Serialize, ApiComponent, JsonSchema)]
+pub struct EventOrg {
+    /// Org details
+    pub org: Org,
+    /// org state for this event
+    pub state: EventOrgState,
+    /// teams for this event
+    pub teams: Vec<Team>,
+}
+
 /// New event details.
 #[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
 pub struct NewEvent {
     pub name: String,
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Associations,
+    Debug,
+    PartialEq,
+    Insertable,
+    AsChangeset,
+    Serialize,
+    Deserialize,
+    ApiComponent,
+    JsonSchema,
+    Clone,
+)]
+#[diesel(belongs_to(Event))]
+#[diesel(belongs_to(Org))]
+#[diesel(table_name = org_event)]
+#[diesel(primary_key(event_id, org_id))]
+pub struct OrgEvent {
+    pub event_id: String,
+    pub org_id: String,
+    pub state: String,
 }

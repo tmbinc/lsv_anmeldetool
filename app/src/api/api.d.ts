@@ -25,6 +25,14 @@ export interface paths {
     /** update event */
     put: operations["put_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
   };
+  "/api/v1/event/{event}/orgs": {
+    /** get org list for a given event */
+    get: operations["get_api-v1-event-45c1132012c55c1196f21c335b92f888"];
+  };
+  "/api/v1/event/{event}/org/{org}": {
+    /** set status for event per org */
+    put: operations["put_api-v1-event-de93f4166d70a3ac4838a8865d319cc1"];
+  };
   "/api/v1/events": {
     /** get list of events */
     get: operations["get_api-v1-events-bc4c42038b2c2f0b5c7deb650fb28842"];
@@ -50,6 +58,21 @@ export interface components {
       name: string;
       public: boolean;
     };
+    /** EventOrg */
+    EventOrg: {
+      /** @description Org details */
+      org: components["schemas"]["Org"];
+      /** @description org state for this event */
+      state: components["schemas"]["EventOrgState"];
+      /** @description teams for this event */
+      teams: components["schemas"]["Team"][];
+    };
+    /** @enum {string} */
+    EventOrgState: "NotEnlisted" | "Created" | "Updated" | "Submitted";
+    /** EventOrgStateUpdate */
+    EventOrgStateUpdate: {
+      state: components["schemas"]["EventOrgState"];
+    };
     /**
      * NewEvent
      * @description New event details.
@@ -64,16 +87,20 @@ export interface components {
     NewOrg: {
       name: string;
     };
-    /**
-     * Org
-     * @description Org details.
-     */
+    /** @description Org details. */
     Org: {
       contact_email?: string | null;
       contact_phone?: string | null;
       id: string;
       name: string;
       public: boolean;
+    };
+    /** @description Team details. */
+    Team: {
+      event: string;
+      id: string;
+      name: string;
+      org: string;
     };
   };
   responses: never;
@@ -260,6 +287,74 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Event"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get org list for a given event */
+  "get_api-v1-event-45c1132012c55c1196f21c335b92f888": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["EventOrg"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** set status for event per org */
+  "put_api-v1-event-de93f4166d70a3ac4838a8865d319cc1": {
+    parameters: {
+      path: {
+        event: string;
+        org: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EventOrgStateUpdate"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
         };
       };
       /** @description Forbidden */

@@ -35,14 +35,20 @@ pub enum ErrorResponse {
 }
 
 impl Display for ErrorResponse {
-    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
 impl ResponseError for ErrorResponse {
     fn status_code(&self) -> StatusCode {
-        todo!()
+        match self {
+            ErrorResponse::MethodNotAllowed(_) => StatusCode::METHOD_NOT_ALLOWED,
+            ErrorResponse::NotFound(_) => StatusCode::NOT_FOUND,
+            ErrorResponse::Conflict(_) => StatusCode::CONFLICT,
+            ErrorResponse::Unauthorized(_) => StatusCode::UNAUTHORIZED,
+            ErrorResponse::Other => StatusCode::INTERNAL_SERVER_ERROR,
+        }
     }
 }
 
@@ -100,6 +106,13 @@ async fn main() -> std::io::Result<()> {
                         resource("event/{event}")
                             .route(get().to(api::events::get_event))
                             .route(put().to(api::events::update_event)),
+                    )
+                    .service(
+                        resource("event/{event}/orgs").route(get().to(api::events::get_event_orgs)),
+                    )
+                    .service(
+                        resource("event/{event}/org/{org}")
+                            .route(put().to(api::events::set_event_org_state)),
                     )
                     .service(resource("events").route(get().to(api::events::get_events)))
                     .service(resource("event").route(post().to(api::events::add_event))),

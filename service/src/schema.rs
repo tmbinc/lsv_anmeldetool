@@ -25,10 +25,10 @@ diesel::table! {
 }
 
 diesel::table! {
-    org_event (rowid) {
-        rowid -> Integer,
+    org_event (event_id, org_id) {
         event_id -> Text,
         org_id -> Text,
+        state -> Text,
     }
 }
 
@@ -50,6 +50,9 @@ diesel::table! {
         name -> Text,
     }
 }
+
+diesel::joinable!(org_event -> events (event_id));
+diesel::joinable!(org_event -> orgs (org_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     events,
