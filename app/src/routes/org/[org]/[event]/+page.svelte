@@ -12,6 +12,7 @@
   import { page } from "$app/state";
   import {
     Button,
+    Select,
     Table,
     TableBody,
     TableBodyCell,
@@ -25,6 +26,12 @@
   let teams: Team[] = $state([]);
   let org_id = page.params.org;
   let event_id = page.params.event;
+
+  const groups = [
+    { value: "u10", name: "AK U10" },
+    { value: "u11", name: "AK U11" },
+    { value: "u12", name: "AK U12" },
+  ];
 
   onMount(async () => {
     const request = getOrg({ org: org_id });
@@ -76,7 +83,9 @@
       {#each teams as team}
         <TableBodyRow>
           <TableBodyCell>{team.name}</TableBodyCell>
-          <TableBodyCell>U10</TableBodyCell>
+          <TableBodyCell>
+            <Select class="mt-2" items={groups} bind:value={team.group} />
+          </TableBodyCell>
           <TableBodyCell>Teamleiter</TableBodyCell>
           <TableBodyCell>(phone)</TableBodyCell>
         </TableBodyRow>
