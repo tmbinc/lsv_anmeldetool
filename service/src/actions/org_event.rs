@@ -1,6 +1,6 @@
 use crate::actions::events::find_event_by_uid;
 use crate::actions::DbError;
-use crate::models::{Event, EventOrgState, Org, OrgEvent};
+use crate::models::{Event, Org, OrgEvent};
 use crate::schema::org_event;
 use diesel::prelude::*;
 use uuid::Uuid;

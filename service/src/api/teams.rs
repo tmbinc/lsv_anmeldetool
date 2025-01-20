@@ -1,11 +1,9 @@
 use crate::actions::DbError;
-use crate::models::{self, Event, EventOrgState, NewTeam, Org, Team};
+use crate::models::{NewTeam, Team};
 use crate::{actions, DbPool, ErrorResponse};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
 use apistos::{api_operation, ApiComponent};
-use schemars::JsonSchema;
-use serde::Serialize;
 use uuid::Uuid;
 
 #[api_operation(summary = "get team list for an org + event")]
