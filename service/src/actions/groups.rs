@@ -1,4 +1,3 @@
-use crate::actions::events::find_event_by_uid;
 use crate::actions::DbError;
 use crate::models::{self, Group, NewGroup};
 use crate::schema;

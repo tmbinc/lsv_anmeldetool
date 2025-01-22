@@ -4,7 +4,6 @@ use chrono::NaiveDate;
 use diesel::prelude::*;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 /// Org details.
 #[derive(

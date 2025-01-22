@@ -1,12 +1,10 @@
 use crate::actions::groups::get_group_by_id;
 use crate::actions::DbError;
-use crate::models::{self, Group, NewGroup};
+use crate::models::{Group, NewGroup};
 use crate::{actions, DbPool, ErrorResponse};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
 use apistos::{api_operation, ApiComponent};
-use schemars::JsonSchema;
-use serde::Serialize;
 use uuid::Uuid;
 
 #[api_operation(summary = "get list of groups")]
