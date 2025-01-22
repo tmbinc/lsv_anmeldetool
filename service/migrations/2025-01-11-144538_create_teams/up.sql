@@ -1,6 +1,0 @@
-CREATE TABLE teams (
-  id TEXT NOT NULL PRIMARY KEY,
-  event TEXT NOT NULL,
-  org TEXT NOT NULL,
-  name TEXT NOT NULL
-);

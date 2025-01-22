@@ -33,6 +33,20 @@ export interface paths {
     /** update event */
     put: operations["put_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
   };
+  "/api/v1/event/{event}/groups": {
+    /** get list of groups */
+    get: operations["get_api-v1-event-6e29cbdb5e0ae2f26ebeb4172e8bf7d5"];
+    /** add a group */
+    post: operations["post_api-v1-event-6e29cbdb5e0ae2f26ebeb4172e8bf7d5"];
+  };
+  "/api/v1/group": {
+    /** update group */
+    put: operations["put_api-v1-group-44e4a130606b544f6ab5a1532e35bc29"];
+  };
+  "/api/v1/group/{group}": {
+    /** delete a group */
+    delete: operations["delete_api-v1-group-0b9bee095d760068add3c5fe8a467e8b"];
+  };
   "/api/v1/event/{event}/orgs": {
     /** get org list for a given event */
     get: operations["get_api-v1-event-45c1132012c55c1196f21c335b92f888"];
@@ -88,10 +102,23 @@ export interface components {
       state: components["schemas"]["EventOrgState"];
     };
     /**
+     * Group
+     * @description Group details
+     */
+    Group: {
+      event_id: string;
+      id: string;
+      name: string;
+    };
+    /**
      * NewEvent
      * @description New event details.
      */
     NewEvent: {
+      name: string;
+    };
+    /** NewGroup */
+    NewGroup: {
       name: string;
     };
     /**
@@ -385,6 +412,135 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Event"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get list of groups */
+  "get_api-v1-event-6e29cbdb5e0ae2f26ebeb4172e8bf7d5": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Group"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** add a group */
+  "post_api-v1-event-6e29cbdb5e0ae2f26ebeb4172e8bf7d5": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewGroup"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Group"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** update group */
+  "put_api-v1-group-44e4a130606b544f6ab5a1532e35bc29": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Group"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** delete a group */
+  "delete_api-v1-group-0b9bee095d760068add3c5fe8a467e8b": {
+    parameters: {
+      path: {
+        group: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
         };
       };
       /** @description Forbidden */

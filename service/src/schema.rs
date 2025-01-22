@@ -10,16 +10,9 @@ diesel::table! {
 }
 
 diesel::table! {
-    group_event (rowid) {
-        rowid -> Integer,
-        group_id -> Text,
-        org_id -> Text,
-    }
-}
-
-diesel::table! {
     groups (id) {
         id -> Text,
+        event_id -> Text,
         name -> Text,
     }
 }
@@ -51,12 +44,12 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(groups -> events (event_id));
 diesel::joinable!(org_event -> events (event_id));
 diesel::joinable!(org_event -> orgs (org_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     events,
-    group_event,
     groups,
     org_event,
     orgs,

@@ -1,9 +1,10 @@
-use crate::schema::{events, org_event, orgs, teams};
+use crate::schema::{events, groups, org_event, orgs, teams};
 use apistos::ApiComponent;
 use chrono::NaiveDate;
 use diesel::prelude::*;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 /// Org details.
 #[derive(
@@ -168,4 +169,30 @@ pub struct OrgEvent {
     pub event_id: String,
     pub org_id: String,
     pub state: String,
+}
+
+/// Group details
+#[derive(
+    Debug,
+    Clone,
+    Serialize,
+    Selectable,
+    Deserialize,
+    Queryable,
+    Insertable,
+    JsonSchema,
+    ApiComponent,
+    AsChangeset,
+    Identifiable,
+)]
+#[diesel(table_name = groups)]
+pub struct Group {
+    pub id: String,
+    pub event_id: String,
+    pub name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+pub struct NewGroup {
+    pub name: String,
 }

@@ -8,10 +8,12 @@
     getTeamsForOrgEvent,
     type Team,
     createTeam,
+    getGroupsForEvent,
   } from "../../../../api/api";
   import { page } from "$app/state";
   import {
     Button,
+    Group,
     Select,
     Table,
     TableBody,
@@ -26,12 +28,7 @@
   let teams: Team[] = $state([]);
   let org_id = page.params.org;
   let event_id = page.params.event;
-
-  const groups = [
-    { value: "u10", name: "AK U10" },
-    { value: "u11", name: "AK U11" },
-    { value: "u12", name: "AK U12" },
-  ];
+  let groups = $state([]);
 
   onMount(async () => {
     const request = getOrg({ org: org_id });
@@ -49,6 +46,11 @@
     const teams_resp = await teams_request.result;
     if (teams_resp.ok) {
       teams = teams_resp.data;
+    }
+
+    const resp_groups = await getGroupsForEvent({ event: event_id }).result;
+    if (resp_groups.ok) {
+      groups = resp_groups.data;
     }
   });
 
@@ -82,12 +84,15 @@
     <TableBody>
       {#each teams as team}
         <TableBodyRow>
-          <TableBodyCell>{team.name}</TableBodyCell>
+          <TableBodyCell><input bind:value={team.name} /></TableBodyCell>
           <TableBodyCell>
             <Select class="mt-2" items={groups} bind:value={team.group} />
           </TableBodyCell>
-          <TableBodyCell>Teamleiter</TableBodyCell>
-          <TableBodyCell>(phone)</TableBodyCell>
+          <TableBodyCell><input bind:value={team.contact_name} /></TableBodyCell
+          >
+          <TableBodyCell
+            ><input bind:value={team.contact_phone} /></TableBodyCell
+          >
         </TableBodyRow>
       {/each}
       <TableBodyRow>

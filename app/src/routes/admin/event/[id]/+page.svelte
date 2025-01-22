@@ -20,6 +20,8 @@
     Button,
   } from "flowbite-svelte";
 
+  import Groups from "./Groups.svelte";
+
   let event: Event | null = $state(null);
   let event_orgs: EventOrg[] = $state([]);
   let other_orgs: Org[] = $state([]);
@@ -80,6 +82,8 @@
 
 <main>
   <h1>{event?.name}</h1>
+  <Groups {event_id} />
+
   <Table>
     <TableHead>
       <TableHeadCell>Name</TableHeadCell>

@@ -1,4 +1,5 @@
 CREATE TABLE groups (
   id TEXT NOT NULL PRIMARY KEY,
+  event_id TEXT NOT NULL REFERENCES events(id),
   name VARCHAR NOT NULL
 );

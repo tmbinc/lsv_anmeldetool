@@ -5,7 +5,7 @@ use actix_web::{error, middleware, web, App, HttpServer};
 use apistos::app::OpenApiWrapper;
 use apistos::info::Info;
 use apistos::spec::Spec;
-use apistos::web::{get, post, put, resource, scope};
+use apistos::web::{delete, get, post, put, resource, scope};
 use apistos::ApiErrorComponent;
 use core::fmt::Formatter;
 use diesel::{prelude::*, r2d2};
@@ -113,6 +113,15 @@ async fn main() -> std::io::Result<()> {
                         resource("event/{event}")
                             .route(get().to(api::events::get_event))
                             .route(put().to(api::events::update_event)),
+                    )
+                    .service(
+                        resource("event/{event}/groups")
+                            .route(get().to(api::groups::get_groups))
+                            .route(post().to(api::groups::add_group)),
+                    )
+                    .service(resource("group").route(put().to(api::groups::update_group)))
+                    .service(
+                        resource("group/{group}").route(delete().to(api::groups::delete_group)),
                     )
                     .service(
                         resource("event/{event}/orgs").route(get().to(api::events::get_event_orgs)),

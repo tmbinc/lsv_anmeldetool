@@ -1,4 +1,5 @@
 pub mod events;
+pub mod groups;
 pub mod org_event;
 pub mod orgs;
 pub mod teams;
