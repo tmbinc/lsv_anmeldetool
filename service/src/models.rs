@@ -132,6 +132,7 @@ impl EventOrgState {
         }
     }
 
+    #[allow(unused)]
     pub fn from_db(s: &str) -> Option<Self> {
         match s {
             "not_enlisted" => Some(Self::NotEnlisted),

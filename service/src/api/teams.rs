@@ -53,7 +53,7 @@ pub async fn update_team(
     })
     .await;
 
-    let event_org = event_org?.map_err(error::ErrorInternalServerError)?;
+    let _event_org = event_org?.map_err(error::ErrorInternalServerError)?;
 
     Ok(Json("ok".to_string()))
 }

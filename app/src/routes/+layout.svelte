@@ -23,7 +23,7 @@
       <span
         class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
       >
-        Turnier-Tool Admin Menu
+        Turnier-Anmeldungen
       </span>
     </NavBrand>
     <NavHamburger on:click={toggle} />

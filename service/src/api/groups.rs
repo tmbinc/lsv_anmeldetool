@@ -4,7 +4,7 @@ use crate::models::{Group, NewGroup};
 use crate::{actions, DbPool, ErrorResponse};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
-use apistos::{api_operation, ApiComponent};
+use apistos::api_operation;
 use uuid::Uuid;
 
 #[api_operation(summary = "get list of groups")]

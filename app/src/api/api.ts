@@ -40,7 +40,8 @@ export const getOrgEvents = apity.path('/api/v1/org/{org}/events').method('get')
 export const getTeamsForOrgEvent = apity.path('/api/v1/org/{org}/{event}/teams').method('get').create();
 export const createTeam = apity.path('/api/v1/team').method('post').create();
 export const updateTeam = apity.path('/api/v1/team').method('put').create();
-export const deleteTeam = apity.path('/api/v1/').method('delete').create();
+export const deleteTeam = apity.path('/api/v1/team/{team}').method('delete').create();
+export const getTeam = apity.path('/api/v1/team/{team}').method('get').create();
 
 export const getGroupsForEvent = apity.path('/api/v1/event/{event}/groups').method('get').create();
 export const deleteGroup = apity.path('/api/v1/group/{group}').method('delete').create();

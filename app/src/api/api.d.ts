@@ -57,6 +57,12 @@ export interface paths {
     /** create a new team */
     post: operations["post_api-v1-team-1d85c5df18ae253cffeaa9339e9ed5cb"];
   };
+  "/api/v1/team/{team}": {
+    /** get one team by ID */
+    get: operations["get_api-v1-team-660a5317bb41a757a76ba890440c3a2e"];
+    /** delete a group */
+    delete: operations["delete_api-v1-team-660a5317bb41a757a76ba890440c3a2e"];
+  };
   "/api/v1/event/{event}/org/{org}": {
     /** set status for event per org */
     put: operations["put_api-v1-event-de93f4166d70a3ac4838a8865d319cc1"];
@@ -637,6 +643,68 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Team"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get one team by ID */
+  "get_api-v1-team-660a5317bb41a757a76ba890440c3a2e": {
+    parameters: {
+      path: {
+        team: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Team"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** delete a group */
+  "delete_api-v1-team-660a5317bb41a757a76ba890440c3a2e": {
+    parameters: {
+      path: {
+        team: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
         };
       };
       /** @description Forbidden */

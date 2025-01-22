@@ -9,6 +9,9 @@
     type Team,
     createTeam,
     getGroupsForEvent,
+    getTeam,
+    updateTeam,
+    deleteTeam,
   } from "../../../../api/api";
   import { page } from "$app/state";
   import {
@@ -21,6 +24,7 @@
     TableBodyRow,
     TableHead,
     TableHeadCell,
+    type SelectOptionType,
   } from "flowbite-svelte";
 
   let org: Org | null = $state(null);
@@ -28,7 +32,7 @@
   let teams: Team[] = $state([]);
   let org_id = page.params.org;
   let event_id = page.params.event;
-  let groups = $state([]);
+  let groups: SelectOptionType<string>[] = $state([]);
   let teams_changed: string[] = $state([]);
 
   onMount(async () => {
@@ -51,7 +55,10 @@
 
     const resp_groups = await getGroupsForEvent({ event: event_id }).result;
     if (resp_groups.ok) {
-      groups = resp_groups.data;
+      groups = resp_groups.data.map((group) => ({
+        name: group.name,
+        value: group.id,
+      }));
     }
   });
 
@@ -69,7 +76,7 @@
   function update_team(id: string) {
     let team_to_update = teams.find((team) => team.id == id);
     if (team_to_update) {
-      updateTeam({ ...event_to_update, event: event_to_update.id });
+      updateTeam(team_to_update);
       teams_changed = teams_changed.filter((item) => item != id);
     }
   }
@@ -88,6 +95,14 @@
   function change_team(id: string) {
     if (!teams_changed.includes(id)) {
       teams_changed.push(id);
+    }
+  }
+
+  async function delete_team(id: string) {
+    const resp = await deleteTeam({ team: id }).result;
+    if (resp.ok) {
+      teams_changed = teams_changed.filter((item) => item != id);
+      teams = teams.filter((team) => team.id != id);
     }
   }
 </script>
@@ -110,15 +125,45 @@
     <TableBody>
       {#each teams as team}
         <TableBodyRow>
-          <TableBodyCell><input bind:value={team.name} /></TableBodyCell>
+          <TableBodyCell
+            ><input
+              bind:value={team.name}
+              oninput={() => change_team(team.id)}
+            /></TableBodyCell
+          >
           <TableBodyCell>
-            <Select class="mt-2" items={groups} bind:value={team.group_id} />
+            <Select
+              class="mt-2"
+              items={groups}
+              oninput={() => change_team(team.id)}
+              bind:value={team.group_id}
+            />
           </TableBodyCell>
-          <TableBodyCell><input bind:value={team.contact_name} /></TableBodyCell
+          <TableBodyCell
+            ><input
+              bind:value={team.contact_name}
+              oninput={() => change_team(team.id)}
+            /></TableBodyCell
           >
           <TableBodyCell
             ><input bind:value={team.contact_phone} /></TableBodyCell
           >
+          <TableBodyCell>
+            <Button
+              on:click={() => update_team(team.id)}
+              class="px-3 py-2 text-xs font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+              disabled={!teams_changed.includes(team.id)}>Speichern</Button
+            >
+            <Button
+              class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+              disabled={!teams_changed.includes(team.id)}
+              on:click={() => revert_team(team.id)}>Rückgängig</Button
+            >
+            <Button
+              class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+              on:click={() => delete_team(team.id)}>Team löschen</Button
+            >
+          </TableBodyCell>
         </TableBodyRow>
       {/each}
       <TableBodyRow>
