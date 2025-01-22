@@ -36,9 +36,30 @@ pub fn create_team(conn: &mut SqliteConnection, team: NewTeam) -> Result<Team, D
         name: team.name,
         event: team.event,
         org: team.org,
+        group_id: None,
+        contact_name: None,
+        contact_phone: None,
     };
     diesel::insert_into(schema::teams::table)
         .values(&team)
         .execute(conn)?;
     Ok(team)
+}
+
+pub fn delete_team(conn: &mut SqliteConnection, team: Team) -> Result<usize, DbError> {
+    let res = diesel::delete(&team).execute(conn)?;
+
+    Ok(res)
+}
+
+pub fn get_team_by_id(
+    conn: &mut SqliteConnection,
+    team_uid: &Uuid,
+) -> Result<Option<Team>, DbError> {
+    use crate::schema::teams::dsl::*;
+
+    Ok(teams
+        .filter(id.eq(team_uid.to_string()))
+        .first::<Team>(conn)
+        .optional()?)
 }

@@ -91,7 +91,9 @@ Altergruppen here
     {/each}
     <TableBodyRow>
       <TableBodyCell
-        ><Button on:click={() => new_group()}>New...</Button>
+        ><Button disabled={!edit_mode} on:click={() => new_group()}
+          >New...</Button
+        >
         <Button
           disabled={edit_mode}
           onclick={() => {

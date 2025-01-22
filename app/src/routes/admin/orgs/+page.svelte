@@ -1,6 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { listOrgs, getOrg, type Org, updateOrg } from "../../../api/api";
+  import {
+    listOrgs,
+    getOrg,
+    type Org,
+    updateOrg,
+    addOrg,
+  } from "../../../api/api";
   import {
     Button,
     Checkbox,
@@ -30,13 +36,11 @@
     loading = false;
   });
 
-  function add() {
-    orgs.push({
-      name: "new",
-      id: "",
-      public: false,
-    });
-    console.log(orgs);
+  async function add() {
+    const resp = await addOrg({ name: "new" }).result;
+    if (resp.ok) {
+      orgs.push(resp.data);
+    }
   }
 
   function update(id: String) {
@@ -137,7 +141,7 @@
         {/each}
       </TableBody>
     </Table>
-    <Button onclick={add}>Add new...</Button>
+    <Button disabled={!edit_mode} onclick={add}>Add new...</Button>
   {/if}
 
   <Button
@@ -146,14 +150,6 @@
       edit_mode = true;
     }}>Edit</Button
   >
-
-  <!-- <Button
-    on:click={() => {
-      request.reload();
-    }}
-  >
-    Reload orgs
-  </Button> -->
 </main>
 
 <style>

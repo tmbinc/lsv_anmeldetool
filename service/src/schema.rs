@@ -41,12 +41,16 @@ diesel::table! {
         event -> Text,
         org -> Text,
         name -> Text,
+        group_id -> Nullable<Text>,
+        contact_name -> Nullable<Text>,
+        contact_phone -> Nullable<Text>,
     }
 }
 
 diesel::joinable!(groups -> events (event_id));
 diesel::joinable!(org_event -> events (event_id));
 diesel::joinable!(org_event -> orgs (org_id));
+diesel::joinable!(teams -> groups (group_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     events,

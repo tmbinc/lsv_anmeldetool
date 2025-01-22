@@ -1,3 +1,4 @@
+use crate::actions::teams::get_team_by_id;
 use crate::actions::DbError;
 use crate::models::{NewTeam, Team};
 use crate::{actions, DbPool, ErrorResponse};
@@ -76,4 +77,60 @@ pub async fn add_team(
     let team = event_org?.map_err(error::ErrorInternalServerError)?;
 
     Ok(Json(team))
+}
+
+#[api_operation(summary = "delete a group")]
+pub async fn delete_team(
+    pool: web::Data<DbPool>,
+    team_uid: Path<Uuid>,
+) -> Result<Json<String>, ErrorResponse> {
+    let team_uid = team_uid.into_inner();
+    let group = web::block(move || -> Result<Option<usize>, DbError> {
+        let mut conn = pool.get()?;
+
+        let team = get_team_by_id(&mut conn, &team_uid)?;
+
+        // FIXME: check team event_id is allowed by user
+
+        if let Some(team) = team {
+            Ok(Some(actions::teams::delete_team(&mut conn, team)?))
+        } else {
+            Ok(None)
+        }
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    match group {
+        Some(1) => Ok(Json("ok".to_owned())),
+        _ => Err(ErrorResponse::NotFound(format!(
+            "No team found with UID: {team_uid}"
+        ))),
+    }
+}
+
+#[api_operation(summary = "get one team by ID")]
+pub async fn get_team(
+    pool: web::Data<DbPool>,
+    team_uid: Path<Uuid>,
+) -> Result<Json<Team>, ErrorResponse> {
+    let team_uid = team_uid.into_inner();
+
+    let team = web::block(move || {
+        let mut conn = pool.get()?;
+
+        actions::teams::get_team_by_id(&mut conn, &team_uid)
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    match team {
+        // user was found; return 200 response with JSON formatted user object
+        Some(team) => Ok(Json(team)),
+
+        // user was not found; return 404 response with error message
+        None => Err(ErrorResponse::NotFound(format!(
+            "No team found with UID: {team_uid}"
+        ))),
+    }
 }

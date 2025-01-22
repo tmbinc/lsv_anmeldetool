@@ -159,7 +159,10 @@ export interface components {
      * @description Team details.
      */
     Team: {
+      contact_name?: string | null;
+      contact_phone?: string | null;
       event: string;
+      group_id?: string | null;
       id: string;
       name: string;
       org: string;

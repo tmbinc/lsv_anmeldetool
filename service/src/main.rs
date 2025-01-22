@@ -132,6 +132,11 @@ async fn main() -> std::io::Result<()> {
                             .route(put().to(api::teams::update_team)),
                     )
                     .service(
+                        resource("team/{team}")
+                            .route(get().to(api::teams::get_team))
+                            .route(delete().to(api::teams::delete_team)),
+                    )
+                    .service(
                         resource("event/{event}/org/{org}")
                             .route(put().to(api::events::set_event_org_state)),
                     )

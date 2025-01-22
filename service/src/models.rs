@@ -55,6 +55,7 @@ impl NewOrg {
     ApiComponent,
     JsonSchema,
     AsChangeset,
+    Identifiable,
 )]
 #[diesel(table_name = teams)]
 pub struct Team {
@@ -62,6 +63,9 @@ pub struct Team {
     pub event: String,
     pub org: String,
     pub name: String,
+    pub group_id: Option<String>,
+    pub contact_name: Option<String>,
+    pub contact_phone: Option<String>,
 }
 
 /// New org details.

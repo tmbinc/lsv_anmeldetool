@@ -29,6 +29,7 @@
   let org_id = page.params.org;
   let event_id = page.params.event;
   let groups = $state([]);
+  let teams_changed: string[] = $state([]);
 
   onMount(async () => {
     const request = getOrg({ org: org_id });
@@ -64,6 +65,31 @@
       teams.push(res.data);
     }
   }
+
+  function update_team(id: string) {
+    let team_to_update = teams.find((team) => team.id == id);
+    if (team_to_update) {
+      updateTeam({ ...event_to_update, event: event_to_update.id });
+      teams_changed = teams_changed.filter((item) => item != id);
+    }
+  }
+
+  async function revert_team(id: string) {
+    let i = teams.findIndex((team) => team.id == id);
+    if (i != -1) {
+      let resp = await getTeam({ team: id }).result;
+      if (resp.ok) {
+        teams[i] = resp.data;
+        teams_changed = teams_changed.filter((item) => item != id);
+      }
+    }
+  }
+
+  function change_team(id: string) {
+    if (!teams_changed.includes(id)) {
+      teams_changed.push(id);
+    }
+  }
 </script>
 
 <main>
@@ -86,7 +112,7 @@
         <TableBodyRow>
           <TableBodyCell><input bind:value={team.name} /></TableBodyCell>
           <TableBodyCell>
-            <Select class="mt-2" items={groups} bind:value={team.group} />
+            <Select class="mt-2" items={groups} bind:value={team.group_id} />
           </TableBodyCell>
           <TableBodyCell><input bind:value={team.contact_name} /></TableBodyCell
           >
@@ -103,9 +129,9 @@
             >Neu...</Button
           >
         </TableBodyCell>
-        <TableBodyCell>a</TableBodyCell>
-        <TableBodyCell>b</TableBodyCell>
-        <TableBodyCell>xx</TableBodyCell>
+        <TableBodyCell></TableBodyCell>
+        <TableBodyCell></TableBodyCell>
+        <TableBodyCell></TableBodyCell>
       </TableBodyRow>
     </TableBody>
   </Table>
