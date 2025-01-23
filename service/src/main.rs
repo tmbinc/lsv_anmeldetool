@@ -71,12 +71,17 @@ async fn main() -> std::io::Result<()> {
     // initialize DB pool outside of `HttpServer::new` so that it is shared across all workers
     let pool = initialize_db_pool();
 
-    log::info!("starting HTTP server at http://localhost:8080");
+    let port: u16 = std::env::var("PORT")
+        .unwrap_or("8080".to_string())
+        .parse()
+        .expect("PORT must be a 16 bit int");
+    let path = std::env::var("STATIC_FILE_PATH").expect("STATIC_FILE_PATH must be set");
+    let static_files = String::from(path.strip_suffix("/").unwrap_or(&path));
 
     HttpServer::new(move || {
         let spec = Spec {
             info: Info {
-                title: "An API".to_string(),
+                title: "LSV REG API".to_string(),
                 version: "1.0.0".to_string(),
                 ..Default::default()
             },
@@ -144,8 +149,18 @@ async fn main() -> std::io::Result<()> {
                     .service(resource("event").route(post().to(api::events::add_event))),
             )
             .build("/openapi.json")
+            .service(
+                actix_files::Files::new("/", static_files.clone())
+                    .index_file("index.html")
+                    .default_handler(
+                        actix_files::NamedFile::open(
+                            vec![static_files.clone(), "index.html".to_string()].join("/"),
+                        )
+                        .expect("index file should exist"),
+                    ),
+            )
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }

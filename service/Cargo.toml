@@ -17,3 +17,4 @@ schemars = { package = "apistos-schemars", version = "0.8" }
 apistos = { version = "0.4", features = ["uuid"] }
 actix-cors = "0.7.0"
 chrono = { version = "0.4.39", features = ["serde"] }
+actix-files = "0.6.6"
