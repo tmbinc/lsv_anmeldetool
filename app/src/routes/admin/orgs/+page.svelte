@@ -27,13 +27,13 @@
 
   onMount(async () => {
     loading = true;
-    const request = listOrgs({});
-    const resp = await request.result;
-    if (resp.ok) {
-      orgs = resp.data;
-      changed = [];
-    }
-    loading = false;
+    const request = listOrgs({}).resp.subscribe((resp) => {
+      if (resp?.ok) {
+        orgs = resp.data;
+        changed = [];
+        loading = false;
+      }
+    });
   });
 
   async function add() {
