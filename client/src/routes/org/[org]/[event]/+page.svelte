@@ -17,6 +17,7 @@
   import {
     Button,
     Group,
+    Input,
     Select,
     Table,
     TableBody,
@@ -126,7 +127,7 @@
       {#each teams as team}
         <TableBodyRow>
           <TableBodyCell
-            ><input
+            ><Input
               bind:value={team.name}
               oninput={() => change_team(team.id)}
             /></TableBodyCell
@@ -140,13 +141,13 @@
             />
           </TableBodyCell>
           <TableBodyCell
-            ><input
+            ><Input
               bind:value={team.contact_name}
               oninput={() => change_team(team.id)}
             /></TableBodyCell
           >
           <TableBodyCell
-            ><input bind:value={team.contact_phone} /></TableBodyCell
+            ><Input bind:value={team.contact_phone} /></TableBodyCell
           >
           <TableBodyCell>
             <Button

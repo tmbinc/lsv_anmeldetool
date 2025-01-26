@@ -28,8 +28,11 @@
 	"dependencies": {
 		"@cocreators-ee/apity": "^0.0.5",
 		"@popperjs/core": "^2.11.8",
+		"@skeletonlabs/skeleton": "^2.11.0",
+		"@skeletonlabs/tw-plugin": "^0.4.1",
 		"flowbite": "^2.5.2",
 		"flowbite-svelte": "^0.47.4",
+		"flowbite-svelte-icons": "^2.0.2",
 		"tailwind-merge": "^2.6.0"
 	}
 }

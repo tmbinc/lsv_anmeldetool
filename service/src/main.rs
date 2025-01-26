@@ -106,6 +106,10 @@ async fn main() -> std::io::Result<()> {
                             .route(put().to(api::orgs::update_org)),
                     )
                     .service(
+                        resource("orgs/self_register")
+                            .route(post().to(api::orgs::self_register_org)),
+                    )
+                    .service(
                         resource("org/{org}/events").route(get().to(api::orgs::get_org_events)),
                     )
                     .service(

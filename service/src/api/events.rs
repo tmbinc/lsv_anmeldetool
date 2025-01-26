@@ -30,7 +30,7 @@ pub async fn get_event(
     let event = web::block(move || {
         let mut conn = pool.get()?;
 
-        actions::events::find_event_by_uid(&mut conn, event_uid)
+        actions::events::find_event_by_uid(&mut conn, &event_uid)
     })
     .await
     .unwrap() // fixme

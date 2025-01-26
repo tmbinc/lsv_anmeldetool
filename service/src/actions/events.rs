@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 pub fn find_event_by_uid(
     conn: &mut SqliteConnection,
-    uid: Uuid,
+    uid: &Uuid,
 ) -> Result<Option<models::Event>, DbError> {
     use crate::schema::events::dsl::*;
 
@@ -34,13 +34,7 @@ pub fn list_events(conn: &mut SqliteConnection) -> Result<Vec<models::Event>, Db
     Ok(events.select(models::Event::as_select()).load(conn)?)
 }
 
-pub fn insert_new_event(
-    conn: &mut SqliteConnection,
-    nm: &str, // prevent collision with `name` column imported inside the function
-) -> Result<models::Event, DbError> {
-    // It is common when using Diesel with Actix Web to import schema-related
-    // modules inside a function's scope (rather than the normal module's scope)
-    // to prevent import collisions and namespace pollution.
+pub fn insert_new_event(conn: &mut SqliteConnection, nm: &str) -> Result<models::Event, DbError> {
     use crate::schema::events::dsl::*;
 
     let new_event = models::Event {
@@ -48,6 +42,8 @@ pub fn insert_new_event(
         name: nm.to_string(),
         public: false,
         begin: None,
+        public_reg_until: None,
+        description: "".to_string(),
     };
 
     diesel::insert_into(events)

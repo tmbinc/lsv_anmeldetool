@@ -1,5 +1,6 @@
+use crate::actions::events::find_event_by_uid;
 use crate::actions::DbError;
-use crate::models::{self, Event, EventOrgState, Org, Team};
+use crate::models::{self, Event, EventOrgState, NewOrgSelfReg, Org, Team};
 use crate::{actions, DbPool, ErrorResponse};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
@@ -55,18 +56,18 @@ pub async fn update_org(
     user_uid: Path<Uuid>,
     data: Json<Org>,
 ) -> Result<Json<Org>, ErrorResponse> {
-    let user = web::block(move || {
+    let data = web::block(move || -> Result<Org, DbError> {
         let mut conn = pool.get()?;
 
-        actions::orgs::update_org(&mut conn, *user_uid, data.into_inner())
+        let data = data.into_inner();
+        actions::orgs::update_org(&mut conn, *user_uid, &data)?;
+        Ok(data)
     })
-    .await
-    .unwrap() // fixme
+    .await?
     // map diesel query errors to a 500 error response
-    .map_err(error::ErrorInternalServerError)
-    .unwrap(); // fixme
+    .map_err(error::ErrorInternalServerError)?;
 
-    Ok(Json(user))
+    Ok(Json(data))
 }
 
 /// List orgs
@@ -139,5 +140,65 @@ pub async fn get_org_events(
         None => Err(ErrorResponse::NotFound(format!(
             "No org found with UID: {org_uid}"
         ))),
+    }
+}
+
+#[api_operation(summary = "self-register a new org")]
+pub async fn self_register_org(
+    pool: web::Data<DbPool>,
+    data: Json<NewOrgSelfReg>,
+) -> Result<Json<String>, ErrorResponse> {
+    log::info!("--- self register");
+    let data = data.into_inner();
+
+    let success = web::block(move || -> Result<bool, DbError> {
+        let mut conn = pool.get()?;
+
+        let event = find_event_by_uid(&mut conn, &data.event_id)?;
+
+        match event {
+            Some(event) => {
+                if event.public {
+                    let new_org = actions::orgs::insert_new_org(&mut conn, "temp")?;
+
+                    let new_org = Org {
+                        name: data.name,
+                        public: false,
+                        contact_email: Some(data.contact_email),
+                        contact_name: Some(data.contact_name),
+                        ..new_org
+                    };
+
+                    actions::orgs::update_org(
+                        &mut conn,
+                        Uuid::parse_str(&new_org.id).expect("generated a uuid that didn't work"),
+                        &new_org,
+                    )?;
+
+                    actions::org_event::update_event_org_state(
+                        &mut conn,
+                        models::OrgEvent {
+                            event_id: event.id,
+                            org_id: new_org.id,
+                            state: EventOrgState::Registered.to_db().into(),
+                        },
+                    )?;
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Ok(false),
+        }
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    if success {
+        Ok(Json("success".to_string()))
+    } else {
+        Err(ErrorResponse::Unauthorized(
+            "No valid event for self-registration".into(),
+        ))
     }
 }

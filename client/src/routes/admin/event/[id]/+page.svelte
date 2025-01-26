@@ -6,6 +6,7 @@
     getEventOrgs,
     listOrgs,
     setEventOrgState,
+    updateEvent,
     type Event,
     type EventOrg,
     type Org,
@@ -18,11 +19,17 @@
     TableBodyRow,
     TableBodyCell,
     Button,
+    Label,
+    Input,
+    A,
+    Checkbox,
+    Textarea,
   } from "flowbite-svelte";
 
   import Groups from "./Groups.svelte";
 
   let event: Event | null = $state(null);
+  let event_changed = $state(false);
   let event_orgs: EventOrg[] = $state([]);
   let other_orgs: Org[] = $state([]);
 
@@ -78,50 +85,85 @@
     other_orgs.push(org);
     sort();
   }
+
+  async function update_event() {
+    if (event) {
+      updateEvent({ ...event, event: event.id });
+      event_changed = false;
+    }
+  }
 </script>
 
 <main>
-  <h1>{event?.name}</h1>
-  <Groups {event_id} />
+  {#if event}
+    <div class="grid gap-6 mb-6 md:grid-cols-2">
+      <div>
+        <Label for="event_name">Event Name</Label>
+        <Input
+          id="event_name"
+          type="text"
+          on:input={() => (event_changed = true)}
+          bind:value={event.name}
+          placeholder="Event Name"
+          required
+        />
+      </div>
+    </div>
+    <div class="mb-6">
+      <div>
+        <Label for="event_description">Event Description</Label>
+        <Textarea
+          id="event_description"
+          rows={10}
+          on:input={() => (event_changed = true)}
+          bind:value={event.description}
+          placeholder="Event Description"
+          required
+        />
+      </div>
+      <Button disabled={!event_changed} on:click={update_event}>Save</Button>
+    </div>
+    <Groups {event_id} />
 
-  <Table>
-    <TableHead>
-      <TableHeadCell>Name</TableHeadCell>
-      <TableHeadCell>State</TableHeadCell>
-      <TableHeadCell></TableHeadCell>
-    </TableHead>
-    <TableBody>
-      {#if event_orgs != null}
-        {#each event_orgs as event_org}
-          <TableBodyRow>
-            <TableBodyCell
-              ><a href="/admin/org/{event_org.org.id}">{event_org.org.name}</a
-              ></TableBodyCell
-            >
-            <TableBodyCell>{event_org.state}</TableBodyCell>
-            <TableBodyCell
-              ><Button onclick={() => remove(event_org.org)}>Remove</Button
-              ></TableBodyCell
-            >
-          </TableBodyRow>
-        {/each}
-      {/if}
-    </TableBody>
-  </Table>
-  <h2>Unassigned:</h2>
-  <Table>
-    <TableBody>
-      {#if other_orgs != null}
-        {#each other_orgs as org}
-          <TableBodyRow>
-            <TableBodyCell>{org.name}</TableBodyCell>
-            <TableBodyCell><i>not assigned</i></TableBodyCell>
-            <TableBodyCell
-              ><Button onclick={() => add(org)}>Add</Button></TableBodyCell
-            >
-          </TableBodyRow>
-        {/each}
-      {/if}
-    </TableBody>
-  </Table>
+    <Table>
+      <TableHead>
+        <TableHeadCell>Name</TableHeadCell>
+        <TableHeadCell>State</TableHeadCell>
+        <TableHeadCell></TableHeadCell>
+      </TableHead>
+      <TableBody>
+        {#if event_orgs != null}
+          {#each event_orgs as event_org}
+            <TableBodyRow>
+              <TableBodyCell
+                ><a href="/admin/org/{event_org.org.id}">{event_org.org.name}</a
+                ></TableBodyCell
+              >
+              <TableBodyCell>{event_org.state}</TableBodyCell>
+              <TableBodyCell
+                ><Button onclick={() => remove(event_org.org)}>Remove</Button
+                ></TableBodyCell
+              >
+            </TableBodyRow>
+          {/each}
+        {/if}
+      </TableBody>
+    </Table>
+    <h2>Unassigned:</h2>
+    <Table>
+      <TableBody>
+        {#if other_orgs != null}
+          {#each other_orgs as org}
+            <TableBodyRow>
+              <TableBodyCell>{org.name}</TableBodyCell>
+              <TableBodyCell><i>not assigned</i></TableBodyCell>
+              <TableBodyCell
+                ><Button onclick={() => add(org)}>Add</Button></TableBodyCell
+              >
+            </TableBodyRow>
+          {/each}
+        {/if}
+      </TableBody>
+    </Table>
+  {/if}
 </main>

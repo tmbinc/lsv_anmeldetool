@@ -48,6 +48,8 @@ export const deleteGroup = apity.path('/api/v1/group/{group}').method('delete').
 export const updateGroup = apity.path('/api/v1/group').method('put').create();
 export const createGroup = apity.path('/api/v1/event/{event}/groups').method('post').create();
 
+export const createOrgSelfReg = apity.path("/api/v1/orgs/self_register").method('post').create();
+
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];
 export type EventOrg = components["schemas"]["EventOrg"];

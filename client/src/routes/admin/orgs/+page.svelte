@@ -84,6 +84,7 @@
     <Table>
       <TableHead>
         <TableHeadCell>Name</TableHeadCell>
+        <TableHeadCell>Contact Name</TableHeadCell>
         <TableHeadCell>Contact Email</TableHeadCell>
         <TableHeadCell>Contact Phone</TableHeadCell>
         <TableHeadCell>Public</TableHeadCell>
@@ -100,6 +101,13 @@
                 disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.name}
+              /></TableBodyCell
+            >
+            <TableBodyCell
+              ><input
+                disabled={!edit_mode}
+                oninput={() => change(org.id)}
+                bind:value={org.contact_name}
               /></TableBodyCell
             >
             <TableBodyCell

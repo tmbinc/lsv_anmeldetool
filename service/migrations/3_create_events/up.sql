@@ -2,5 +2,7 @@ CREATE TABLE events (
   id TEXT NOT NULL PRIMARY KEY,
   name VARCHAR NOT NULL,
   public BOOLEAN NOT NULL DEFAULT 0,
-  begin DATE
+  public_reg_until DATETIME,
+  begin DATETIME,
+  description VARCHAR NOT NULL DEFAULT ""
 );

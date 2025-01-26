@@ -1,9 +1,10 @@
 use crate::schema::{events, groups, org_event, orgs, teams};
 use apistos::ApiComponent;
-use chrono::NaiveDate;
+use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 /// Org details.
 #[derive(
@@ -25,7 +26,9 @@ pub struct Org {
     pub name: String,
     pub public: bool,
     pub contact_email: Option<String>,
+    pub contact_name: Option<String>,
     pub contact_phone: Option<String>,
+    pub confirmed_email: bool,
 }
 
 /// New org details.
@@ -106,14 +109,22 @@ pub struct Event {
     pub id: String,
     pub name: String,
     pub public: bool,
-    pub begin: Option<NaiveDate>,
+    pub public_reg_until: Option<NaiveDateTime>,
+    pub begin: Option<NaiveDateTime>,
+    pub description: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
 pub enum EventOrgState {
+    /// Org has not been included in this event.
     NotEnlisted,
+    /// Org self-registered for this event.
+    Registered,
+    /// Org was confirmed (or manually added) to the event, has validated contact data.
     Created,
+    /// Org has done any changes (i.e. clicked on final email link)
     Updated,
+    /// Org has finalized entries for this event.
     Submitted,
 }
 
@@ -126,6 +137,7 @@ impl EventOrgState {
     pub fn to_db(&self) -> &'static str {
         match self {
             Self::NotEnlisted => "not_enlisted",
+            Self::Registered => "registered",
             Self::Created => "created",
             Self::Updated => "updated",
             Self::Submitted => "submitted",
@@ -136,6 +148,7 @@ impl EventOrgState {
     pub fn from_db(s: &str) -> Option<Self> {
         match s {
             "not_enlisted" => Some(Self::NotEnlisted),
+            "registered" => Some(Self::Registered),
             "created" => Some(Self::Created),
             "updated" => Some(Self::Updated),
             "submitted" => Some(Self::Submitted),
@@ -199,4 +212,12 @@ pub struct Group {
 #[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
 pub struct NewGroup {
     pub name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+pub struct NewOrgSelfReg {
+    pub name: String,
+    pub event_id: Uuid,
+    pub contact_email: String,
+    pub contact_name: String,
 }

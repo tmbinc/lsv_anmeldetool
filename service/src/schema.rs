@@ -5,7 +5,9 @@ diesel::table! {
         id -> Text,
         name -> Text,
         public -> Bool,
-        begin -> Nullable<Date>,
+        public_reg_until -> Nullable<Timestamp>,
+        begin -> Nullable<Timestamp>,
+        description -> Text,
     }
 }
 
@@ -31,7 +33,9 @@ diesel::table! {
         name -> Text,
         public -> Bool,
         contact_email -> Nullable<Text>,
+        contact_name -> Nullable<Text>,
         contact_phone -> Nullable<Text>,
+        confirmed_email -> Bool,
     }
 }
 

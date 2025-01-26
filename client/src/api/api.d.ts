@@ -11,6 +11,10 @@ export interface paths {
     /** update org */
     put: operations["put_api-v1-org-e5659494460fbdef2fe5e110ad7644e8"];
   };
+  "/api/v1/orgs/self_register": {
+    /** self-register a new org */
+    post: operations["post_api-v1-orgs-self_register-0556be35dff40f12eac6263dd7d00514"];
+  };
   "/api/v1/org/{org}/events": {
     /** get event list for a org */
     get: operations["get_api-v1-org-7dc929bdfbe96d14e91c23f78cd42f84"];
@@ -86,11 +90,14 @@ export interface components {
      * @description Event details
      */
     Event: {
-      /** Format: date */
+      /** Format: partial-date-time */
       begin?: string | null;
+      description: string;
       id: string;
       name: string;
       public: boolean;
+      /** Format: partial-date-time */
+      public_reg_until?: string | null;
     };
     /** EventOrg */
     EventOrg: {
@@ -101,8 +108,7 @@ export interface components {
       /** @description teams for this event */
       teams: components["schemas"]["Team"][];
     };
-    /** @enum {string} */
-    EventOrgState: "NotEnlisted" | "Created" | "Updated" | "Submitted";
+    EventOrgState: "NotEnlisted" | "Registered" | "Created" | "Updated" | "Submitted";
     /** EventOrgStateUpdate */
     EventOrgStateUpdate: {
       state: components["schemas"]["EventOrgState"];
@@ -134,6 +140,14 @@ export interface components {
     NewOrg: {
       name: string;
     };
+    /** NewOrgSelfReg */
+    NewOrgSelfReg: {
+      contact_email: string;
+      contact_name: string;
+      /** Format: uuid */
+      event_id: string;
+      name: string;
+    };
     /**
      * NewTeam
      * @description New org details.
@@ -145,7 +159,9 @@ export interface components {
     };
     /** @description Org details. */
     Org: {
+      confirmed_email: boolean;
       contact_email?: string | null;
+      contact_name?: string | null;
       contact_phone?: string | null;
       id: string;
       name: string;
@@ -234,6 +250,37 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Org"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** self-register a new org */
+  "post_api-v1-orgs-self_register-0556be35dff40f12eac6263dd7d00514": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewOrgSelfReg"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
         };
       };
       /** @description Forbidden */

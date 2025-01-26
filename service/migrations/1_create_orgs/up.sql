@@ -3,5 +3,7 @@ CREATE TABLE orgs (
   name VARCHAR NOT NULL,
   public BOOLEAN NOT NULL DEFAULT 0,
   contact_email VARCHAR(50),
-  contact_phone VARCHAR(50)
+  contact_name VARCHAR(50),
+  contact_phone VARCHAR(50),
+  confirmed_email BOOLEAN NOT NULL DEFAULT 0
 );

@@ -14,13 +14,13 @@ pub fn find_org_by_uid(conn: &mut SqliteConnection, uid: Uuid) -> Result<Option<
     Ok(user)
 }
 
-pub fn update_org(conn: &mut SqliteConnection, uid: Uuid, data: Org) -> Result<Org, DbError> {
+pub fn update_org(conn: &mut SqliteConnection, uid: Uuid, data: &Org) -> Result<(), DbError> {
     use crate::schema::orgs::dsl::*;
 
     diesel::update(orgs.filter(id.eq(uid.to_string())))
-        .set(&data)
+        .set(data)
         .execute(conn)?;
-    Ok(data)
+    Ok(())
 }
 
 pub fn list_org(conn: &mut SqliteConnection) -> Result<Vec<Org>, DbError> {
@@ -40,6 +40,8 @@ pub fn insert_new_org(conn: &mut SqliteConnection, nm: &str) -> Result<Org, DbEr
         public: false,
         contact_email: None,
         contact_phone: None,
+        contact_name: None,
+        confirmed_email: false,
     };
 
     diesel::insert_into(orgs).values(&new_org).execute(conn)?;
