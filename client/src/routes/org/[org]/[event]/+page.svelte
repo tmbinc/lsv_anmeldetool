@@ -171,13 +171,18 @@
         <TableBodyCell>
           <Button
             on:click={() => new_team()}
-            class="px-3 py-2 text-xs font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-            >Neu...</Button
+            class="px-3 py-2 text-s font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+            >Team hinzufügen...</Button
           >
         </TableBodyCell>
+        <TableBodyCell>Status: Anmeldung in Bearbeitung</TableBodyCell>
         <TableBodyCell></TableBodyCell>
-        <TableBodyCell></TableBodyCell>
-        <TableBodyCell></TableBodyCell>
+        <TableBodyCell>
+          <Button
+            class="px-3 py-2 text-s font-medium text-center text-white bg-orange-700 rounded-lg hover:bg-orange-800 focus:ring-4 focus:outline-none focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700 dark:focus:ring-orange-800"
+            >Anmeldung finalisieren</Button
+          >
+        </TableBodyCell>
       </TableBodyRow>
     </TableBody>
   </Table>

@@ -24,12 +24,14 @@
   } from "flowbite-svelte";
   import { EnvelopeSolid } from "flowbite-svelte-icons";
   import Loading from "../../Loading.svelte";
+  import LoadError from "../../LoadError.svelte";
 
   let event: Event | null = $state(null);
   let loading = $state(true);
   let submitting = $state(false);
   let submitted = $state(false);
-  let failed = $state(false);
+  let failed_submit = $state(false);
+  let failed_load = $state(false);
   let contact_name = $state("");
   let contact_email = $state("");
   let org_name = $state("");
@@ -41,8 +43,10 @@
     const resp = await request.result;
     if (resp.ok) {
       event = resp.data;
-      loading = false;
+    } else {
+      failed_load = true;
     }
+    loading = false;
   });
 
   async function submit_reg() {
@@ -56,11 +60,10 @@
 
     if (result.ok) {
       submitted = true;
-      submitting = false;
     } else {
-      submitting = false;
-      failed = true;
+      failed_submit = true;
     }
+    submitting = false;
   }
 </script>
 
@@ -69,11 +72,16 @@
     <Loading text="Lade Turnierdetails..." />
   {:else if submitting}
     <Loading text="Speichere Anmeldung..." />
+  {:else if failed_load}
+    <LoadError text="Laden fehlgeschlagen!" />
   {:else if submitted}
-    <div class="w-full mt-24 flex items-center justify-center gap-4">
+    <div class="w-full mt-24 items-center justify-center gap-4">
       <h1 class="text-2xl font-semibold text-gray-900">
         Anmeldung erfolgreich gespeichert!
       </h1>
+      <p>
+        Sie bekommen eine Email an {contact_email} mit weiteren Informationen.
+      </p>
     </div>
   {:else}
     <h1
@@ -93,7 +101,7 @@
         Teilnahme
       </h2>
 
-      {#if failed}
+      {#if failed_submit}
         <div class="w-full items-center justify-center">
           <h1 class="text-2xl font-semibold text-orange-900">
             Fehler beim Speichern der Anmeldung! Bitte noch einmal probieren

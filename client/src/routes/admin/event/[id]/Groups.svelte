@@ -11,6 +11,7 @@
   import {
     Button,
     Checkbox,
+    Input,
     Table,
     TableBody,
     TableBodyCell,
@@ -68,7 +69,7 @@
       {#each groups as group}
         <TableBodyRow>
           <TableBodyCell>
-            <input
+            <Input
               disabled={!edit_mode}
               bind:value={group.name}
               oninput={() => change(group.id)}

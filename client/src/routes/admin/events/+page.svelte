@@ -11,6 +11,7 @@
     Button,
     Checkbox,
     Datepicker,
+    Input,
     Table,
     TableBody,
     TableBodyCell,
@@ -90,7 +91,7 @@
         {#each events as event}
           <TableBodyRow>
             <TableBodyCell>
-              <input
+              <Input
                 disabled={!edit_mode}
                 bind:value={event.name}
                 oninput={() => change(event.id)}
@@ -98,7 +99,7 @@
             >
             <TableBodyCell>
               <!-- <Datepicker bind:value={fakedate.get(event.id} /> -->
-              <input
+              <Input
                 disabled={!edit_mode}
                 bind:value={event.begin}
                 oninput={() => change(event.id)}

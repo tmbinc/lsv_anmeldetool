@@ -10,6 +10,7 @@
   import {
     Button,
     Checkbox,
+    Input,
     Table,
     TableBody,
     TableBodyCell,
@@ -97,28 +98,28 @@
             class="org {changed.includes(org.id) ? 'changed' : 'unchanged'}"
           >
             <TableBodyCell
-              ><input
+              ><Input
                 disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.name}
               /></TableBodyCell
             >
             <TableBodyCell
-              ><input
+              ><Input
                 disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.contact_name}
               /></TableBodyCell
             >
             <TableBodyCell
-              ><input
+              ><Input
                 disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.contact_email}
               /></TableBodyCell
             >
             <TableBodyCell
-              ><input
+              ><Input
                 disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.contact_phone}
