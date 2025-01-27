@@ -1,6 +1,7 @@
 use crate::actions::DbError;
+use crate::errors::ErrorResponse;
 use crate::models::{self, Event, EventOrgState, EventOrgStateUpdate, NewEvent, Org, Team};
-use crate::{actions, DbPool, ErrorResponse};
+use crate::{actions, DbPool};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
 use apistos::{api_operation, ApiComponent};

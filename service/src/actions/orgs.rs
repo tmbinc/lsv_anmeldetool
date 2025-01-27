@@ -1,5 +1,6 @@
 use crate::actions::DbError;
 use crate::models::Org;
+use chrono::Utc;
 use diesel::prelude::*;
 use uuid::Uuid;
 
@@ -42,6 +43,7 @@ pub fn insert_new_org(conn: &mut SqliteConnection, nm: &str) -> Result<Org, DbEr
         contact_phone: None,
         contact_name: None,
         confirmed_email: false,
+        last_update: Utc::now().naive_utc(),
     };
 
     diesel::insert_into(orgs).values(&new_org).execute(conn)?;

@@ -36,6 +36,7 @@ diesel::table! {
         contact_name -> Nullable<Text>,
         contact_phone -> Nullable<Text>,
         confirmed_email -> Bool,
+        last_update -> Timestamp,
     }
 }
 
@@ -51,6 +52,14 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    users (email) {
+        email -> Text,
+        hash -> Text,
+        created_at -> Timestamp,
+    }
+}
+
 diesel::joinable!(groups -> events (event_id));
 diesel::joinable!(org_event -> events (event_id));
 diesel::joinable!(org_event -> orgs (org_id));
@@ -62,4 +71,5 @@ diesel::allow_tables_to_appear_in_same_query!(
     org_event,
     orgs,
     teams,
+    users,
 );

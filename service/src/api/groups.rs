@@ -1,7 +1,8 @@
 use crate::actions::groups::get_group_by_id;
 use crate::actions::DbError;
+use crate::errors::ErrorResponse;
 use crate::models::{Group, NewGroup};
-use crate::{actions, DbPool, ErrorResponse};
+use crate::{actions, DbPool};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
 use apistos::api_operation;

@@ -1,67 +1,23 @@
 use actix_cors::Cors;
-use actix_web::http::StatusCode;
-use actix_web::ResponseError;
-use actix_web::{error, middleware, web, App, HttpServer};
+use actix_identity::IdentityMiddleware;
+use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
+use actix_web::cookie::time::Duration;
+use actix_web::cookie::Key;
+use actix_web::{middleware, web, App, HttpServer};
 use apistos::app::OpenApiWrapper;
 use apistos::info::Info;
 use apistos::spec::Spec;
 use apistos::web::{delete, get, post, put, resource, scope};
-use apistos::ApiErrorComponent;
-use core::fmt::Formatter;
 use diesel::{prelude::*, r2d2};
-use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 
 mod actions;
 mod api;
+mod errors;
 mod models;
 mod schema;
+mod utils;
 
 type DbPool = r2d2::Pool<r2d2::ConnectionManager<SqliteConnection>>;
-
-#[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-#[openapi_error(
-    status(code = 403),
-    status(code = 404),
-    status(code = 405, description = "Invalid input"),
-    status(code = 409)
-)]
-pub enum ErrorResponse {
-    MethodNotAllowed(String),
-    NotFound(String),
-    Conflict(String),
-    Unauthorized(String),
-    Other,
-}
-
-impl Display for ErrorResponse {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-impl ResponseError for ErrorResponse {
-    fn status_code(&self) -> StatusCode {
-        match self {
-            ErrorResponse::MethodNotAllowed(_) => StatusCode::METHOD_NOT_ALLOWED,
-            ErrorResponse::NotFound(_) => StatusCode::NOT_FOUND,
-            ErrorResponse::Conflict(_) => StatusCode::CONFLICT,
-            ErrorResponse::Unauthorized(_) => StatusCode::UNAUTHORIZED,
-            ErrorResponse::Other => StatusCode::INTERNAL_SERVER_ERROR,
-        }
-    }
-}
-
-impl From<actix_web::Error> for ErrorResponse {
-    fn from(_value: actix_web::Error) -> Self {
-        Self::Other
-    }
-}
-impl From<error::BlockingError> for ErrorResponse {
-    fn from(_value: error::BlockingError) -> Self {
-        Self::Other
-    }
-}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -77,6 +33,10 @@ async fn main() -> std::io::Result<()> {
         .expect("PORT must be a 16 bit int");
     let path = std::env::var("STATIC_FILE_PATH").expect("STATIC_FILE_PATH must be set");
     let static_files = String::from(path.strip_suffix("/").unwrap_or(&path));
+    let domain: String = std::env::var("DOMAIN").unwrap_or_else(|_| "localhost".to_owned());
+
+    let secret_key = Key::generate();
+    let cookie_store = CookieSessionStore::default();
 
     HttpServer::new(move || {
         let spec = Spec {
@@ -97,6 +57,15 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             // add request logger middleware
             .wrap(middleware::Logger::default())
+            // Authentication
+            .wrap(IdentityMiddleware::default())
+            .wrap(
+                SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
+                    .cookie_name("session".to_owned())
+                    .cookie_secure(false)
+                    .session_lifecycle(PersistentSession::default().session_ttl(Duration::days(1)))
+                    .build(),
+            )
             // add route handlers
             .service(
                 scope("/api/v1")
@@ -150,7 +119,13 @@ async fn main() -> std::io::Result<()> {
                             .route(put().to(api::events::set_event_org_state)),
                     )
                     .service(resource("events").route(get().to(api::events::get_events)))
-                    .service(resource("event").route(post().to(api::events::add_event))),
+                    .service(resource("event").route(post().to(api::events::add_event)))
+                    .service(
+                        resource("/auth")
+                            .route(post().to(api::auth::login))
+                            //.route(delete().to(api::auth::logout))
+                            .route(get().to(api::auth::get_me)),
+                    ),
             )
             .build("/openapi.json")
             .service(

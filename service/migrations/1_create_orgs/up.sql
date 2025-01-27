@@ -5,5 +5,6 @@ CREATE TABLE orgs (
   contact_email VARCHAR(50),
   contact_name VARCHAR(50),
   contact_phone VARCHAR(50),
-  confirmed_email BOOLEAN NOT NULL DEFAULT 0
+  confirmed_email BOOLEAN NOT NULL DEFAULT 0,
+  last_update DATETIME NOT NULL
 );

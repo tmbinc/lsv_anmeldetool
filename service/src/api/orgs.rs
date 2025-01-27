@@ -1,7 +1,8 @@
 use crate::actions::events::find_event_by_uid;
 use crate::actions::DbError;
+use crate::errors::ErrorResponse;
 use crate::models::{self, Event, EventOrgState, NewOrgSelfReg, Org, Team};
-use crate::{actions, DbPool, ErrorResponse};
+use crate::{actions, DbPool};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
 use apistos::{api_operation, ApiComponent};

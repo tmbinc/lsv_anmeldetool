@@ -1,4 +1,13 @@
-pub mod orgs;
+use uuid::Uuid;
+
+pub mod auth;
 pub mod events;
-pub mod teams;
 pub mod groups;
+pub mod orgs;
+pub mod teams;
+
+enum Authentication {
+    None,
+    Admin,
+    Org(Uuid),
+}
