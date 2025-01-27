@@ -1,7 +1,8 @@
 use crate::actions::events::find_event_by_uid;
 use crate::actions::DbError;
+use crate::api::auth::LoggedUser;
 use crate::errors::ErrorResponse;
-use crate::models::{self, Event, EventOrgState, NewOrgSelfReg, Org, Team};
+use crate::models::{self, Event, EventOrgState, NewOrgSelfReg, Org, Role, Team};
 use crate::{actions, DbPool};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
@@ -25,14 +26,23 @@ pub struct OrgEvent {
 #[api_operation(summary = "get one org by ID")]
 pub async fn get_org(
     pool: web::Data<DbPool>,
-    user_uid: Path<Uuid>,
+    user: LoggedUser,
+    org_id: Path<Uuid>,
 ) -> Result<Json<Org>, ErrorResponse> {
-    let user_uid = user_uid.into_inner();
+    let org_id = org_id.into_inner();
 
-    let user = web::block(move || {
+    match user.role {
+        Role::Admin => {}
+        Role::Org(org) if org == org_id => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
+    let org = web::block(move || {
         let mut conn = pool.get()?;
 
-        actions::orgs::find_org_by_uid(&mut conn, user_uid)
+        actions::orgs::find_org_by_uid(&mut conn, org_id)
     })
     .await
     .unwrap() // fixme
@@ -40,13 +50,13 @@ pub async fn get_org(
     .map_err(error::ErrorInternalServerError)
     .unwrap(); // fixme
 
-    match user {
+    match org {
         // user was found; return 200 response with JSON formatted user object
         Some(user) => Ok(Json(user)),
 
         // user was not found; return 404 response with error message
         None => Err(ErrorResponse::NotFound(format!(
-            "No user found with UID: {user_uid}"
+            "No user found with UID: {org_id}"
         ))),
     }
 }
@@ -54,14 +64,25 @@ pub async fn get_org(
 #[api_operation(summary = "update org")]
 pub async fn update_org(
     pool: web::Data<DbPool>,
-    user_uid: Path<Uuid>,
+    user: LoggedUser,
+    org_uid: Path<Uuid>,
     data: Json<Org>,
 ) -> Result<Json<Org>, ErrorResponse> {
+    let data = data.into_inner();
+    let org_uid = org_uid.into_inner();
+
+    match user.role {
+        Role::Admin => {}
+        Role::Org(org) if org == org_uid => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let data = web::block(move || -> Result<Org, DbError> {
         let mut conn = pool.get()?;
 
-        let data = data.into_inner();
-        actions::orgs::update_org(&mut conn, *user_uid, &data)?;
+        actions::orgs::update_org(&mut conn, org_uid, &data)?;
         Ok(data)
     })
     .await?
@@ -73,7 +94,17 @@ pub async fn update_org(
 
 /// List orgs
 #[api_operation(summary = "get list of orgs")]
-pub async fn get_orgs(pool: web::Data<DbPool>) -> Result<Json<Vec<Org>>, ErrorResponse> {
+pub async fn get_orgs(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+) -> Result<Json<Vec<Org>>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let orgs = web::block(move || {
         let mut conn = pool.get()?;
 
@@ -89,8 +120,16 @@ pub async fn get_orgs(pool: web::Data<DbPool>) -> Result<Json<Vec<Org>>, ErrorRe
 #[api_operation(summary = "add an org")]
 pub async fn add_org(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     form: web::Json<models::NewOrg>,
 ) -> Result<Json<Org>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     // use web::block to offload blocking Diesel queries without blocking server thread
     let org = web::block(move || {
         // note that obtaining a connection from the pool is also potentially blocking
@@ -109,9 +148,18 @@ pub async fn add_org(
 #[api_operation(summary = "get event list for a org")]
 pub async fn get_org_events(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     org_uid: Path<Uuid>,
 ) -> Result<Json<Vec<OrgEvent>>, ErrorResponse> {
     let org_uid = org_uid.into_inner();
+
+    match user.role {
+        Role::Admin => {}
+        Role::Org(org) if org == org_uid => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
 
     let event_org = web::block(move || -> Result<Option<Vec<OrgEvent>>, DbError> {
         let mut conn = pool.get()?;
@@ -147,9 +195,16 @@ pub async fn get_org_events(
 #[api_operation(summary = "self-register a new org")]
 pub async fn self_register_org(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     data: Json<NewOrgSelfReg>,
 ) -> Result<Json<String>, ErrorResponse> {
-    log::info!("--- self register");
+    match user.role {
+        Role::Admin | Role::None | Role::Org(_) => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let data = data.into_inner();
 
     let success = web::block(move || -> Result<bool, DbError> {

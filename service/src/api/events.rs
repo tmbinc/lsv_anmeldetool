@@ -1,6 +1,7 @@
 use crate::actions::DbError;
+use crate::api::auth::LoggedUser;
 use crate::errors::ErrorResponse;
-use crate::models::{self, Event, EventOrgState, EventOrgStateUpdate, NewEvent, Org, Team};
+use crate::models::{self, Event, EventOrgState, EventOrgStateUpdate, NewEvent, Org, Role, Team};
 use crate::{actions, DbPool};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
@@ -24,8 +25,13 @@ pub struct EventOrg {
 #[api_operation(summary = "get one event by ID")]
 pub async fn get_event(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     event_uid: Path<Uuid>,
 ) -> Result<Json<Event>, ErrorResponse> {
+    match user.role {
+        Role::Admin | Role::None | Role::Org(_) => {}
+    };
+
     let event_uid = event_uid.into_inner();
 
     let event = web::block(move || {
@@ -53,8 +59,16 @@ pub async fn get_event(
 pub async fn update_event(
     pool: web::Data<DbPool>,
     event_uid: Path<Uuid>,
+    user: LoggedUser,
     data: Json<Event>,
 ) -> Result<Json<Event>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let event = web::block(move || {
         let mut conn = pool.get()?;
 
@@ -71,7 +85,17 @@ pub async fn update_event(
 
 /// List events
 #[api_operation(summary = "get list of events")]
-pub async fn get_events(pool: web::Data<DbPool>) -> Result<Json<Vec<Event>>, ErrorResponse> {
+pub async fn get_events(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+) -> Result<Json<Vec<Event>>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let orgs = web::block(move || {
         let mut conn = pool.get()?;
 
@@ -86,8 +110,16 @@ pub async fn get_events(pool: web::Data<DbPool>) -> Result<Json<Vec<Event>>, Err
 #[api_operation(summary = "add an event")]
 pub async fn add_event(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     form: web::Json<NewEvent>,
 ) -> Result<Json<Event>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let org = web::block(move || {
         let mut conn = pool.get()?;
 
@@ -102,8 +134,16 @@ pub async fn add_event(
 #[api_operation(summary = "get org list for a given event")]
 pub async fn get_event_orgs(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     event_uid: Path<Uuid>,
 ) -> Result<Json<Vec<EventOrg>>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let event_uid = event_uid.into_inner();
 
     let event_org = web::block(move || -> Result<Option<Vec<EventOrg>>, DbError> {
@@ -141,10 +181,20 @@ pub async fn get_event_orgs(
 #[api_operation(summary = "set status for event per org")]
 pub async fn set_event_org_state(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     event_org_uid: Path<(Uuid, Uuid)>,
     state_update: Json<EventOrgStateUpdate>,
 ) -> Result<Json<String>, ErrorResponse> {
     let (event_uid, org_uid) = event_org_uid.into_inner();
+
+    match user.role {
+        Role::Admin => {}
+        Role::Org(org) if org == org_uid => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let event_org = web::block(move || {
         let mut conn = pool.get()?;
 

@@ -1,7 +1,8 @@
 use crate::actions::teams::get_team_by_id;
 use crate::actions::DbError;
+use crate::api::auth::LoggedUser;
 use crate::errors::ErrorResponse;
-use crate::models::{NewTeam, Team};
+use crate::models::{NewTeam, Role, Team};
 use crate::{actions, DbPool};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
@@ -11,9 +12,18 @@ use uuid::Uuid;
 #[api_operation(summary = "get team list for an org + event")]
 pub async fn get_org_teams(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     org_event_uid: Path<(Uuid, Uuid)>,
 ) -> Result<Json<Vec<Team>>, ErrorResponse> {
     let (org_uid, event_uid) = org_event_uid.into_inner();
+
+    match user.role {
+        Role::Admin => {}
+        Role::Org(org) if org == org_uid => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
 
     // TODO: check if org exists!
     // TODO: check if event exists!
@@ -40,10 +50,19 @@ pub async fn get_org_teams(
 #[api_operation(summary = "update team")]
 pub async fn update_team(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     team: Json<Team>,
 ) -> Result<Json<String>, ErrorResponse> {
     // TODO: check if org exists!
     // TODO: check if event exists!
+
+    match user.role {
+        Role::Admin => {}
+        Role::Org(org) if org.to_string() == team.org => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
 
     let event_org = web::block(move || -> Result<(), DbError> {
         let mut conn = pool.get()?;
@@ -62,10 +81,19 @@ pub async fn update_team(
 #[api_operation(summary = "create a new team")]
 pub async fn add_team(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     team: Json<NewTeam>,
 ) -> Result<Json<Team>, ErrorResponse> {
     // TODO: check if org exists!
     // TODO: check if event exists!
+
+    match user.role {
+        Role::Admin => {}
+        Role::Org(org) if org.to_string() == team.org => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
 
     let event_org = web::block(move || -> Result<Team, DbError> {
         let mut conn = pool.get()?;
@@ -80,21 +108,30 @@ pub async fn add_team(
     Ok(Json(team))
 }
 
-#[api_operation(summary = "delete a group")]
+#[api_operation(summary = "delete a team")]
 pub async fn delete_team(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     team_uid: Path<Uuid>,
 ) -> Result<Json<String>, ErrorResponse> {
     let team_uid = team_uid.into_inner();
+
     let group = web::block(move || -> Result<Option<usize>, DbError> {
         let mut conn = pool.get()?;
 
         let team = get_team_by_id(&mut conn, &team_uid)?;
 
-        // FIXME: check team event_id is allowed by user
-
         if let Some(team) = team {
-            Ok(Some(actions::teams::delete_team(&mut conn, team)?))
+            let authorized = match user.role {
+                Role::Admin => true,
+                Role::Org(org) if org.to_string() == team.org => true,
+                _ => false,
+            };
+            if authorized {
+                Ok(Some(actions::teams::delete_team(&mut conn, team)?))
+            } else {
+                Ok(None)
+            }
         } else {
             Ok(None)
         }
@@ -103,6 +140,7 @@ pub async fn delete_team(
     .map_err(error::ErrorInternalServerError)?;
 
     match group {
+        None => Err(ErrorResponse::Unauthorized("".to_string())),
         Some(1) => Ok(Json("ok".to_owned())),
         _ => Err(ErrorResponse::NotFound(format!(
             "No team found with UID: {team_uid}"
@@ -113,6 +151,7 @@ pub async fn delete_team(
 #[api_operation(summary = "get one team by ID")]
 pub async fn get_team(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     team_uid: Path<Uuid>,
 ) -> Result<Json<Team>, ErrorResponse> {
     let team_uid = team_uid.into_inner();
@@ -127,7 +166,19 @@ pub async fn get_team(
 
     match team {
         // user was found; return 200 response with JSON formatted user object
-        Some(team) => Ok(Json(team)),
+        Some(team) => {
+            let authorized = match user.role {
+                Role::Admin => true,
+                Role::Org(org) if org.to_string() == team.org => true,
+                _ => false,
+            };
+
+            if authorized {
+                Ok(Json(team))
+            } else {
+                Err(ErrorResponse::Unauthorized("".to_string()))
+            }
+        }
 
         // user was not found; return 404 response with error message
         None => Err(ErrorResponse::NotFound(format!(

@@ -1,7 +1,8 @@
 use crate::actions::groups::get_group_by_id;
 use crate::actions::DbError;
+use crate::api::auth::LoggedUser;
 use crate::errors::ErrorResponse;
-use crate::models::{Group, NewGroup};
+use crate::models::{Group, NewGroup, Role};
 use crate::{actions, DbPool};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
@@ -11,8 +12,16 @@ use uuid::Uuid;
 #[api_operation(summary = "get list of groups")]
 pub async fn get_groups(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     event_id: Path<Uuid>,
 ) -> Result<Json<Vec<Group>>, ErrorResponse> {
+    match user.role {
+        Role::Admin | Role::None | Role::Org(_) => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let orgs = web::block(move || {
         let mut conn = pool.get()?;
 
@@ -27,9 +36,17 @@ pub async fn get_groups(
 #[api_operation(summary = "add a group")]
 pub async fn add_group(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     event_id: Path<Uuid>,
     new_group: Json<NewGroup>,
 ) -> Result<Json<Group>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let group = web::block(move || {
         let mut conn = pool.get()?;
 
@@ -44,8 +61,16 @@ pub async fn add_group(
 #[api_operation(summary = "update group")]
 pub async fn update_group(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     data: Json<Group>,
 ) -> Result<Json<String>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     web::block(move || {
         let mut conn = pool.get()?;
 
@@ -60,8 +85,16 @@ pub async fn update_group(
 #[api_operation(summary = "delete a group")]
 pub async fn delete_group(
     pool: web::Data<DbPool>,
+    user: LoggedUser,
     group_uid: Path<Uuid>,
 ) -> Result<Json<String>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
     let group_uid = group_uid.into_inner();
     let group = web::block(move || -> Result<Option<usize>, DbError> {
         let mut conn = pool.get()?;

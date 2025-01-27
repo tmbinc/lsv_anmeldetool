@@ -242,12 +242,23 @@ impl User {
 }
 
 #[derive(Debug, Serialize, Deserialize, ApiComponent, JsonSchema)]
+pub enum Role {
+    None,
+    Admin,
+    Org(Uuid),
+}
+
+#[derive(Debug, Serialize, Deserialize, ApiComponent, JsonSchema)]
 pub struct SlimUser {
     pub email: String,
+    pub role: Role,
 }
 
 impl From<User> for SlimUser {
     fn from(user: User) -> Self {
-        SlimUser { email: user.email }
+        SlimUser {
+            email: user.email,
+            role: Role::Admin,
+        }
     }
 }

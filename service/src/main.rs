@@ -33,10 +33,8 @@ async fn main() -> std::io::Result<()> {
         .expect("PORT must be a 16 bit int");
     let path = std::env::var("STATIC_FILE_PATH").expect("STATIC_FILE_PATH must be set");
     let static_files = String::from(path.strip_suffix("/").unwrap_or(&path));
-    let domain: String = std::env::var("DOMAIN").unwrap_or_else(|_| "localhost".to_owned());
 
     let secret_key = Key::generate();
-    let cookie_store = CookieSessionStore::default();
 
     HttpServer::new(move || {
         let spec = Spec {
