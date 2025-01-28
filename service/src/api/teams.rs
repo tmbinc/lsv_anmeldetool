@@ -9,7 +9,7 @@ use actix_web::{error, web};
 use apistos::api_operation;
 use uuid::Uuid;
 
-#[api_operation(summary = "get team list for an org + event")]
+#[api_operation(summary = "get team list for an org + event", skip_args = "user")]
 pub async fn get_org_teams(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -47,7 +47,7 @@ pub async fn get_org_teams(
     }
 }
 
-#[api_operation(summary = "update team")]
+#[api_operation(summary = "update team", skip_args = "user")]
 pub async fn update_team(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -78,7 +78,7 @@ pub async fn update_team(
     Ok(Json("ok".to_string()))
 }
 
-#[api_operation(summary = "create a new team")]
+#[api_operation(summary = "create a new team", skip_args = "user")]
 pub async fn add_team(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -108,7 +108,7 @@ pub async fn add_team(
     Ok(Json(team))
 }
 
-#[api_operation(summary = "delete a team")]
+#[api_operation(summary = "delete a team", skip_args = "user")]
 pub async fn delete_team(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -148,7 +148,7 @@ pub async fn delete_team(
     }
 }
 
-#[api_operation(summary = "get one team by ID")]
+#[api_operation(summary = "get one team by ID", skip_args = "user")]
 pub async fn get_team(
     pool: web::Data<DbPool>,
     user: LoggedUser,

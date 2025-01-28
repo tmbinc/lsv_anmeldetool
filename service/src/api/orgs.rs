@@ -23,7 +23,7 @@ pub struct OrgEvent {
 }
 
 /// Finds org by UID.
-#[api_operation(summary = "get one org by ID")]
+#[api_operation(summary = "get one org by ID", skip_args = "user")]
 pub async fn get_org(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -61,7 +61,7 @@ pub async fn get_org(
     }
 }
 
-#[api_operation(summary = "update org")]
+#[api_operation(summary = "update org", skip_args = "user")]
 pub async fn update_org(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -93,7 +93,7 @@ pub async fn update_org(
 }
 
 /// List orgs
-#[api_operation(summary = "get list of orgs")]
+#[api_operation(summary = "get list of orgs", skip_args = "user")]
 pub async fn get_orgs(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -117,7 +117,7 @@ pub async fn get_orgs(
     Ok(Json(orgs))
 }
 
-#[api_operation(summary = "add an org")]
+#[api_operation(summary = "add an org", skip_args = "user")]
 pub async fn add_org(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -145,7 +145,7 @@ pub async fn add_org(
     Ok(Json(org))
 }
 
-#[api_operation(summary = "get event list for a org")]
+#[api_operation(summary = "get event list for a org", skip_args = "user")]
 pub async fn get_org_events(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -192,7 +192,7 @@ pub async fn get_org_events(
     }
 }
 
-#[api_operation(summary = "self-register a new org")]
+#[api_operation(summary = "self-register a new org", skip_args = "user")]
 pub async fn self_register_org(
     pool: web::Data<DbPool>,
     user: LoggedUser,

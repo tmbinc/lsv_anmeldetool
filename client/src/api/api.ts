@@ -8,7 +8,7 @@ const forceEnvironment: 'development' | 'production-test' | 'production' | undef
 export function getServerUrl(): string {
 	const env = forceEnvironment || import.meta.env.VITE_ENV;
 	if (env === 'development') {
-		return 'http://localhost:8080';
+		return 'http://localhost:5173';
 	} else if (env === 'production-test') {
 		return 'https://beta.reg.lsv1873.de';
 	} else {
@@ -49,6 +49,9 @@ export const updateGroup = apity.path('/api/v1/group').method('put').create();
 export const createGroup = apity.path('/api/v1/event/{event}/groups').method('post').create();
 
 export const createOrgSelfReg = apity.path("/api/v1/orgs/self_register").method('post').create();
+
+export const authLogin = apity.path('/api/v1/auth').method('post').create();
+export const whoAmI = apity.path('/api/v1/auth').method('get').create();
 
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];

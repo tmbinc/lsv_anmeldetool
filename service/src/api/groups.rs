@@ -9,7 +9,7 @@ use actix_web::{error, web};
 use apistos::api_operation;
 use uuid::Uuid;
 
-#[api_operation(summary = "get list of groups")]
+#[api_operation(summary = "get list of groups", skip_args = "user")]
 pub async fn get_groups(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -33,7 +33,7 @@ pub async fn get_groups(
     Ok(Json(orgs))
 }
 
-#[api_operation(summary = "add a group")]
+#[api_operation(summary = "add a group", skip_args = "user")]
 pub async fn add_group(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -58,7 +58,7 @@ pub async fn add_group(
     Ok(Json(group))
 }
 
-#[api_operation(summary = "update group")]
+#[api_operation(summary = "update group", skip_args = "user")]
 pub async fn update_group(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -82,7 +82,7 @@ pub async fn update_group(
     Ok(Json("updated".to_owned()))
 }
 
-#[api_operation(summary = "delete a group")]
+#[api_operation(summary = "delete a group", skip_args = "user")]
 pub async fn delete_group(
     pool: web::Data<DbPool>,
     user: LoggedUser,

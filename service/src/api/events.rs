@@ -22,7 +22,7 @@ pub struct EventOrg {
 }
 
 /// Get event details
-#[api_operation(summary = "get one event by ID")]
+#[api_operation(summary = "get one event by ID", skip_args = "user")]
 pub async fn get_event(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -55,7 +55,7 @@ pub async fn get_event(
     }
 }
 
-#[api_operation(summary = "update event")]
+#[api_operation(summary = "update event", skip_args = "user")]
 pub async fn update_event(
     pool: web::Data<DbPool>,
     event_uid: Path<Uuid>,
@@ -84,7 +84,7 @@ pub async fn update_event(
 }
 
 /// List events
-#[api_operation(summary = "get list of events")]
+#[api_operation(summary = "get list of events", skip_args = "user")]
 pub async fn get_events(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -107,7 +107,7 @@ pub async fn get_events(
     Ok(Json(orgs))
 }
 
-#[api_operation(summary = "add an event")]
+#[api_operation(summary = "add an event", skip_args = "user")]
 pub async fn add_event(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -131,7 +131,7 @@ pub async fn add_event(
     Ok(Json(org))
 }
 
-#[api_operation(summary = "get org list for a given event")]
+#[api_operation(summary = "get org list for a given event", skip_args = "user")]
 pub async fn get_event_orgs(
     pool: web::Data<DbPool>,
     user: LoggedUser,
@@ -178,7 +178,7 @@ pub async fn get_event_orgs(
     }
 }
 
-#[api_operation(summary = "set status for event per org")]
+#[api_operation(summary = "set status for event per org", skip_args = "user")]
 pub async fn set_event_org_state(
     pool: web::Data<DbPool>,
     user: LoggedUser,

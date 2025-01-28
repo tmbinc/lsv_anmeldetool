@@ -4,6 +4,11 @@
  */
 
 
+/** OneOf type helpers */
+type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
+type OneOf<T extends any[]> = T extends [infer Only] ? Only : T extends [infer A, infer B, ...infer Rest] ? OneOf<[XOR<A, B>, ...Rest]> : never;
+
 export interface paths {
   "/api/v1/org/{org}": {
     /** get one org by ID */
@@ -64,7 +69,7 @@ export interface paths {
   "/api/v1/team/{team}": {
     /** get one team by ID */
     get: operations["get_api-v1-team-660a5317bb41a757a76ba890440c3a2e"];
-    /** delete a group */
+    /** delete a team */
     delete: operations["delete_api-v1-team-660a5317bb41a757a76ba890440c3a2e"];
   };
   "/api/v1/event/{event}/org/{org}": {
@@ -79,12 +84,23 @@ export interface paths {
     /** add an event */
     post: operations["post_api-v1-event-28122581fdbc5bd19bb7de68ab3a43f6"];
   };
+  "/api/v1/auth": {
+    /** get logged in identity */
+    get: operations["get_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
+    /** login */
+    post: operations["post_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
+  };
 }
 
 export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    /** AuthData */
+    AuthData: {
+      email: string;
+      password: string;
+    };
     /**
      * Event
      * @description Event details
@@ -164,6 +180,8 @@ export interface components {
       contact_name?: string | null;
       contact_phone?: string | null;
       id: string;
+      /** Format: partial-date-time */
+      last_update: string;
       name: string;
       public: boolean;
     };
@@ -175,6 +193,15 @@ export interface components {
       state: components["schemas"]["EventOrgState"];
       /** @description teams for this event */
       teams: components["schemas"]["Team"][];
+    };
+    Role: OneOf<["None" | "Admin", {
+      /** Format: uuid */
+      Org: string;
+    }]>;
+    /** SlimUser */
+    SlimUser: {
+      email: string;
+      role: components["schemas"]["Role"];
     };
     /**
      * Team
@@ -741,7 +768,7 @@ export interface operations {
       };
     };
   };
-  /** delete a group */
+  /** delete a team */
   "delete_api-v1-team-660a5317bb41a757a76ba890440c3a2e": {
     parameters: {
       path: {
@@ -862,6 +889,32 @@ export interface operations {
       };
       /** @description Conflict */
       409: {
+        content: never;
+      };
+    };
+  };
+  /** get logged in identity */
+  "get_api-v1-auth-0a4ec84191b3223053d50fc370e78726": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SlimUser"];
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+    };
+  };
+  /** login */
+  "post_api-v1-auth-0a4ec84191b3223053d50fc370e78726": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AuthData"];
+      };
+    };
+    responses: {
+      200: {
         content: never;
       };
     };
