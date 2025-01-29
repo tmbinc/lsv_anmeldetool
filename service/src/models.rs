@@ -127,6 +127,8 @@ pub enum EventOrgState {
     Updated,
     /// Org has finalized entries for this event.
     Submitted,
+    /// Org has been verified by admin
+    Verified,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
@@ -142,6 +144,7 @@ impl EventOrgState {
             Self::Created => "created",
             Self::Updated => "updated",
             Self::Submitted => "submitted",
+            Self::Verified => "verified",
         }
     }
 
@@ -153,6 +156,7 @@ impl EventOrgState {
             "created" => Some(Self::Created),
             "updated" => Some(Self::Updated),
             "submitted" => Some(Self::Submitted),
+            "verified" => Some(Self::Verified),
             _ => None,
         }
     }

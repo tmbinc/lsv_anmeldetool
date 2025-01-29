@@ -12,6 +12,7 @@
     getTeam,
     updateTeam,
     deleteTeam,
+    setEventOrgState,
   } from "../../../../api/api";
   import { page } from "$app/state";
   import {
@@ -133,7 +134,9 @@
       }
     }
   }
-  async function submit_teams() {}
+  async function submit_teams() {
+    setEventOrgState({ event: event_id, org: org_id, state: "Submitted" });
+  }
 </script>
 
 <main>

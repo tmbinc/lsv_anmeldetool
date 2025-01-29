@@ -24,6 +24,9 @@
     A,
     Checkbox,
     Textarea,
+    Select,
+    type SelectOptionType,
+    ButtonGroup,
   } from "flowbite-svelte";
 
   import Groups from "./Groups.svelte";
@@ -32,6 +35,15 @@
   let event_changed = $state(false);
   let event_orgs: EventOrg[] = $state([]);
   let other_orgs: Org[] = $state([]);
+
+  const states: SelectOptionType<string>[] = [
+    { name: "Not enlisted", value: "NotEnlisted", disabled: true },
+    { name: "Self-registered", value: "Registered" },
+    { name: "Created", value: "Created" },
+    { name: "Updated", value: "Updated" },
+    { name: "Submitted", value: "Submitted" },
+    { name: "Verified", value: "Verified" },
+  ];
 
   const event_id = page.params.id;
 
@@ -92,6 +104,14 @@
       event_changed = false;
     }
   }
+
+  async function update_org_state(event_org: EventOrg) {
+    setEventOrgState({
+      event: event_id,
+      org: event_org.org.id,
+      state: event_org.state,
+    });
+  }
 </script>
 
 <main>
@@ -108,6 +128,36 @@
           required
         />
       </div>
+      <div>
+        <Label for="event_begin">Start Time</Label>
+        <Input
+          id="event_begin"
+          type="text"
+          on:input={() => (event_changed = true)}
+          bind:value={event.begin}
+          placeholder="Event Start Time"
+          required
+        />
+      </div>
+      <div>
+        <Label for="event_public_reg_until">Registration End Time</Label>
+        <Input
+          id="event_public_reg_until"
+          type="text"
+          on:input={() => (event_changed = true)}
+          bind:value={event.public_reg_until}
+          placeholder="Registration End Time"
+          required
+        />
+      </div>
+      <div>
+        <Label for="event_public">Self-registration allowed</Label>
+        <Checkbox
+          id="event_public"
+          bind:checked={event.public}
+          on:change={() => (event_changed = true)}
+        ></Checkbox>
+      </div>
     </div>
     <div class="mb-6">
       <div>
@@ -123,6 +173,9 @@
       </div>
       <Button disabled={!event_changed} on:click={update_event}>Save</Button>
     </div>
+
+    <Button href="/event/{event_id}/">Public Self-Registration Link</Button>
+
     <Groups {event_id} />
 
     <Table>
@@ -134,16 +187,39 @@
       <TableBody>
         {#if event_orgs != null}
           {#each event_orgs as event_org}
-            <TableBodyRow>
+            <TableBodyRow
+              color={{
+                NotEnlisted: "red",
+                Registered: "red",
+                Created: "red",
+                Updated: "yellow",
+                Submitted: "green",
+                Verified: "purple",
+              }[event_org.state]}
+            >
               <TableBodyCell
                 ><a href="/admin/org/{event_org.org.id}">{event_org.org.name}</a
                 ></TableBodyCell
               >
-              <TableBodyCell>{event_org.state}</TableBodyCell>
-              <TableBodyCell
-                ><Button onclick={() => remove(event_org.org)}>Remove</Button
-                ></TableBodyCell
-              >
+              <TableBodyCell>
+                <Select
+                  class="mt-2"
+                  items={states}
+                  onchange={() => update_org_state(event_org)}
+                  bind:value={event_org.state}
+                />
+              </TableBodyCell>
+              <TableBodyCell>
+                <ButtonGroup>
+                  <Button color="red" onclick={() => remove(event_org.org)}
+                    >Remove</Button
+                  >
+                  <Button
+                    color="green"
+                    href="/org/{event_org.org.id}/{event_id}">Teams</Button
+                  ></ButtonGroup
+                >
+              </TableBodyCell>
             </TableBodyRow>
           {/each}
         {/if}
