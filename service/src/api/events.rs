@@ -28,7 +28,7 @@ pub async fn get_event(
     user: LoggedUser,
     event_uid: Path<Uuid>,
 ) -> Result<Json<Event>, ErrorResponse> {
-    match user.role {
+    let can_view_all = match user.role {
         Role::Admin | Role::None | Role::Org(_) => {}
     };
 
@@ -39,11 +39,8 @@ pub async fn get_event(
 
         actions::events::find_event_by_uid(&mut conn, &event_uid)
     })
-    .await
-    .unwrap() // fixme
-    // map diesel query errors to a 500 error response
-    .map_err(error::ErrorInternalServerError)
-    .unwrap(); // fixme
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
 
     match event {
         Some(event) => Ok(Json(event)),
@@ -154,9 +151,9 @@ pub async fn get_event_orgs(
         Ok(match orgs {
             Some(orgs) => Some(
                 orgs.into_iter()
-                    .map(|org| EventOrg {
-                        org: org,
-                        state: EventOrgState::Created,
+                    .map(|(org, state)| EventOrg {
+                        org,
+                        state,
                         teams: [].into(),
                     })
                     .collect(),

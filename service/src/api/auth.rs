@@ -2,6 +2,7 @@ use std::future::{ready, Ready};
 
 use actix_identity::Identity;
 use actix_web::dev::{self, Payload};
+use actix_web::web::Json;
 use actix_web::{error, web, Error, FromRequest, HttpMessage as _, HttpRequest, HttpResponse};
 use apistos::{api_operation, ApiComponent};
 use diesel::prelude::*;
@@ -9,7 +10,7 @@ use schemars::JsonSchema;
 use serde::Deserialize;
 
 use crate::errors::ErrorResponse;
-use crate::models::{SlimUser, User};
+use crate::models::{Role, SlimUser, User};
 use crate::utils::verify;
 use crate::DbPool;
 
@@ -36,16 +37,18 @@ impl FromRequest for LoggedUser {
             }
         }
 
-        ready(Err(
-            ErrorResponse::Unauthorized("user not found".into()).into()
-        ))
+        ready(Ok(Self {
+            email: "".to_string(),
+            role: Role::None,
+        }))
     }
 }
 
-// pub async fn logout(id: Identity) -> HttpResponse {
-//     id.logout();
-//     HttpResponse::NoContent().finish()
-// }
+#[api_operation(summary = "login", skip_args = "id")]
+pub async fn logout(id: Identity) -> HttpResponse {
+    id.logout();
+    HttpResponse::NoContent().finish()
+}
 
 #[api_operation(summary = "login")]
 pub async fn login(
@@ -61,9 +64,9 @@ pub async fn login(
     Ok(HttpResponse::NoContent().finish())
 }
 
-#[api_operation(summary = "get logged in identity")]
-pub async fn get_me(logged_user: LoggedUser) -> HttpResponse {
-    HttpResponse::Ok().json(logged_user)
+#[api_operation(summary = "get logged in identity", skip_args = "logged_user")]
+pub async fn get_me(logged_user: LoggedUser) -> Result<Json<LoggedUser>, ErrorResponse> {
+    Ok(Json(logged_user))
 }
 /// Diesel query
 fn query(auth_data: AuthData, pool: web::Data<DbPool>) -> Result<SlimUser, ErrorResponse> {

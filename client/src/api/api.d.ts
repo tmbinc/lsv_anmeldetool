@@ -89,6 +89,8 @@ export interface paths {
     get: operations["get_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
     /** login */
     post: operations["post_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
+    /** login */
+    delete: operations["delete_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
   };
 }
 
@@ -895,13 +897,26 @@ export interface operations {
   };
   /** get logged in identity */
   "get_api-v1-auth-0a4ec84191b3223053d50fc370e78726": {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SlimUser"];
-      };
-    };
     responses: {
       200: {
+        content: {
+          "application/json": components["schemas"]["SlimUser"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
         content: never;
       };
     };
@@ -913,6 +928,14 @@ export interface operations {
         "application/json": components["schemas"]["AuthData"];
       };
     };
+    responses: {
+      200: {
+        content: never;
+      };
+    };
+  };
+  /** login */
+  "delete_api-v1-auth-0a4ec84191b3223053d50fc370e78726": {
     responses: {
       200: {
         content: never;

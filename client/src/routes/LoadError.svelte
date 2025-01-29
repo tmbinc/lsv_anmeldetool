@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Alert } from "flowbite-svelte";
+
   let props = $props();
 </script>
 
@@ -7,5 +9,5 @@
     class="animate-bounce rounded-full h-8 w-8 border-t-2 border-b-2 border-red-600"
   ></div>
 
-  <h1 class="text-2xl font-semibold text-gray-900">{props.text}</h1>
+  <Alert>{props.text}</Alert>
 </div>

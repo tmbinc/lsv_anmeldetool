@@ -1,6 +1,6 @@
 use crate::actions::events::find_event_by_uid;
 use crate::actions::DbError;
-use crate::models::{Event, Org, OrgEvent};
+use crate::models::{Event, EventOrgState, Org, OrgEvent};
 use crate::schema::org_event;
 use diesel::prelude::*;
 use uuid::Uuid;
@@ -10,18 +10,29 @@ use super::orgs::find_org_by_uid;
 pub fn list_event_orgs(
     conn: &mut SqliteConnection,
     event_uid: Uuid,
-) -> Result<Option<Vec<Org>>, DbError> {
+) -> Result<Option<Vec<(Org, EventOrgState)>>, DbError> {
     let event = find_event_by_uid(conn, &event_uid)?;
 
     match event {
         Some(event) => {
             use crate::schema::orgs::dsl::*;
-            let event_org_list = OrgEvent::belonging_to(&event)
+            let event_org_list: Vec<(Org, OrgEvent)> = OrgEvent::belonging_to(&event)
                 .inner_join(orgs)
-                .select(Org::as_select())
+                .select((Org::as_select(), OrgEvent::as_select()))
                 .load(conn)?;
 
-            Ok(Some(event_org_list))
+            Ok(Some(
+                event_org_list
+                    .into_iter()
+                    .map(|(org, event_org_state)| {
+                        (
+                            org,
+                            EventOrgState::from_db(&event_org_state.state)
+                                .unwrap_or(EventOrgState::NotEnlisted),
+                        )
+                    })
+                    .collect(),
+            ))
         }
         None => Ok(None),
     }
@@ -30,18 +41,29 @@ pub fn list_event_orgs(
 pub fn list_org_events(
     conn: &mut SqliteConnection,
     org_uid: Uuid,
-) -> Result<Option<Vec<Event>>, DbError> {
+) -> Result<Option<Vec<(Event, EventOrgState)>>, DbError> {
     let org = find_org_by_uid(conn, org_uid)?;
 
     match org {
         Some(org) => {
             use crate::schema::events::dsl::*;
-            let org_event_list = OrgEvent::belonging_to(&org)
+            let org_event_list: Vec<(Event, OrgEvent)> = OrgEvent::belonging_to(&org)
                 .inner_join(events)
-                .select(Event::as_select())
+                .select((Event::as_select(), OrgEvent::as_select()))
                 .load(conn)?;
 
-            Ok(Some(org_event_list))
+            Ok(Some(
+                org_event_list
+                    .into_iter()
+                    .map(|(event, event_org_state)| {
+                        (
+                            event,
+                            EventOrgState::from_db(&event_org_state.state)
+                                .unwrap_or(EventOrgState::NotEnlisted),
+                        )
+                    })
+                    .collect(),
+            ))
         }
         None => Ok(None),
     }

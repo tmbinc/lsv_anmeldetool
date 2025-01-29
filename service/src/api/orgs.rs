@@ -170,9 +170,9 @@ pub async fn get_org_events(
             Some(events) => Some(
                 events
                     .into_iter()
-                    .map(|event| OrgEvent {
-                        event: event,
-                        state: EventOrgState::Created,
+                    .map(|(event, state)| OrgEvent {
+                        event,
+                        state,
                         teams: [].into(),
                     })
                     .collect(),

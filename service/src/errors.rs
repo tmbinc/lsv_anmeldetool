@@ -1,16 +1,8 @@
-use actix_cors::Cors;
-use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
-use actix_web::cookie::Key;
+use actix_web::error;
 use actix_web::http::StatusCode;
 use actix_web::ResponseError;
-use actix_web::{error, middleware, web, App, HttpServer};
-use apistos::app::OpenApiWrapper;
-use apistos::info::Info;
-use apistos::spec::Spec;
-use apistos::web::{delete, get, post, put, resource, scope};
 use apistos::ApiErrorComponent;
 use core::fmt::Formatter;
-use diesel::{prelude::*, r2d2};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 

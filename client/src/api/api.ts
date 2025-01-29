@@ -52,6 +52,7 @@ export const createOrgSelfReg = apity.path("/api/v1/orgs/self_register").method(
 
 export const authLogin = apity.path('/api/v1/auth').method('post').create();
 export const whoAmI = apity.path('/api/v1/auth').method('get').create();
+export const authLogout = apity.path('/api/v1/auth').method('delete').create();
 
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];

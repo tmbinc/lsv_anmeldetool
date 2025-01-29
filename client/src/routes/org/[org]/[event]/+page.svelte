@@ -16,8 +16,10 @@
   import { page } from "$app/state";
   import {
     Button,
+    ButtonGroup,
     Group,
     Input,
+    Modal,
     Select,
     Table,
     TableBody,
@@ -27,6 +29,9 @@
     TableHeadCell,
     type SelectOptionType,
   } from "flowbite-svelte";
+  import { ExclamationCircleOutline } from "flowbite-svelte-icons";
+  import FetchErrors from "../../../FetchErrors.svelte";
+  import Loading from "../../../Loading.svelte";
 
   let org: Org | null = $state(null);
   let event: Event | null = $state(null);
@@ -35,23 +40,38 @@
   let event_id = page.params.event;
   let groups: SelectOptionType<string>[] = $state([]);
   let teams_changed: string[] = $state([]);
+  let team_to_delete: string | null = $state(null);
+  let team_delete_modal = $state(false);
+  let fetch_error: FetchErrors;
+  let loading = $state(true);
+  let submit_modal = $state(false);
 
   onMount(async () => {
     const request = getOrg({ org: org_id });
     const resp = await request.result;
+    let all_good = true;
     if (resp.ok) {
       org = resp.data;
+    } else {
+      fetch_error.check(resp);
+      all_good = false;
     }
     const event_request = getEvent({ event: event_id });
     const event_resp = await event_request.result;
     if (event_resp.ok) {
       event = event_resp.data;
+    } else {
+      fetch_error.check(event_resp);
+      all_good = false;
     }
 
     const teams_request = getTeamsForOrgEvent({ org: org_id, event: event_id });
     const teams_resp = await teams_request.result;
     if (teams_resp.ok) {
       teams = teams_resp.data;
+    } else {
+      fetch_error.check(teams_resp);
+      all_good = false;
     }
 
     const resp_groups = await getGroupsForEvent({ event: event_id }).result;
@@ -60,7 +80,12 @@
         name: group.name,
         value: group.id,
       }));
+    } else {
+      fetch_error.check(resp_groups);
+      all_good = false;
     }
+
+    loading = !all_good;
   });
 
   async function new_team() {
@@ -99,91 +124,138 @@
     }
   }
 
-  async function delete_team(id: string) {
-    const resp = await deleteTeam({ team: id }).result;
-    if (resp.ok) {
-      teams_changed = teams_changed.filter((item) => item != id);
-      teams = teams.filter((team) => team.id != id);
+  async function delete_team(id: string | null) {
+    if (id) {
+      const resp = await deleteTeam({ team: id }).result;
+      if (resp.ok) {
+        teams_changed = teams_changed.filter((item) => item != id);
+        teams = teams.filter((team) => team.id != id);
+      }
     }
   }
+  async function submit_teams() {}
 </script>
 
 <main>
-  <h1 class="text-3xl font-bold underline">
-    Wilkommen, {org?.name}!
-  </h1>
+  <FetchErrors admin={false} bind:this={fetch_error} />
+  {#if loading}
+    <Loading />
+  {:else}
+    <h1 class="text-3xl font-bold underline">
+      Wilkommen, {org?.name}!
+    </h1>
 
-  <p class="text-lg font-medium">
-    Bitte melden Sie die Mannschaften für das Turnier {event?.name}.
-  </p>
-  <Table>
-    <TableHead>
-      <TableHeadCell>Team-Name</TableHeadCell>
-      <TableHeadCell>Altersgruppe</TableHeadCell>
-      <TableHeadCell>Ansprechpartner (Name)</TableHeadCell>
-      <TableHeadCell>Email</TableHeadCell>
-    </TableHead>
-    <TableBody>
-      {#each teams as team}
+    <p class="text-lg font-medium">
+      Bitte melden Sie die Mannschaften für das Turnier {event?.name}.
+    </p>
+    <Table>
+      <TableHead>
+        <TableHeadCell>Team-Name</TableHeadCell>
+        <TableHeadCell>Altersgruppe</TableHeadCell>
+        <TableHeadCell>Ansprechpartner (Name)</TableHeadCell>
+        <TableHeadCell>Telefon</TableHeadCell>
+        <TableHeadCell>Bearbeiten</TableHeadCell>
+      </TableHead>
+      <TableBody>
+        {#each teams as team}
+          <TableBodyRow>
+            <TableBodyCell
+              ><Input
+                bind:value={team.name}
+                oninput={() => change_team(team.id)}
+              /></TableBodyCell
+            >
+            <TableBodyCell>
+              <Select
+                class="mt-2"
+                items={groups}
+                oninput={() => change_team(team.id)}
+                bind:value={team.group_id}
+              />
+            </TableBodyCell>
+            <TableBodyCell
+              ><Input
+                bind:value={team.contact_name}
+                oninput={() => change_team(team.id)}
+              /></TableBodyCell
+            >
+            <TableBodyCell
+              ><Input
+                bind:value={team.contact_phone}
+                oninput={() => change_team(team.id)}
+              /></TableBodyCell
+            >
+            <TableBodyCell>
+              <ButtonGroup>
+                <Button
+                  on:click={() => update_team(team.id)}
+                  color="green"
+                  disabled={!teams_changed.includes(team.id)}>Speichern</Button
+                >
+                <Button
+                  color="yellow"
+                  disabled={!teams_changed.includes(team.id)}
+                  on:click={() => revert_team(team.id)}>Rückgängig</Button
+                >
+                <Button
+                  color="red"
+                  on:click={() => {
+                    team_to_delete = team.id;
+                    team_delete_modal = true;
+                  }}>Team löschen</Button
+                >
+              </ButtonGroup>
+            </TableBodyCell>
+          </TableBodyRow>
+        {/each}
         <TableBodyRow>
-          <TableBodyCell
-            ><Input
-              bind:value={team.name}
-              oninput={() => change_team(team.id)}
-            /></TableBodyCell
-          >
           <TableBodyCell>
-            <Select
-              class="mt-2"
-              items={groups}
-              oninput={() => change_team(team.id)}
-              bind:value={team.group_id}
-            />
+            <Button on:click={() => new_team()} color="green"
+              >Team hinzufügen...</Button
+            >
           </TableBodyCell>
-          <TableBodyCell
-            ><Input
-              bind:value={team.contact_name}
-              oninput={() => change_team(team.id)}
-            /></TableBodyCell
-          >
-          <TableBodyCell
-            ><Input bind:value={team.contact_phone} /></TableBodyCell
-          >
+          <TableBodyCell>Status: Anmeldung in Bearbeitung</TableBodyCell>
+          <TableBodyCell></TableBodyCell>
+          <TableBodyCell></TableBodyCell>
           <TableBodyCell>
-            <Button
-              on:click={() => update_team(team.id)}
-              class="px-3 py-2 text-xs font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-              disabled={!teams_changed.includes(team.id)}>Speichern</Button
-            >
-            <Button
-              class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-              disabled={!teams_changed.includes(team.id)}
-              on:click={() => revert_team(team.id)}>Rückgängig</Button
-            >
-            <Button
-              class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-              on:click={() => delete_team(team.id)}>Team löschen</Button
+            <Button color="red" on:click={() => (submit_modal = true)}
+              >Anmeldung finalisieren</Button
             >
           </TableBodyCell>
         </TableBodyRow>
-      {/each}
-      <TableBodyRow>
-        <TableBodyCell>
-          <Button
-            on:click={() => new_team()}
-            class="px-3 py-2 text-s font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-            >Team hinzufügen...</Button
-          >
-        </TableBodyCell>
-        <TableBodyCell>Status: Anmeldung in Bearbeitung</TableBodyCell>
-        <TableBodyCell></TableBodyCell>
-        <TableBodyCell>
-          <Button
-            class="px-3 py-2 text-s font-medium text-center text-white bg-orange-700 rounded-lg hover:bg-orange-800 focus:ring-4 focus:outline-none focus:ring-orange-300 dark:bg-orange-600 dark:hover:bg-orange-700 dark:focus:ring-orange-800"
-            >Anmeldung finalisieren</Button
-          >
-        </TableBodyCell>
-      </TableBodyRow>
-    </TableBody>
-  </Table>
+      </TableBody>
+    </Table>
+
+    <Modal bind:open={team_delete_modal} size="xs" autoclose>
+      <div class="text-center">
+        <ExclamationCircleOutline
+          class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+        />
+        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+          Soll dieses Team wirklich gelöscht werden?
+        </h3>
+        <Button
+          color="red"
+          class="me-2"
+          on:click={() => delete_team(team_to_delete)}>Ja</Button
+        >
+        <Button color="alternative">Nein (Abbruch)</Button>
+      </div>
+    </Modal>
+
+    <Modal bind:open={submit_modal} size="xs" autoclose>
+      <div class="text-center">
+        <ExclamationCircleOutline
+          class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+        />
+        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+          Anmeldungen absenden?
+        </h3>
+        <Button color="red" class="me-2" on:click={() => submit_teams()}
+          >Ja</Button
+        >
+        <Button color="alternative">Nein (Abbruch)</Button>
+      </div>
+    </Modal>
+  {/if}
 </main>

@@ -121,7 +121,7 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         resource("/auth")
                             .route(post().to(api::auth::login))
-                            //.route(delete().to(api::auth::logout))
+                            .route(delete().to(api::auth::logout))
                             .route(get().to(api::auth::get_me)),
                     ),
             )

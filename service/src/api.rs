@@ -1,5 +1,3 @@
-use uuid::Uuid;
-
 pub mod auth;
 pub mod events;
 pub mod groups;

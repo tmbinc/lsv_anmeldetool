@@ -9,6 +9,7 @@
   } from "../../../api/api";
   import {
     Button,
+    ButtonGroup,
     Checkbox,
     Input,
     Table,
@@ -20,11 +21,13 @@
   } from "flowbite-svelte";
   import type { ApiRequest } from "@cocreators-ee/apity";
   import type { components } from "../../../api/api.d";
+  import FetchErrors from "../../FetchErrors.svelte";
 
   let loading = $state(false);
   let orgs: Org[] = $state([]);
   let changed: string[] = $state([]);
   let edit_mode = $state(false);
+  let fetch_error: FetchErrors;
 
   onMount(async () => {
     loading = true;
@@ -33,6 +36,8 @@
         orgs = resp.data;
         changed = [];
         loading = false;
+      } else {
+        fetch_error.check(resp);
       }
     });
   });
@@ -41,6 +46,8 @@
     const resp = await addOrg({ name: "new" }).result;
     if (resp.ok) {
       orgs.push(resp.data);
+    } else {
+      fetch_error.check(resp);
     }
   }
 
@@ -61,6 +68,8 @@
       if (resp.ok) {
         orgs[i] = resp.data;
         changed = changed.filter((item) => item != id);
+      } else {
+        fetch_error.check(resp);
       }
     }
   }
@@ -73,6 +82,7 @@
 </script>
 
 <main>
+  <FetchErrors bind:this={fetch_error} />
   {#if loading}
     <div class="w-full mt-24 flex items-center justify-center gap-4">
       <div
@@ -133,18 +143,21 @@
               ></Checkbox>
             </TableBodyCell>
             <TableBodyCell>
-              <Button href="/admin/org/{org.id}/">Details</Button>
-
-              <Button
-                on:click={() => update(org.id)}
-                class="px-3 py-2 text-xs font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                disabled={!changed.includes(org.id)}>Save</Button
-              >
-              <Button
-                class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-                disabled={!changed.includes(org.id)}
-                on:click={() => revert(org.id)}>Undo</Button
-              >
+              <ButtonGroup>
+                <Button color="blue" href="/admin/org/{org.id}/"
+                  >Details...</Button
+                >
+                <Button
+                  on:click={() => update(org.id)}
+                  color="green"
+                  disabled={!changed.includes(org.id)}>Save</Button
+                >
+                <Button
+                  color="red"
+                  disabled={!changed.includes(org.id)}
+                  on:click={() => revert(org.id)}>Undo</Button
+                >
+              </ButtonGroup>
             </TableBodyCell>
           </TableBodyRow>
         {/each}
