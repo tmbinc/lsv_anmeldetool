@@ -126,7 +126,7 @@ export interface components {
       /** @description teams for this event */
       teams: components["schemas"]["Team"][];
     };
-    EventOrgState: "NotEnlisted" | "Registered" | "Created" | "Updated" | "Submitted" | "Verified";
+    EventOrgState: "NotEnlisted" | "Registered" | "Invited" | "Updated" | "Submitted" | "Verified";
     /** EventOrgStateUpdate */
     EventOrgStateUpdate: {
       state: components["schemas"]["EventOrgState"];

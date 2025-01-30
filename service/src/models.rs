@@ -119,10 +119,10 @@ pub struct Event {
 pub enum EventOrgState {
     /// Org has not been included in this event.
     NotEnlisted,
-    /// Org self-registered for this event.
+    /// Org (self-)registered for this event, but no invitation sent.
     Registered,
-    /// Org was confirmed (or manually added) to the event, has validated contact data.
-    Created,
+    /// Org was confirmed (or manually added) to the event, was sent invitation
+    Invited,
     /// Org has done any changes (i.e. clicked on final email link)
     Updated,
     /// Org has finalized entries for this event.
@@ -141,7 +141,7 @@ impl EventOrgState {
         match self {
             Self::NotEnlisted => "not_enlisted",
             Self::Registered => "registered",
-            Self::Created => "created",
+            Self::Invited => "invited",
             Self::Updated => "updated",
             Self::Submitted => "submitted",
             Self::Verified => "verified",
@@ -153,7 +153,7 @@ impl EventOrgState {
         match s {
             "not_enlisted" => Some(Self::NotEnlisted),
             "registered" => Some(Self::Registered),
-            "created" => Some(Self::Created),
+            "invited" => Some(Self::Invited),
             "updated" => Some(Self::Updated),
             "submitted" => Some(Self::Submitted),
             "verified" => Some(Self::Verified),

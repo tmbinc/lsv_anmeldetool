@@ -9,6 +9,7 @@
     updateEvent,
     type Event,
     type EventOrg,
+    type EventOrgState,
     type Org,
   } from "../../../../api/api";
   import {
@@ -39,7 +40,7 @@
   const states: SelectOptionType<string>[] = [
     { name: "Not enlisted", value: "NotEnlisted", disabled: true },
     { name: "Self-registered", value: "Registered" },
-    { name: "Created", value: "Created" },
+    { name: "Invited", value: "Invited" },
     { name: "Updated", value: "Updated" },
     { name: "Submitted", value: "Submitted" },
     { name: "Verified", value: "Verified" },
@@ -85,8 +86,8 @@
   }
 
   async function add(org: Org) {
-    setEventOrgState({ event: event_id, org: org.id, state: "Created" });
-    event_orgs.push({ org: org, state: "Created", teams: [] });
+    setEventOrgState({ event: event_id, org: org.id, state: "Registered" });
+    event_orgs.push({ org: org, state: "Registered", teams: [] });
     other_orgs = other_orgs.filter((other_org) => other_org.id != org.id);
     sort();
   }
@@ -106,6 +107,15 @@
   }
 
   async function update_org_state(event_org: EventOrg) {
+    setEventOrgState({
+      event: event_id,
+      org: event_org.org.id,
+      state: event_org.state,
+    });
+  }
+
+  async function set_org_state(event_org: EventOrg, new_state: EventOrgState) {
+    event_org.state = new_state;
     setEventOrgState({
       event: event_id,
       org: event_org.org.id,
@@ -188,14 +198,14 @@
         {#if event_orgs != null}
           {#each event_orgs as event_org}
             <TableBodyRow
-              color={{
-                NotEnlisted: "red",
-                Registered: "red",
-                Created: "red",
-                Updated: "yellow",
-                Submitted: "green",
-                Verified: "purple",
-              }[event_org.state]}
+              class={{
+                NotEnlisted: "bg-red-300",
+                Registered: "bg-red-300",
+                Invited: "bg-yellow-300",
+                Updated: "bg-green-300",
+                Submitted: "bg-blue-300",
+                Verified: "bg-purple-300",
+              }[event_org.state] || "bg-red-300"}
             >
               <TableBodyCell
                 ><a href="/admin/org/{event_org.org.id}">{event_org.org.name}</a
@@ -211,12 +221,35 @@
               </TableBodyCell>
               <TableBodyCell>
                 <ButtonGroup>
+                  {#if event_org.state == "Registered"}
+                    <Button
+                      color="green"
+                      on:click={() => set_org_state(event_org, "Invited")}
+                      >Invite</Button
+                    >
+                  {:else if event_org.state == "Invited"}
+                    <Button color="green" disabled={true}>Invite</Button>
+                  {:else if event_org.state == "Updated"}
+                    <Button
+                      color="green"
+                      on:click={() => set_org_state(event_org, "Submitted")}
+                      >Submit</Button
+                    >
+                  {:else if event_org.state == "Submitted"}
+                    <Button
+                      color="green"
+                      on:click={() => set_org_state(event_org, "Verified")}
+                      >Verify</Button
+                    >
+                  {:else if event_org.state == "Verified"}
+                    <Button color="green" disabled={true}>Verify</Button>
+                  {/if}
+
                   <Button color="red" onclick={() => remove(event_org.org)}
                     >Remove</Button
                   >
-                  <Button
-                    color="green"
-                    href="/org/{event_org.org.id}/{event_id}">Teams</Button
+                  <Button color="blue" href="/org/{event_org.org.id}/{event_id}"
+                    >Teams</Button
                   ></ButtonGroup
                 >
               </TableBodyCell>

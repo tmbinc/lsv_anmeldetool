@@ -61,3 +61,4 @@ export type OrgEvent = components["schemas"]["OrgEvent"];
 export type Team = components["schemas"]["Team"];
 export type NewTeam = components["schemas"]["NewTeam"];
 export type Group = components["schemas"]["Group"];
+export type EventOrgState = components["schemas"]["EventOrgState"];
