@@ -20,6 +20,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    invite_queue (rowid) {
+        rowid -> Integer,
+        event_id -> Text,
+        org_id -> Text,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     org_event (event_id, org_id) {
         event_id -> Text,
         org_id -> Text,
@@ -28,14 +37,23 @@ diesel::table! {
 }
 
 diesel::table! {
+    org_secrets (org_id, secret) {
+        org_id -> Text,
+        secret -> Text,
+    }
+}
+
+diesel::table! {
     orgs (id) {
         id -> Text,
         name -> Text,
+        name_additional -> Nullable<Text>,
+        genus -> Nullable<Text>,
         public -> Bool,
         contact_email -> Nullable<Text>,
+        contact_email_pending -> Nullable<Text>,
         contact_name -> Nullable<Text>,
         contact_phone -> Nullable<Text>,
-        confirmed_email -> Bool,
         last_update -> Timestamp,
     }
 }
@@ -61,14 +79,19 @@ diesel::table! {
 }
 
 diesel::joinable!(groups -> events (event_id));
+diesel::joinable!(invite_queue -> events (event_id));
+diesel::joinable!(invite_queue -> orgs (org_id));
 diesel::joinable!(org_event -> events (event_id));
 diesel::joinable!(org_event -> orgs (org_id));
+diesel::joinable!(org_secrets -> orgs (org_id));
 diesel::joinable!(teams -> groups (group_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     events,
     groups,
+    invite_queue,
     org_event,
+    org_secrets,
     orgs,
     teams,
     users,

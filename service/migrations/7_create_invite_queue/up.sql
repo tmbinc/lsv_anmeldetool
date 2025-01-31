@@ -1,0 +1,5 @@
+CREATE TABLE invite_queue (
+  event_id TEXT NOT NULL REFERENCES events(id),
+  org_id TEXT NOT NULL REFERENCES orgs(id),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

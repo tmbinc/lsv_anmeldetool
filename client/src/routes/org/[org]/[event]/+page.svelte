@@ -13,6 +13,9 @@
     updateTeam,
     deleteTeam,
     setEventOrgState,
+    getOrgEventStatus,
+    type EventOrgState,
+    updateOrg,
   } from "../../../../api/api";
   import { page } from "$app/state";
   import {
@@ -20,6 +23,7 @@
     ButtonGroup,
     Group,
     Input,
+    Label,
     Modal,
     Select,
     Table,
@@ -46,6 +50,23 @@
   let fetch_error: FetchErrors;
   let loading = $state(true);
   let submit_modal = $state(false);
+  let org_changed = $state(false);
+  let org_event_state: EventOrgState = $state("NotEnlisted");
+
+  const state_description = {
+    NotEnlisted: "Not Enlisted",
+    Registered: "Registriert",
+    Invited: "Neu",
+    Updated: "In Bearbeitung",
+    Submitted: "Finalisiert, warte auf Bestätigung des Ausrichters",
+    Verified: "Bestätigt! Viel Spaß am Turniertag!",
+  };
+
+  const genera: SelectOptionType<string>[] = [
+    { name: "Der", value: "m" },
+    { name: "Die", value: "f" },
+    { name: "Das", value: "n" },
+  ];
 
   onMount(async () => {
     const request = getOrg({ org: org_id });
@@ -85,6 +106,14 @@
       fetch_error.check(resp_groups);
       all_good = false;
     }
+
+    getOrgEventStatus({ event: event_id, org: org_id }).resp.subscribe(
+      (resp) => {
+        if (resp?.ok) {
+          org_event_state = resp.data;
+        }
+      }
+    );
 
     loading = !all_good;
   });
@@ -134,8 +163,18 @@
       }
     }
   }
+
   async function submit_teams() {
     setEventOrgState({ event: event_id, org: org_id, state: "Submitted" });
+  }
+
+  async function update_org() {
+    if (org_changed && org) {
+      const resp = await updateOrg({ ...org, org: org.id }).result;
+      if (resp.ok) {
+        org_changed = false;
+      }
+    }
   }
 </script>
 
@@ -148,9 +187,93 @@
       Wilkommen, {org?.name}!
     </h1>
 
+    {#if org}
+      <div>
+        <div>
+          <Label for="org_name"
+            >Name der Schule, wie er auf den Urkunden gedruckt werden soll -
+            bitte auch den Artikel korrekt einstellen!</Label
+          >
+          <Select
+            class="inline w-32"
+            items={genera}
+            onchange={() => (org_changed = true)}
+            bind:value={org.genus}
+          />
+          <Input
+            class="inline w-8/12"
+            id="org_name"
+            type="text"
+            on:input={() => (org_changed = true)}
+            bind:value={org.name}
+            placeholder="Schulname"
+            required
+          />
+        </div>
+
+        <div>
+          <Label for="org_add_name">Ort: (Für uns zur Unterscheidung)</Label>
+
+          <Input
+            class="w-100"
+            id="org_add_name"
+            type="text"
+            on:input={() => (org_changed = true)}
+            bind:value={org.name_additional}
+            placeholder="Schulort"
+            required
+          />
+        </div>
+        <div>
+          <Label for="org_contact_email">Kontaktdaten Schule:</Label>
+
+          <Input
+            class="w-100"
+            id="org_contact_email"
+            type="text"
+            on:input={() => (org_changed = true)}
+            bind:value={org.contact_email}
+            placeholder="Email-Addresse"
+            required
+          />
+        </div>
+        <div>
+          <Label for="org_contact_name">Kontaktdaten Schule, Email:</Label>
+
+          <Input
+            class="w-100"
+            id="org_contact_name"
+            type="text"
+            on:input={() => (org_changed = true)}
+            bind:value={org.contact_name}
+            placeholder="Name"
+            required
+          />
+        </div>
+        <div>
+          <Label for="org_contact_phone">Kontaktdaten Schule, Telefon:</Label>
+
+          <Input
+            class="w-100"
+            id="org_contact_phone"
+            type="text"
+            on:input={() => (org_changed = true)}
+            bind:value={org.contact_phone}
+            placeholder="Telefon"
+            required
+          />
+        </div>
+      </div>
+
+      <Button color="green" disabled={!org_changed} on:click={update_org}
+        >Schuledaten Speichern</Button
+      >
+    {/if}
+
     <p class="text-lg font-medium">
       Bitte melden Sie die Mannschaften für das Turnier {event?.name}.
     </p>
+
     <Table>
       <TableHead>
         <TableHeadCell>Team-Name</TableHeadCell>
@@ -217,7 +340,9 @@
               >Team hinzufügen...</Button
             >
           </TableBodyCell>
-          <TableBodyCell>Status: Anmeldung in Bearbeitung</TableBodyCell>
+          <TableBodyCell
+            >Status: {state_description[org_event_state]}</TableBodyCell
+          >
           <TableBodyCell></TableBodyCell>
           <TableBodyCell></TableBodyCell>
           <TableBodyCell>

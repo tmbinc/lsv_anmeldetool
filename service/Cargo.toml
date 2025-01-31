@@ -21,5 +21,6 @@ rust-argon2 = "2.1"
 schemars = { package = "apistos-schemars", version = "0.8" }
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.137"
+sha256 = "1.5.0"
 uid = "0.1.8"
 uuid = { version = "1.6", features = ["v4", "v7", "serde"] }

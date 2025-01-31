@@ -16,6 +16,10 @@ export interface paths {
     /** update org */
     put: operations["put_api-v1-org-e5659494460fbdef2fe5e110ad7644e8"];
   };
+  "/api/v1/org/{org}/auth": {
+    /** login for org */
+    post: operations["post_api-v1-org-4e7473169fa823300fa931e3c864e9a6"];
+  };
   "/api/v1/orgs/self_register": {
     /** self-register a new org */
     post: operations["post_api-v1-orgs-self_register-0556be35dff40f12eac6263dd7d00514"];
@@ -27,6 +31,14 @@ export interface paths {
   "/api/v1/org/{org}/{event}/teams": {
     /** get team list for an org + event */
     get: operations["get_api-v1-org-640c441034f7cd1e205777f7f2c464b4"];
+  };
+  "/api/v1/org/{org}/{event}/invite": {
+    /** invite an org to an event */
+    post: operations["post_api-v1-org-9d1624e23d71d9d47a3ddda43d4a0ee0"];
+  };
+  "/api/v1/org/{org}/{event}": {
+    /** get event status for an org */
+    get: operations["get_api-v1-org-4edb397f1ce33a3e430233fb4a2e8e52"];
   };
   "/api/v1/orgs": {
     /** get list of orgs */
@@ -89,7 +101,7 @@ export interface paths {
     get: operations["get_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
     /** login */
     post: operations["post_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
-    /** login */
+    /** logout */
     delete: operations["delete_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
   };
 }
@@ -177,14 +189,16 @@ export interface components {
     };
     /** @description Org details. */
     Org: {
-      confirmed_email: boolean;
       contact_email?: string | null;
+      contact_email_pending?: string | null;
       contact_name?: string | null;
       contact_phone?: string | null;
+      genus?: string | null;
       id: string;
       /** Format: partial-date-time */
       last_update: string;
       name: string;
+      name_additional?: string | null;
       public: boolean;
     };
     /** OrgEvent */
@@ -299,6 +313,19 @@ export interface operations {
       };
     };
   };
+  /** login for org */
+  "post_api-v1-org-4e7473169fa823300fa931e3c864e9a6": {
+    parameters: {
+      path: {
+        org: string;
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+    };
+  };
   /** self-register a new org */
   "post_api-v1-orgs-self_register-0556be35dff40f12eac6263dd7d00514": {
     requestBody: {
@@ -373,6 +400,70 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Team"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** invite an org to an event */
+  "post_api-v1-org-9d1624e23d71d9d47a3ddda43d4a0ee0": {
+    parameters: {
+      path: {
+        org: string;
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get event status for an org */
+  "get_api-v1-org-4edb397f1ce33a3e430233fb4a2e8e52": {
+    parameters: {
+      path: {
+        org: string;
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["EventOrgState"];
         };
       };
       /** @description Forbidden */
@@ -934,7 +1025,7 @@ export interface operations {
       };
     };
   };
-  /** login */
+  /** logout */
   "delete_api-v1-auth-0a4ec84191b3223053d50fc370e78726": {
     responses: {
       200: {

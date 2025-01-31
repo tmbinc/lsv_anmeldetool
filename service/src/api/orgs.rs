@@ -1,4 +1,6 @@
 use crate::actions::events::find_event_by_uid;
+use crate::actions::invite_queue::create_invite;
+use crate::actions::org_event::{get_event_org_state, update_event_org_state};
 use crate::actions::DbError;
 use crate::api::auth::LoggedUser;
 use crate::errors::ErrorResponse;
@@ -192,6 +194,40 @@ pub async fn get_org_events(
     }
 }
 
+#[api_operation(summary = "get event status for an org", skip_args = "user")]
+pub async fn get_org_event_state(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+    org_event_uid: Path<(Uuid, Uuid)>,
+) -> Result<Json<EventOrgState>, ErrorResponse> {
+    let (org_uid, event_uid) = org_event_uid.into_inner();
+
+    match user.role {
+        Role::Admin => {}
+        Role::Org(org) if org == org_uid => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
+    let event_org = web::block(move || -> Result<Option<EventOrgState>, DbError> {
+        let mut conn = pool.get()?;
+
+        Ok(actions::org_event::get_event_org_state(
+            &mut conn, &event_uid, &org_uid,
+        )?)
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    match event_org {
+        Some(event_org) => Ok(Json(event_org)),
+        None => Err(ErrorResponse::NotFound(format!(
+            "No event/org found with UID: {org_uid}/{event_uid}"
+        ))),
+    }
+}
+
 #[api_operation(summary = "self-register a new org", skip_args = "user")]
 pub async fn self_register_org(
     pool: web::Data<DbPool>,
@@ -255,6 +291,58 @@ pub async fn self_register_org(
     } else {
         Err(ErrorResponse::Unauthorized(
             "No valid event for self-registration".into(),
+        ))
+    }
+}
+
+#[api_operation(summary = "invite an org to an event", skip_args = "user")]
+pub async fn invite_org_event(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+    path: Path<(Uuid, Uuid)>,
+) -> Result<Json<String>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
+    let (org_uid, event_uid) = path.into_inner();
+
+    let success = web::block(move || -> Result<bool, DbError> {
+        let mut conn = pool.get()?;
+
+        match get_event_org_state(&mut conn, &event_uid, &org_uid)? {
+            Some(EventOrgState::Registered) => {
+                // Add invitation to queue
+
+                create_invite(&mut conn, &event_uid, &org_uid)?;
+
+                // Update state to "invited"
+                update_event_org_state(
+                    &mut conn,
+                    models::OrgEvent {
+                        event_id: event_uid.to_string(),
+                        org_id: org_uid.to_string(),
+                        state: EventOrgState::Registered.to_db().into(),
+                    },
+                )?;
+
+                Ok(true)
+            }
+            // If state is not "registered", then we can't invite.
+            _ => Ok(false),
+        }
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    if success {
+        Ok(Json("invite created".into()))
+    } else {
+        Err(ErrorResponse::NotFound(
+            "Org not in registered state for event".into(),
         ))
     }
 }

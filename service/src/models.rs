@@ -1,4 +1,4 @@
-use crate::schema::{events, groups, org_event, orgs, teams, users};
+use crate::schema::{events, groups, invite_queue, org_event, org_secrets, orgs, teams, users};
 use apistos::ApiComponent;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
@@ -24,11 +24,13 @@ use uuid::Uuid;
 pub struct Org {
     pub id: String,
     pub name: String,
+    pub name_additional: Option<String>,
+    pub genus: Option<String>,
     pub public: bool,
     pub contact_email: Option<String>,
+    pub contact_email_pending: Option<String>,
     pub contact_name: Option<String>,
     pub contact_phone: Option<String>,
-    pub confirmed_email: bool,
     pub last_update: NaiveDateTime,
 }
 
@@ -265,4 +267,49 @@ impl From<User> for SlimUser {
             role: Role::Admin,
         }
     }
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Associations,
+    Debug,
+    PartialEq,
+    Insertable,
+    AsChangeset,
+    Serialize,
+    Deserialize,
+    ApiComponent,
+    JsonSchema,
+    Clone,
+)]
+#[diesel(belongs_to(Event))]
+#[diesel(belongs_to(Org))]
+#[diesel(table_name = invite_queue)]
+#[diesel(primary_key(event_id, org_id))]
+pub struct InviteQueue {
+    pub event_id: String,
+    pub org_id: String,
+    pub created_at: Option<NaiveDateTime>,
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Associations,
+    Debug,
+    PartialEq,
+    Insertable,
+    Serialize,
+    Deserialize,
+    Clone,
+)]
+#[diesel(belongs_to(Org))]
+#[diesel(table_name = org_secrets)]
+#[diesel(primary_key(org_id, secret))]
+pub struct OrgSecret {
+    pub org_id: String,
+    pub secret: String,
 }

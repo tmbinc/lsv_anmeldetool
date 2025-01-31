@@ -82,6 +82,21 @@ pub fn update_event_org_state(
     Ok(())
 }
 
+pub fn get_event_org_state(
+    conn: &mut SqliteConnection,
+    event_uid: &Uuid,
+    org_uid: &Uuid,
+) -> Result<Option<EventOrgState>, DbError> {
+    use crate::schema::org_event::dsl::*;
+
+    Ok(org_event
+        .filter(org_id.eq(org_uid.to_string()))
+        .filter(event_id.eq(event_uid.to_string()))
+        .first::<OrgEvent>(conn)
+        .optional()?
+        .map(|r| EventOrgState::from_db(&r.state).unwrap_or(EventOrgState::NotEnlisted)))
+}
+
 pub fn delete_event_org(conn: &mut SqliteConnection, org_event: OrgEvent) -> Result<(), DbError> {
     diesel::delete(&org_event).execute(conn)?;
     Ok(())

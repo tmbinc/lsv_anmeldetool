@@ -49,6 +49,7 @@ export const updateGroup = apity.path('/api/v1/group').method('put').create();
 export const createGroup = apity.path('/api/v1/event/{event}/groups').method('post').create();
 
 export const createOrgSelfReg = apity.path("/api/v1/orgs/self_register").method('post').create();
+export const getOrgEventStatus = apity.path("/api/v1/org/{org}/{event}").method('get').create();
 
 export const authLogin = apity.path('/api/v1/auth').method('post').create();
 export const whoAmI = apity.path('/api/v1/auth').method('get').create();

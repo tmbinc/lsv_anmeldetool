@@ -38,11 +38,13 @@ pub fn insert_new_org(conn: &mut SqliteConnection, nm: &str) -> Result<Org, DbEr
     let new_org = Org {
         id: Uuid::new_v4().to_string(),
         name: nm.to_owned(),
+        name_additional: None,
+        genus: None,
         public: false,
         contact_email: None,
         contact_phone: None,
         contact_name: None,
-        confirmed_email: false,
+        contact_email_pending: None,
         last_update: Utc::now().naive_utc(),
     };
 
