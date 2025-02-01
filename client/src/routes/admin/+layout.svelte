@@ -14,7 +14,8 @@
     <NavUl {hidden}>
       <NavLi href="/admin/events">Events</NavLi>
       <NavLi href="/admin/orgs">Orgs</NavLi>
-      <NavLi href="/admin/teams">Teams</NavLi>
+      <NavLi href="/admin/invites">Invites</NavLi>
+      <NavLi href="/admin/login">Login</NavLi>
     </NavUl>
   </Navbar>
 </nav>

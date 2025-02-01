@@ -88,6 +88,7 @@ async fn main() -> std::io::Result<()> {
                         resource("org/{org}/{event}/invite")
                             .route(post().to(api::orgs::invite_org_event)),
                     )
+                    .service(resource("invites").route(get().to(api::orgs::list_invites)))
                     .service(
                         resource("org/{org}/{event}")
                             .route(get().to(api::orgs::get_org_event_state)),

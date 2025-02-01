@@ -50,6 +50,7 @@
       <h1>Logged in as {user_email}</h1>
       <Button on:click={() => logout()}>Logout</Button>
     {:else}
+      Aktuell nicht eingeloggt.
       <h1>Für den Administrationsbereich bitte einloggen.</h1>
       <div>
         (Für die Verwaltung von Mannschaften ist ein einloggen nicht

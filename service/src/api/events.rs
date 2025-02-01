@@ -28,7 +28,7 @@ pub async fn get_event(
     user: LoggedUser,
     event_uid: Path<Uuid>,
 ) -> Result<Json<Event>, ErrorResponse> {
-    let can_view_all = match user.role {
+    match user.role {
         Role::Admin | Role::None | Role::Org(_) => {}
     };
 
@@ -86,17 +86,15 @@ pub async fn get_events(
     pool: web::Data<DbPool>,
     user: LoggedUser,
 ) -> Result<Json<Vec<Event>>, ErrorResponse> {
-    match user.role {
-        Role::Admin => {}
-        _ => {
-            return Err(ErrorResponse::Unauthorized("".to_string()));
-        }
+    let only_public = match user.role {
+        Role::Admin => false,
+        _ => true,
     };
 
     let orgs = web::block(move || {
         let mut conn = pool.get()?;
 
-        actions::events::list_events(&mut conn)
+        actions::events::list_events(&mut conn, only_public)
     })
     .await?
     .map_err(error::ErrorInternalServerError)?;

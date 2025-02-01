@@ -16,11 +16,13 @@
     getOrgEventStatus,
     type EventOrgState,
     updateOrg,
-  } from "../../../../api/api";
+    authOrgLogin,
+  } from "../../../../../api/api";
   import { page } from "$app/state";
   import {
     Button,
     ButtonGroup,
+    Checkbox,
     Group,
     Input,
     Label,
@@ -35,23 +37,29 @@
     type SelectOptionType,
   } from "flowbite-svelte";
   import { ExclamationCircleOutline } from "flowbite-svelte-icons";
-  import FetchErrors from "../../../FetchErrors.svelte";
-  import Loading from "../../../Loading.svelte";
+  import FetchErrors from "../../../../FetchErrors.svelte";
+  import Loading from "../../../../Loading.svelte";
+  import { beforeNavigate } from "$app/navigation";
+  import type { BeforeNavigate } from "@sveltejs/kit";
+  import LoadError from "../../../../LoadError.svelte";
 
   let org: Org | null = $state(null);
-  let event: Event | null = $state(null);
+  let reg_event: Event | null = $state(null);
   let teams: Team[] = $state([]);
   let org_id = page.params.org;
   let event_id = page.params.event;
+  let login_token = page.params.token;
   let groups: SelectOptionType<string>[] = $state([]);
   let teams_changed: string[] = $state([]);
   let team_to_delete: string | null = $state(null);
   let team_delete_modal = $state(false);
   let fetch_error: FetchErrors;
+  let login_error = $state(false);
   let loading = $state(true);
   let submit_modal = $state(false);
   let org_changed = $state(false);
   let org_event_state: EventOrgState = $state("NotEnlisted");
+  let finalized = $state(false);
 
   const state_description = {
     NotEnlisted: "Not Enlisted",
@@ -69,9 +77,19 @@
   ];
 
   onMount(async () => {
+    let all_good = true;
+
+    if (login_token) {
+      let resp = await authOrgLogin({ org: org_id, token: login_token }).result;
+      if (resp.ok) {
+      } else {
+        all_good = false;
+        login_error = true;
+      }
+    }
+
     const request = getOrg({ org: org_id });
     const resp = await request.result;
-    let all_good = true;
     if (resp.ok) {
       org = resp.data;
     } else {
@@ -81,7 +99,7 @@
     const event_request = getEvent({ event: event_id });
     const event_resp = await event_request.result;
     if (event_resp.ok) {
-      event = event_resp.data;
+      reg_event = event_resp.data;
     } else {
       fetch_error.check(event_resp);
       all_good = false;
@@ -111,6 +129,8 @@
       (resp) => {
         if (resp?.ok) {
           org_event_state = resp.data;
+          finalized =
+            org_event_state == "Submitted" || org_event_state == "Verified";
         }
       }
     );
@@ -165,7 +185,15 @@
   }
 
   async function submit_teams() {
-    setEventOrgState({ event: event_id, org: org_id, state: "Submitted" });
+    org_event_state = "Submitted";
+    setEventOrgState({ event: event_id, org: org_id, state: org_event_state });
+    finalized = true;
+  }
+
+  async function unsubmit_teams() {
+    org_event_state = "Updated";
+    setEventOrgState({ event: event_id, org: org_id, state: org_event_state });
+    finalized = false;
   }
 
   async function update_org() {
@@ -176,11 +204,23 @@
       }
     }
   }
+
+  beforeNavigate(({ cancel }) => {
+    if (teams_changed.length != 0 || org_changed) {
+      if (!confirm("Achtung, ungespeicherte Daten. Wirklich schließen?")) {
+        cancel();
+      }
+    }
+  });
 </script>
 
 <main>
   <FetchErrors admin={false} bind:this={fetch_error} />
-  {#if loading}
+  {#if login_error}
+    <LoadError
+      text="Ungültiger Link! Bitte folgen Sie dem Link aus der Registrierungsbestätigung."
+    />
+  {:else if loading}
     <Loading />
   {:else}
     <h1 class="text-3xl font-bold underline">
@@ -212,7 +252,10 @@
         </div>
 
         <div>
-          <Label for="org_add_name">Ort: (Für uns zur Unterscheidung)</Label>
+          <Label for="org_add_name"
+            >Ort: (Für uns zur Unterscheidung; wird nicht für die Urkunde
+            verwendet.)</Label
+          >
 
           <Input
             class="w-100"
@@ -225,7 +268,22 @@
           />
         </div>
         <div>
-          <Label for="org_contact_email">Kontaktdaten Schule:</Label>
+          <Label for="org_contact_name"
+            >Kontaktperson für Organisatorisches (muss nicht am Turniertag
+            anwesend sein):</Label
+          >
+          <Input
+            class="w-100"
+            id="org_contact_name"
+            type="text"
+            on:input={() => (org_changed = true)}
+            bind:value={org.contact_name}
+            placeholder="Name"
+            required
+          />
+        </div>
+        <div>
+          <Label for="org_contact_email">Email-Adresse:</Label>
 
           <Input
             class="w-100"
@@ -238,20 +296,7 @@
           />
         </div>
         <div>
-          <Label for="org_contact_name">Kontaktdaten Schule, Email:</Label>
-
-          <Input
-            class="w-100"
-            id="org_contact_name"
-            type="text"
-            on:input={() => (org_changed = true)}
-            bind:value={org.contact_name}
-            placeholder="Name"
-            required
-          />
-        </div>
-        <div>
-          <Label for="org_contact_phone">Kontaktdaten Schule, Telefon:</Label>
+          <Label for="org_contact_phone">Telefon:</Label>
 
           <Input
             class="w-100"
@@ -266,12 +311,12 @@
       </div>
 
       <Button color="green" disabled={!org_changed} on:click={update_org}
-        >Schuledaten Speichern</Button
+        >Daten speichern...</Button
       >
     {/if}
 
     <p class="text-lg font-medium">
-      Bitte melden Sie die Mannschaften für das Turnier {event?.name}.
+      Bitte melden Sie die Mannschaften für das Turnier {reg_event?.name}.
     </p>
 
     <Table>
@@ -283,10 +328,20 @@
         <TableHeadCell>Bearbeiten</TableHeadCell>
       </TableHead>
       <TableBody>
+        {#if teams.length == 0}
+          <TableBodyRow>
+            <TableBodyCell>Bitte mindestens ein Team hinzufügen!</TableBodyCell>
+            <TableBodyCell></TableBodyCell>
+            <TableBodyCell></TableBodyCell>
+            <TableBodyCell></TableBodyCell>
+            <TableBodyCell></TableBodyCell>
+          </TableBodyRow>
+        {/if}
         {#each teams as team}
           <TableBodyRow>
             <TableBodyCell
               ><Input
+                disabled={finalized}
                 bind:value={team.name}
                 oninput={() => change_team(team.id)}
               /></TableBodyCell
@@ -295,6 +350,7 @@
               <Select
                 class="mt-2"
                 items={groups}
+                disabled={finalized}
                 oninput={() => change_team(team.id)}
                 bind:value={team.group_id}
               />
@@ -312,32 +368,49 @@
               /></TableBodyCell
             >
             <TableBodyCell>
-              <ButtonGroup>
+              {#if org_event_state != "Verified"}
+                <ButtonGroup>
+                  <Button
+                    on:click={() => update_team(team.id)}
+                    color="green"
+                    disabled={!teams_changed.includes(team.id)}
+                    >Speichern</Button
+                  >
+                  <Button
+                    color="yellow"
+                    disabled={!teams_changed.includes(team.id)}
+                    on:click={() => revert_team(team.id)}>Rückgängig</Button
+                  >
+                  <Button
+                    color="red"
+                    disabled={finalized}
+                    on:click={() => {
+                      team_to_delete = team.id;
+                      team_delete_modal = true;
+                    }}>Team löschen</Button
+                  >
+                </ButtonGroup>
+              {:else}
+                <Checkbox
+                  bind:checked={team.present}
+                  oninput={() => change_team(team.id)}
+                  >Anwesenheit erklärt</Checkbox
+                >
                 <Button
                   on:click={() => update_team(team.id)}
                   color="green"
                   disabled={!teams_changed.includes(team.id)}>Speichern</Button
                 >
-                <Button
-                  color="yellow"
-                  disabled={!teams_changed.includes(team.id)}
-                  on:click={() => revert_team(team.id)}>Rückgängig</Button
-                >
-                <Button
-                  color="red"
-                  on:click={() => {
-                    team_to_delete = team.id;
-                    team_delete_modal = true;
-                  }}>Team löschen</Button
-                >
-              </ButtonGroup>
+              {/if}
             </TableBodyCell>
           </TableBodyRow>
         {/each}
         <TableBodyRow>
           <TableBodyCell>
-            <Button on:click={() => new_team()} color="green"
-              >Team hinzufügen...</Button
+            <Button
+              disabled={finalized}
+              on:click={() => new_team()}
+              color="green">Team hinzufügen...</Button
             >
           </TableBodyCell>
           <TableBodyCell
@@ -346,9 +419,19 @@
           <TableBodyCell></TableBodyCell>
           <TableBodyCell></TableBodyCell>
           <TableBodyCell>
-            <Button color="red" on:click={() => (submit_modal = true)}
-              >Anmeldung finalisieren</Button
-            >
+            {#if org_event_state == "Invited" || org_event_state == "Registered" || org_event_state == "Updated"}
+              <Button
+                color="red"
+                on:click={() => (submit_modal = true)}
+                disabled={teams.length == 0 || teams_changed.length != 0}
+                >Anmeldung finalisieren</Button
+              >
+            {/if}
+            {#if org_event_state == "Submitted" || org_event_state == "Verified"}
+              <Button color="red" on:click={() => (submit_modal = true)}
+                >Anmeldung bearbeiten</Button
+              >
+            {/if}
           </TableBodyCell>
         </TableBodyRow>
       </TableBody>
@@ -376,12 +459,22 @@
         <ExclamationCircleOutline
           class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
         />
-        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-          Anmeldungen absenden?
-        </h3>
-        <Button color="red" class="me-2" on:click={() => submit_teams()}
-          >Ja</Button
-        >
+        {#if org_event_state == "Invited" || org_event_state == "Registered" || org_event_state == "Updated"}
+          <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+            Anmeldungen absenden?
+          </h3>
+          <Button color="red" class="me-2" on:click={() => submit_teams()}
+            >Ja</Button
+          >
+        {/if}
+        {#if org_event_state == "Verified" || org_event_state == "Submitted"}
+          <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+            Anmeldung wieder bearbeiten?
+          </h3>
+          <Button color="red" class="me-2" on:click={() => unsubmit_teams()}
+            >Ja</Button
+          >
+        {/if}
         <Button color="alternative">Nein (Abbruch)</Button>
       </div>
     </Modal>

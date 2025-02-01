@@ -28,10 +28,20 @@ pub fn update_event(
     Ok(data)
 }
 
-pub fn list_events(conn: &mut SqliteConnection) -> Result<Vec<models::Event>, DbError> {
+pub fn list_events(
+    conn: &mut SqliteConnection,
+    only_public: bool,
+) -> Result<Vec<models::Event>, DbError> {
     use crate::schema::events::dsl::*;
 
-    Ok(events.select(models::Event::as_select()).load(conn)?)
+    if only_public {
+        Ok(events
+            .select(models::Event::as_select())
+            .filter(public.eq(true))
+            .load(conn)?)
+    } else {
+        Ok(events.select(models::Event::as_select()).load(conn)?)
+    }
 }
 
 pub fn insert_new_event(conn: &mut SqliteConnection, nm: &str) -> Result<models::Event, DbError> {

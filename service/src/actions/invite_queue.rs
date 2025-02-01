@@ -1,5 +1,5 @@
 use crate::actions::DbError;
-use crate::models::InviteQueue;
+use crate::models::{InviteQueue, InviteQueueEntry};
 use crate::schema;
 use diesel::prelude::*;
 use uuid::Uuid;
@@ -18,4 +18,11 @@ pub fn create_invite(
         .values(&invite)
         .execute(conn)?;
     Ok(())
+}
+
+pub fn get_invites(conn: &mut SqliteConnection) -> Result<Vec<InviteQueueEntry>, DbError> {
+    use crate::schema::invite_queue::dsl::*;
+    Ok(invite_queue
+        .select(InviteQueueEntry::as_select())
+        .load::<InviteQueueEntry>(conn)?)
 }

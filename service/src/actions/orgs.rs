@@ -4,7 +4,7 @@ use chrono::Utc;
 use diesel::prelude::*;
 use uuid::Uuid;
 
-pub fn find_org_by_uid(conn: &mut SqliteConnection, uid: Uuid) -> Result<Option<Org>, DbError> {
+pub fn find_org_by_uid(conn: &mut SqliteConnection, uid: &Uuid) -> Result<Option<Org>, DbError> {
     use crate::schema::orgs::dsl::*;
 
     let user = orgs

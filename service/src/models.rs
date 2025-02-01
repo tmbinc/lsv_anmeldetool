@@ -68,6 +68,7 @@ pub struct Team {
     pub event: String,
     pub org: String,
     pub name: String,
+    pub present: bool,
     pub group_id: Option<String>,
     pub contact_name: Option<String>,
     pub contact_phone: Option<String>,
@@ -230,7 +231,7 @@ pub struct NewOrgSelfReg {
 }
 
 #[derive(Debug, Serialize, Deserialize, Queryable, Insertable)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct User {
     pub email: String,
     pub hash: String,
@@ -292,6 +293,31 @@ pub struct InviteQueue {
     pub event_id: String,
     pub org_id: String,
     pub created_at: Option<NaiveDateTime>,
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Associations,
+    Debug,
+    PartialEq,
+    Insertable,
+    AsChangeset,
+    Serialize,
+    Deserialize,
+    ApiComponent,
+    JsonSchema,
+    Clone,
+)]
+#[diesel(belongs_to(Event))]
+#[diesel(belongs_to(Org))]
+#[diesel(table_name = invite_queue)]
+#[diesel(primary_key(event_id, org_id))]
+pub struct InviteQueueEntry {
+    pub event_id: String,
+    pub org_id: String,
+    pub created_at: NaiveDateTime,
 }
 
 #[derive(

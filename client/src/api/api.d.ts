@@ -36,6 +36,10 @@ export interface paths {
     /** invite an org to an event */
     post: operations["post_api-v1-org-9d1624e23d71d9d47a3ddda43d4a0ee0"];
   };
+  "/api/v1/invites": {
+    /** get invites */
+    get: operations["get_api-v1-invites-4a7e45dfc0832f05a15444003398849c"];
+  };
   "/api/v1/org/{org}/{event}": {
     /** get event status for an org */
     get: operations["get_api-v1-org-4edb397f1ce33a3e430233fb4a2e8e52"];
@@ -152,6 +156,12 @@ export interface components {
       id: string;
       name: string;
     };
+    /** Invite */
+    Invite: {
+      event: components["schemas"]["Event"];
+      org: components["schemas"]["Org"];
+      secret: string;
+    };
     /**
      * NewEvent
      * @description New event details.
@@ -201,6 +211,10 @@ export interface components {
       name_additional?: string | null;
       public: boolean;
     };
+    /** OrgAuthLoginData */
+    OrgAuthLoginData: {
+      token: string;
+    };
     /** OrgEvent */
     OrgEvent: {
       /** @description Event details */
@@ -231,6 +245,7 @@ export interface components {
       id: string;
       name: string;
       org: string;
+      present: boolean;
     };
   };
   responses: never;
@@ -318,6 +333,11 @@ export interface operations {
     parameters: {
       path: {
         org: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrgAuthLoginData"];
       };
     };
     responses: {
@@ -432,6 +452,32 @@ export interface operations {
       200: {
         content: {
           "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get invites */
+  "get_api-v1-invites-4a7e45dfc0832f05a15444003398849c": {
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Invite"][];
         };
       };
       /** @description Forbidden */

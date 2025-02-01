@@ -1930,6 +1930,7 @@ dependencies = [
  "actix-web",
  "apistos",
  "apistos-schemars",
+ "base64 0.22.1",
  "chrono",
  "diesel",
  "dotenvy",

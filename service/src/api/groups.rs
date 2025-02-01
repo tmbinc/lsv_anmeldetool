@@ -17,9 +17,6 @@ pub async fn get_groups(
 ) -> Result<Json<Vec<Group>>, ErrorResponse> {
     match user.role {
         Role::Admin | Role::None | Role::Org(_) => {}
-        _ => {
-            return Err(ErrorResponse::Unauthorized("".to_string()));
-        }
     };
 
     let orgs = web::block(move || {

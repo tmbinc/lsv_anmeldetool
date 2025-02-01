@@ -42,7 +42,7 @@ pub fn list_org_events(
     conn: &mut SqliteConnection,
     org_uid: Uuid,
 ) -> Result<Option<Vec<(Event, EventOrgState)>>, DbError> {
-    let org = find_org_by_uid(conn, org_uid)?;
+    let org = find_org_by_uid(conn, &org_uid)?;
 
     match org {
         Some(org) => {

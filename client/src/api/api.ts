@@ -12,7 +12,7 @@ export function getServerUrl(): string {
 	} else if (env === 'production-test') {
 		return 'https://beta.reg.lsv1873.de';
 	} else {
-		return 'https://reg.lsv1873.de';
+		return 'https://anmeldung.lsv1873.de';
 	}
 }
 
@@ -54,7 +54,12 @@ export const getOrgEventStatus = apity.path("/api/v1/org/{org}/{event}").method(
 export const authLogin = apity.path('/api/v1/auth').method('post').create();
 export const whoAmI = apity.path('/api/v1/auth').method('get').create();
 export const authLogout = apity.path('/api/v1/auth').method('delete').create();
+export const authOrgLogin = apity.path('/api/v1/org/{org}/auth').method('post').create();
 
+export const inviteOrgToEvent = apity.path('/api/v1/org/{org}/{event}/invite').method("post").create();
+export const listInvites = apity.path('/api/v1/invites').method('get').create();
+
+export type Invite = components["schemas"]["Invite"];
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];
 export type EventOrg = components["schemas"]["EventOrg"];

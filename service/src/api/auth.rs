@@ -1,5 +1,5 @@
 use actix_identity::Identity;
-use actix_web::dev::{self, Payload};
+use actix_web::dev::Payload;
 use actix_web::web::{Json, Path};
 use actix_web::{error, web, Error, FromRequest, HttpMessage as _, HttpRequest, HttpResponse};
 use apistos::{api_operation, ApiComponent};
@@ -19,12 +19,6 @@ use crate::DbPool;
 pub struct AuthData {
     pub email: String,
     pub password: String,
-}
-
-#[derive(Debug, Deserialize, ApiComponent, JsonSchema)]
-pub struct OrgAuthData {
-    pub org_id: Uuid,
-    pub token: String,
 }
 
 // we need the same data
@@ -71,15 +65,20 @@ pub async fn login(
     Ok(HttpResponse::NoContent().finish())
 }
 
+#[derive(Deserialize, ApiComponent, JsonSchema)]
+pub struct OrgAuthLoginData {
+    token: String,
+}
+
 #[api_operation(summary = "login for org")]
 pub async fn org_login(
     req: HttpRequest,
     org_id: Path<Uuid>,
-    auth_data: web::Json<String>,
+    auth_data: web::Json<OrgAuthLoginData>,
     pool: web::Data<DbPool>,
-) -> Result<HttpResponse, actix_web::Error> {
+) -> Result<HttpResponse, ErrorResponse> {
     let org_id = org_id.into_inner();
-    let token = auth_data.into_inner();
+    let token = auth_data.into_inner().token;
     let valid_token = web::block(move || {
         let mut conn = pool.get()?;
         check_org_auth_token(&mut conn, org_id, &token)
@@ -94,9 +93,10 @@ pub async fn org_login(
         };
         let user_string = serde_json::to_string(&user).unwrap();
         Identity::login(&req.extensions(), user_string).unwrap();
+        Ok(HttpResponse::NoContent().finish())
+    } else {
+        Err(ErrorResponse::Unauthorized("invalid token".into()))
     }
-
-    Ok(HttpResponse::NoContent().finish())
 }
 
 #[api_operation(summary = "get logged in identity", skip_args = "logged_user")]

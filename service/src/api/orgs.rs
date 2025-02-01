@@ -1,6 +1,8 @@
 use crate::actions::events::find_event_by_uid;
 use crate::actions::invite_queue::create_invite;
 use crate::actions::org_event::{get_event_org_state, update_event_org_state};
+use crate::actions::org_secrets::create_org_secret;
+use crate::actions::org_secrets::get_org_secret;
 use crate::actions::DbError;
 use crate::api::auth::LoggedUser;
 use crate::errors::ErrorResponse;
@@ -44,7 +46,7 @@ pub async fn get_org(
     let org = web::block(move || {
         let mut conn = pool.get()?;
 
-        actions::orgs::find_org_by_uid(&mut conn, org_id)
+        actions::orgs::find_org_by_uid(&mut conn, &org_id)
     })
     .await
     .unwrap() // fixme
@@ -236,9 +238,6 @@ pub async fn self_register_org(
 ) -> Result<Json<String>, ErrorResponse> {
     match user.role {
         Role::Admin | Role::None | Role::Org(_) => {}
-        _ => {
-            return Err(ErrorResponse::Unauthorized("".to_string()));
-        }
     };
 
     let data = data.into_inner();
@@ -258,6 +257,7 @@ pub async fn self_register_org(
                         public: false,
                         contact_email: Some(data.contact_email),
                         contact_name: Some(data.contact_name),
+                        genus: Some("f".into()),
                         ..new_org
                     };
 
@@ -315,9 +315,11 @@ pub async fn invite_org_event(
 
         match get_event_org_state(&mut conn, &event_uid, &org_uid)? {
             Some(EventOrgState::Registered) => {
-                // Add invitation to queue
+                // Create org secret
+                create_org_secret(&mut conn, &org_uid).expect("failed to create org secret");
 
-                create_invite(&mut conn, &event_uid, &org_uid)?;
+                // Add invitation to queue
+                create_invite(&mut conn, &event_uid, &org_uid).expect("failed to create invite");
 
                 // Update state to "invited"
                 update_event_org_state(
@@ -325,9 +327,10 @@ pub async fn invite_org_event(
                     models::OrgEvent {
                         event_id: event_uid.to_string(),
                         org_id: org_uid.to_string(),
-                        state: EventOrgState::Registered.to_db().into(),
+                        state: EventOrgState::Invited.to_db().into(),
                     },
-                )?;
+                )
+                .expect("failed to update org event state");
 
                 Ok(true)
             }
@@ -345,4 +348,56 @@ pub async fn invite_org_event(
             "Org not in registered state for event".into(),
         ))
     }
+}
+
+#[derive(Serialize, JsonSchema, ApiComponent)]
+pub struct Invite {
+    pub event: Event,
+    pub org: Org,
+    pub secret: String,
+}
+
+#[api_operation(summary = "get invites", skip_args = "user")]
+pub async fn list_invites(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+) -> Result<Json<Vec<Invite>>, ErrorResponse> {
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
+    let success = web::block(move || -> Result<Vec<Invite>, DbError> {
+        let mut conn = pool.get()?;
+        let invite_queue_entries = actions::invite_queue::get_invites(&mut conn)?;
+
+        let invite_queue_entries = invite_queue_entries
+            .into_iter()
+            .filter_map(|entry| {
+                log::info!("entry {:?}", entry);
+                let org_id = Uuid::parse_str(&entry.org_id).ok()?;
+                let event_id = &Uuid::parse_str(&entry.event_id).ok()?;
+                let org = actions::orgs::find_org_by_uid(&mut conn, &org_id).ok()??;
+
+                let event = actions::events::find_event_by_uid(&mut conn, &event_id).ok()??;
+
+                let secret = get_org_secret(&mut conn, &org_id).ok()?;
+                log::info!("ok got everything {:?}", secret);
+
+                Some(Invite {
+                    event: event,
+                    org: org,
+                    secret: secret.unwrap_or("".into()),
+                })
+            })
+            .collect();
+
+        Ok(invite_queue_entries)
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    Ok(Json(success))
 }

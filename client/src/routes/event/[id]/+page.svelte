@@ -21,8 +21,12 @@
     Button,
     FloatingLabelInput,
     Helper,
+    Modal,
   } from "flowbite-svelte";
-  import { EnvelopeSolid } from "flowbite-svelte-icons";
+  import {
+    EnvelopeSolid,
+    ExclamationCircleOutline,
+  } from "flowbite-svelte-icons";
   import Loading from "../../Loading.svelte";
   import LoadError from "../../LoadError.svelte";
 
@@ -35,8 +39,18 @@
   let contact_name = $state("");
   let contact_email = $state("");
   let org_name = $state("");
+  let verify_failed: string | null = $state(null);
+  let verify_failed_open = $state(false);
 
   const event_id = page.params.id;
+
+  const is_valid_email = (email: string) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
 
   onMount(async () => {
     const request = getEvent({ event: event_id });
@@ -50,20 +64,33 @@
   });
 
   async function submit_reg() {
-    submitting = true;
-    const result = await createOrgSelfReg({
-      name: org_name,
-      event_id: event_id,
-      contact_email: contact_email,
-      contact_name: contact_name,
-    }).result;
-
-    if (result.ok) {
-      submitted = true;
+    if (org_name.length < 3) {
+      verify_failed = "org_name_too_short";
+      verify_failed_open = true;
+    } else if (contact_name.length < 3) {
+      verify_failed = "contact_name_too_short";
+      verify_failed_open = true;
+    } else if (!is_valid_email(contact_email)) {
+      verify_failed = "email_invalid";
+      verify_failed_open = true;
     } else {
-      failed_submit = true;
+      verify_failed = null;
+      submitting = true;
+
+      const result = await createOrgSelfReg({
+        name: org_name,
+        event_id: event_id,
+        contact_email: contact_email,
+        contact_name: contact_name,
+      }).result;
+
+      if (result.ok) {
+        submitted = true;
+      } else {
+        failed_submit = true;
+      }
+      submitting = false;
     }
-    submitting = false;
   }
 </script>
 
@@ -80,7 +107,8 @@
         Anmeldung erfolgreich gespeichert!
       </h1>
       <p>
-        Sie bekommen eine Email an {contact_email} mit weiteren Informationen.
+        Sie bekommen in den nächsten Tagen eine Email an {contact_email} mit weiteren
+        Informationen.
       </p>
     </div>
   {:else}
@@ -121,17 +149,20 @@
         <li>
           Wir versenden dann einen Link an die angegebene E-Mail-Adresse, der
           zur Bestätigung der Anmeldung dient. Unter diesem Link können dann die
-          teilnehmenden Mannschaften {#if event?.public_reg_until}bis zum {event?.public_reg_until}{/if}
+          teilnehmenden Mannschaften {#if event?.public_reg_until}bis zum {new Date(
+              event.public_reg_until
+            ).toLocaleDateString()}{/if}
           mit den entsprechenden Altersgruppen gemeldet werden.
         </li>
         <li>
-          Am Turniertag {#if event?.begin}({event?.begin}){/if} werden die Anmeldungen
-          vor Ort bestätigt.
+          Am Turniertag {#if event?.begin}({new Date(
+              event.begin
+            ).toLocaleDateString()}){/if} werden die Anmeldungen vor Ort bestätigt.
         </li>
       </ol>
 
       Zur Teilnahme bitte die folgenden Daten eingeben:
-      <form method="POST" action="/event/{event?.id}/submitted">
+      <form>
         <div class="grid gap-6 items-end w-full">
           <FloatingLabelInput
             style="outlined"
@@ -166,7 +197,7 @@
               style="outlined"
               id="floating_outlined"
               name="floating_outlined"
-              type="text"
+              type="email"
               bind:value={contact_email}
             >
               Email-Adresse
@@ -184,4 +215,22 @@
       anzumelden.
     {/if}
   {/if}
+
+  <Modal bind:open={verify_failed_open} size="xs" autoclose>
+    <div class="text-center">
+      <ExclamationCircleOutline
+        class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+      />
+      <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+        {#if verify_failed == "org_name_too_short"}
+          Bitte den Namen der Schule eingeben!
+        {:else if verify_failed == "contact_name_too_short"}
+          Bitte Kontaktperson angeben!
+        {:else if verify_failed == "email_invalid"}
+          Bitte eine gültige Email angeben!
+        {/if}
+      </h3>
+      <Button color="alternative">Schliessen</Button>
+    </div>
+  </Modal>
 </div>

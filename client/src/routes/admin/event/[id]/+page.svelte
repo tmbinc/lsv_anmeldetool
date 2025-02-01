@@ -4,6 +4,7 @@
   import {
     getEvent,
     getEventOrgs,
+    inviteOrgToEvent,
     listOrgs,
     setEventOrgState,
     updateEvent,
@@ -101,8 +102,12 @@
 
   async function update_event() {
     if (event) {
-      updateEvent({ ...event, event: event.id });
-      event_changed = false;
+      let result = await updateEvent({ ...event, event: event.id }).result;
+      if (result.ok) {
+        event_changed = false;
+      } else {
+        alert("warning - failed to save: " + result.data);
+      }
     }
   }
 
@@ -122,6 +127,15 @@
       state: event_org.state,
     });
   }
+  async function invite_org(event_org: EventOrg) {
+    let result = await inviteOrgToEvent({
+      org: event_org.org.id,
+      event: event_id,
+    }).result;
+    if (result.ok) {
+      event_org.state = "Invited";
+    }
+  }
 </script>
 
 <main>
@@ -139,7 +153,9 @@
         />
       </div>
       <div>
-        <Label for="event_begin">Start Time</Label>
+        <Label for="event_begin"
+          >Start Time -- FIXME: format _must be_ <pre>2022-01-19T18:15:36.283</pre></Label
+        >
         <Input
           id="event_begin"
           type="text"
@@ -222,9 +238,7 @@
               <TableBodyCell>
                 <ButtonGroup>
                   {#if event_org.state == "Registered"}
-                    <Button
-                      color="green"
-                      on:click={() => set_org_state(event_org, "Invited")}
+                    <Button color="green" on:click={() => invite_org(event_org)}
                       >Invite</Button
                     >
                   {:else if event_org.state == "Invited"}

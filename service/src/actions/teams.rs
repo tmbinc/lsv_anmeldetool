@@ -39,6 +39,7 @@ pub fn create_team(conn: &mut SqliteConnection, team: NewTeam) -> Result<Team, D
         group_id: None,
         contact_name: None,
         contact_phone: None,
+        present: false,
     };
     diesel::insert_into(schema::teams::table)
         .values(&team)
