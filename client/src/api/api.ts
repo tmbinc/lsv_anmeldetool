@@ -3,7 +3,7 @@ import type { components, paths } from './api.d';
 
 export const apity = Apity.for<paths>();
 
-const forceEnvironment: 'development' | 'production-test' | 'production' | undefined = 'development';
+const forceEnvironment: 'development' | 'production-test' | 'production' | undefined = undefined;
 
 export function getServerUrl(): string {
 	const env = forceEnvironment || import.meta.env.VITE_ENV;

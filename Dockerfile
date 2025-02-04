@@ -36,8 +36,8 @@ COPY --from=builder /usr/src/api-service/db.sqlite3 /app/db.sqlite3
 
 COPY --from=web-builder /usr/src/build /app/static
 
-ENV STATIC_FILE_PATH=/app/static PORT=8080
+ENV STATIC_FILE_PATH=/app/static PORT=80
 # Replace with your database connection string if not using sqlite
 ENV DATABASE_URL=/app/db.sqlite3
-EXPOSE 8080
+EXPOSE 80
 CMD ["/app/service"]
