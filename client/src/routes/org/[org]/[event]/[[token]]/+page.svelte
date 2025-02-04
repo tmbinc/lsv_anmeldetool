@@ -323,7 +323,7 @@
     </p>
 
     <Table>
-      <TableHead>
+      <TableHead class="flex flex-col md:flex-row  mb-4">
         <TableHeadCell>Team-Name</TableHeadCell>
         <TableHeadCell>Altersgruppe</TableHeadCell>
         <TableHeadCell>Ansprechpartner (Name)</TableHeadCell>
@@ -332,7 +332,7 @@
       </TableHead>
       <TableBody>
         {#if teams.length == 0}
-          <TableBodyRow>
+          <TableBodyRow class="flex flex-col md:flex-row  mb-4">
             <TableBodyCell>Bitte mindestens ein Team hinzufügen!</TableBodyCell>
             <TableBodyCell></TableBodyCell>
             <TableBodyCell></TableBodyCell>
@@ -341,7 +341,7 @@
           </TableBodyRow>
         {/if}
         {#each teams as team}
-          <TableBodyRow>
+          <TableBodyRow class="flex flex-col md:flex-row  mb-4">
             <TableBodyCell
               ><Input
                 disabled={finalized}
@@ -408,7 +408,7 @@
             </TableBodyCell>
           </TableBodyRow>
         {/each}
-        <TableBodyRow>
+        <TableBodyRow class="flex flex-col md:flex-row  mb-4">
           <TableBodyCell>
             <Button
               disabled={finalized}

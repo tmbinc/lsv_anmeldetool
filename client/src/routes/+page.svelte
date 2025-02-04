@@ -28,31 +28,41 @@
   });
 </script>
 
-<main>
-  <FetchErrors admin={false} bind:this={fetch_errors} />
-  {#if loading}
-    <Loading />
-  {:else}
-    <h1>Turnierkalender</h1>
-    <Table>
-      <TableBody>
-        {#each events as event}
-          <TableBodyRow>
-            <TableBodyCell>
-              {event.name}
-            </TableBodyCell>
-            <TableBodyCell>
-              {#if event.begin}
-                Datum: {new Date(event.begin).toLocaleDateString()}
-              {/if}
-            </TableBodyCell>
-            <TableBodyCell
-              ><Button href="/event/{event.id}">Zur Anmeldung...</Button
-              ></TableBodyCell
-            >
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
-  {/if}
+<main
+  class="mx-auto items-center gap-x-4 rounded-xl bg-white p-6
+shadow-lg outline outline-black/5 dark:bg-slate-800 dark:shadow-none
+dark:-outline-offset-1 dark:outline-white/10"
+>
+  <div>
+    <FetchErrors admin={false} bind:this={fetch_errors} />
+    {#if loading}
+      <Loading />
+    {:else}
+      <div class="text-xl font-medium text-black dark:text-white">
+        Turnierkalender
+      </div>
+      <div class="flex items-center sm:justify-center ml-4 sm:ml-0">
+        <Table>
+          <TableBody>
+            {#each events as event}
+              <TableBodyRow class="flex flex-col md:flex-row  mb-4">
+                <TableBodyCell>
+                  {event.name}
+                </TableBodyCell>
+                <TableBodyCell>
+                  {#if event.begin}
+                    Datum: {new Date(event.begin).toLocaleDateString()}
+                  {/if}
+                </TableBodyCell>
+                <TableBodyCell
+                  ><Button href="/event/{event.id}">Zur Anmeldung...</Button
+                  ></TableBodyCell
+                >
+              </TableBodyRow>
+            {/each}
+          </TableBody>
+        </Table>
+      </div>
+    {/if}
+  </div>
 </main>
