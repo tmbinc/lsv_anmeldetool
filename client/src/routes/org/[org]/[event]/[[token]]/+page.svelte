@@ -61,6 +61,7 @@
   let org_changed = $state(false);
   let org_event_state: EventOrgState = $state("NotEnlisted");
   let finalized = $state(false);
+  let questionnaire_changes = $state(false);
 
   const state_description = {
     NotEnlisted: "Not Enlisted",
@@ -207,7 +208,7 @@
   }
 
   beforeNavigate(({ cancel }) => {
-    if (teams_changed.length != 0 || org_changed) {
+    if (teams_changed.length != 0 || org_changed || questionnaire_changes) {
       if (!confirm("Achtung, ungespeicherte Daten. Wirklich schließen?")) {
         cancel();
       }
@@ -316,7 +317,11 @@
       >
     {/if}
 
-    <Questionnaire {event_id} {org_id} />
+    <Questionnaire
+      {event_id}
+      {org_id}
+      bind:active_changes={questionnaire_changes}
+    />
 
     <p class="text-xl font-medium">
       Bitte melden Sie die Mannschaften für das Turnier {reg_event?.name}.
@@ -328,7 +333,7 @@
     </p>
 
     <Table>
-      <TableHead class="flex flex-col lg:flex-row  mb-4">
+      <TableHead class=" flex-col lg:flex-row  mb-4 lg:block hidden">
         <TableHeadCell>Team-Name</TableHeadCell>
         <TableHeadCell>Altersgruppe</TableHeadCell>
         <TableHeadCell>Ansprechpartner (Name)</TableHeadCell>
@@ -346,15 +351,17 @@
           </TableBodyRow>
         {/if}
         {#each teams as team}
-          <TableBodyRow class="flex flex-col lg:flex-row  mb-4">
+          <TableBodyRow class="flex flex-col lg:flex-row mb-4">
             <TableBodyCell
-              ><Input
+              ><Label class="block lg:hidden">Team-Name</Label>
+              <Input
                 disabled={finalized}
                 bind:value={team.name}
                 oninput={() => change_team(team.id)}
               /></TableBodyCell
             >
             <TableBodyCell>
+              <Label class="block lg:hidden">Altersgruppe</Label>
               <Select
                 class="mt-2"
                 items={groups}
@@ -364,13 +371,14 @@
               />
             </TableBodyCell>
             <TableBodyCell
+              ><Label class="block lg:hidden">Ansprechpartner (Name)</Label
               ><Input
                 bind:value={team.contact_name}
                 oninput={() => change_team(team.id)}
               /></TableBodyCell
             >
             <TableBodyCell
-              ><Input
+              ><Label class="block lg:hidden">Telefon</Label><Input
                 bind:value={team.contact_phone}
                 oninput={() => change_team(team.id)}
               /></TableBodyCell
@@ -382,7 +390,7 @@
                     on:click={() => update_team(team.id)}
                     color="green"
                     disabled={!teams_changed.includes(team.id)}
-                    >{#if teams_changed.includes(team.id)}Speichern?{:else}Gespeichert.{/if}</Button
+                    >{#if teams_changed.includes(team.id)}Speichern{:else}Gespeichert.{/if}</Button
                   >
                   <Button
                     color="yellow"

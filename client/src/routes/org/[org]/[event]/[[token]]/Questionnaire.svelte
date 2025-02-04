@@ -1,11 +1,12 @@
 <script lang="ts">
-  let props = $props();
   import { onMount } from "svelte";
 
   import {
     Button,
     ButtonGroup,
     Checkbox,
+    Input,
+    Radio,
     Select,
     Table,
     TableBody,
@@ -23,6 +24,8 @@
   } from "../../../../../api/api";
   import { ExclamationCircleOutline } from "flowbite-svelte-icons";
 
+  let { active_changes = $bindable(false), event_id, org_id } = $props();
+
   type QuestionnaireAnswered = Questionnaire & {
     answer?: string;
     items: SelectOptionType<string>[];
@@ -34,8 +37,8 @@
 
   onMount(async () => {
     const resp_answer = await getQuestionnaireAnswerForOrgEvent({
-      org: props.org_id,
-      event: props.event_id,
+      org: org_id,
+      event: event_id,
     }).result;
 
     if (resp_answer.ok) {
@@ -45,15 +48,15 @@
     }
 
     const resp = await getQuestionnaireForOrgEvent({
-      event: props.event_id,
-      org: props.org_id,
+      event: event_id,
+      org: org_id,
     }).result;
     if (resp.ok) {
       questionnaire = resp.data.map((question) => {
         if (!responses.has(question.id)) {
           responses.set(question.id, {
-            event_id: props.event_id,
-            org_id: props.org_id,
+            event_id: event_id,
+            org_id: org_id,
             question_id: question.id,
             question_answer: "",
           });
@@ -75,6 +78,7 @@
     if (!changed.includes(id)) {
       changed.push(id);
     }
+    active_changes = changed.length > 0;
   }
 
   async function save() {
@@ -92,20 +96,22 @@
         }
       }
     }
+    active_changes = changed.length > 0;
   }
 </script>
 
-<div class="mb-6">
-  <Table>
+<div>
+  <Table class="flex flex-col mb-4">
     <TableBody>
       {#each questionnaire as question}
-        <TableBodyRow>
-          <TableBodyCell>
-            {question.question_text}
+        <TableBodyRow class="flex flex-col mb-4">
+          <TableBodyCell class="flex flex-col mb-4">
+            {@html question.question_text}
           </TableBodyCell>
           <TableBodyCell>
             {#if question.question_type == "Freeform"}
               <Textarea
+                class="w-xl"
                 bind:value={question.answer}
                 on:input={() => change(question.id)}
               />
@@ -121,6 +127,24 @@
                 bind:value={question.answer}
                 on:change={() => change(question.id)}
               />
+            {:else if question.question_type == "Radio"}
+              {#each question.items as item}
+                <Radio
+                  value={item.value}
+                  bind:group={question.answer}
+                  on:change={() => change(question.id)}>{item.name}</Radio
+                >
+              {/each}
+            {:else if question.question_type == "SingleInput"}
+              <div class="inline-block">
+                {question.question_data.split("__")[0]}
+                <Input
+                  class="inline-block w-16"
+                  bind:value={question.answer}
+                  on:change={() => change(question.id)}
+                />
+                {question.question_data.split("__")[1]}
+              </div>
             {/if}
           </TableBodyCell>
         </TableBodyRow>

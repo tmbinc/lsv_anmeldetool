@@ -36,6 +36,8 @@
     { name: "Freeform (Text)", value: "Freeform" },
     { name: "Checkbox", value: "Checkbox" },
     { name: "Multiple Choice", value: "MultipleChoice" },
+    { name: "Radio", value: "Radio" },
+    { name: "Single Input Field, use __ as placeholder", value: "SingleInput" },
   ];
 
   onMount(async () => {
