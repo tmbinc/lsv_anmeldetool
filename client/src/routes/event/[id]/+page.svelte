@@ -120,16 +120,14 @@
       Abfolge:
       <ol class="ps-5 mt-2 space-y-1 list-decimal list-inside">
         <li>
-          Jede Schule meldet über dieses Formular grundsätzlich ein Interesse an
+          Jede Schule meldet über dieses Formular grundsätzlich das Interesse an
           einer Teilnahme an.
         </li>
         <li>
-          Wir versenden dann einen Link an die angegebene E-Mail-Adresse, der
-          zur Bestätigung der Anmeldung dient. Unter diesem Link können dann die
-          teilnehmenden Mannschaften {#if event?.public_reg_until}bis zum {new Date(
-              event.public_reg_until
-            ).toLocaleDateString()}{/if}
-          mit den entsprechenden Altersgruppen gemeldet werden.
+          Wir versenden dann einen Link an die angegebene E-Mail-Adresse. Unter
+          diesem Link können dann die teilnehmenden Mannschaften {#if event?.public_reg_until}bis
+            zum {new Date(event.public_reg_until).toLocaleDateString()}{/if}
+          gemeldet werden.
         </li>
         <li>
           Am Turniertag {#if event?.begin}({new Date(

@@ -215,7 +215,7 @@
   });
 </script>
 
-<main>
+<main class="px-10 pt-6 flex flex-col gap-4">
   <FetchErrors admin={false} bind:this={fetch_error} />
   {#if login_error}
     <LoadError
@@ -318,12 +318,17 @@
 
     <Questionnaire {event_id} {org_id} />
 
-    <p class="text-lg font-medium">
+    <p class="text-xl font-medium">
       Bitte melden Sie die Mannschaften für das Turnier {reg_event?.name}.
     </p>
 
+    <p class="text-lg font-medium">
+      Bei "Ansprechpartner" bitte eine Person eintragen, die am Turniertag vor
+      Ort und telefonisch erreichbar ist!
+    </p>
+
     <Table>
-      <TableHead class="flex flex-col md:flex-row  mb-4">
+      <TableHead class="flex flex-col lg:flex-row  mb-4">
         <TableHeadCell>Team-Name</TableHeadCell>
         <TableHeadCell>Altersgruppe</TableHeadCell>
         <TableHeadCell>Ansprechpartner (Name)</TableHeadCell>
@@ -332,7 +337,7 @@
       </TableHead>
       <TableBody>
         {#if teams.length == 0}
-          <TableBodyRow class="flex flex-col md:flex-row  mb-4">
+          <TableBodyRow class="flex flex-col lg:flex-row  mb-4">
             <TableBodyCell>Bitte mindestens ein Team hinzufügen!</TableBodyCell>
             <TableBodyCell></TableBodyCell>
             <TableBodyCell></TableBodyCell>
@@ -341,7 +346,7 @@
           </TableBodyRow>
         {/if}
         {#each teams as team}
-          <TableBodyRow class="flex flex-col md:flex-row  mb-4">
+          <TableBodyRow class="flex flex-col lg:flex-row  mb-4">
             <TableBodyCell
               ><Input
                 disabled={finalized}
@@ -408,7 +413,7 @@
             </TableBodyCell>
           </TableBodyRow>
         {/each}
-        <TableBodyRow class="flex flex-col md:flex-row  mb-4">
+        <TableBodyRow class="flex flex-col lg:flex-row  mb-4">
           <TableBodyCell>
             <Button
               disabled={finalized}
