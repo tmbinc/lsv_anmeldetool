@@ -42,6 +42,7 @@
   import { beforeNavigate } from "$app/navigation";
   import type { BeforeNavigate } from "@sveltejs/kit";
   import LoadError from "../../../../LoadError.svelte";
+  import Questionnaire from "./Questionnaire.svelte";
 
   let org: Org | null = $state(null);
   let reg_event: Event | null = $state(null);
@@ -311,9 +312,11 @@
       </div>
 
       <Button color="green" disabled={!org_changed} on:click={update_org}
-        >Daten speichern...</Button
+        >{#if org_changed}Änderungen speichern{:else}Daten gespeichert.{/if}</Button
       >
     {/if}
+
+    <Questionnaire {event_id} {org_id} />
 
     <p class="text-lg font-medium">
       Bitte melden Sie die Mannschaften für das Turnier {reg_event?.name}.
@@ -374,7 +377,7 @@
                     on:click={() => update_team(team.id)}
                     color="green"
                     disabled={!teams_changed.includes(team.id)}
-                    >Speichern</Button
+                    >{#if teams_changed.includes(team.id)}Speichern?{:else}Gespeichert.{/if}</Button
                   >
                   <Button
                     color="yellow"

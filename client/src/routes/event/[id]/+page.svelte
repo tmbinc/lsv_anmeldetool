@@ -1,32 +1,9 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { onMount } from "svelte";
-  import {
-    createOrgSelfReg,
-    getEvent,
-    getEventOrgs,
-    listOrgs,
-    setEventOrgState,
-    type Event,
-    type EventOrg,
-    type Org,
-  } from "../../../api/api";
-  import {
-    Table,
-    TableHead,
-    TableHeadCell,
-    TableBody,
-    TableBodyRow,
-    TableBodyCell,
-    Button,
-    FloatingLabelInput,
-    Helper,
-    Modal,
-  } from "flowbite-svelte";
-  import {
-    EnvelopeSolid,
-    ExclamationCircleOutline,
-  } from "flowbite-svelte-icons";
+  import { createOrgSelfReg, getEvent, type Event } from "../../../api/api";
+  import { Button, FloatingLabelInput, Helper, Modal } from "flowbite-svelte";
+  import { ExclamationCircleOutline } from "flowbite-svelte-icons";
   import Loading from "../../Loading.svelte";
   import LoadError from "../../LoadError.svelte";
 

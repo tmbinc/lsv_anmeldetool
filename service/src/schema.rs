@@ -59,6 +59,26 @@ diesel::table! {
 }
 
 diesel::table! {
+    questionnaire (id) {
+        id -> Text,
+        event_id -> Nullable<Text>,
+        org_id -> Nullable<Text>,
+        question_text -> Text,
+        question_type -> Text,
+        question_data -> Text,
+    }
+}
+
+diesel::table! {
+    questionnaire_answers (question_id, event_id, org_id) {
+        question_id -> Text,
+        event_id -> Text,
+        org_id -> Text,
+        question_answer -> Text,
+    }
+}
+
+diesel::table! {
     teams (id) {
         id -> Text,
         event -> Text,
@@ -85,6 +105,11 @@ diesel::joinable!(invite_queue -> orgs (org_id));
 diesel::joinable!(org_event -> events (event_id));
 diesel::joinable!(org_event -> orgs (org_id));
 diesel::joinable!(org_secrets -> orgs (org_id));
+diesel::joinable!(questionnaire -> events (event_id));
+diesel::joinable!(questionnaire -> orgs (org_id));
+diesel::joinable!(questionnaire_answers -> events (event_id));
+diesel::joinable!(questionnaire_answers -> orgs (org_id));
+diesel::joinable!(questionnaire_answers -> questionnaire (question_id));
 diesel::joinable!(teams -> groups (group_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
@@ -94,6 +119,8 @@ diesel::allow_tables_to_appear_in_same_query!(
     org_event,
     org_secrets,
     orgs,
+    questionnaire,
+    questionnaire_answers,
     teams,
     users,
 );

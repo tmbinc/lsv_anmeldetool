@@ -84,6 +84,9 @@ async fn main() -> std::io::Result<()> {
                         resource("org/{org}/{event}/teams")
                             .route(get().to(api::teams::get_org_teams)),
                     )
+                    .service(resource("org/{org}/{event}/questionnaire_answer").route(
+                        get().to(api::questionnaire::get_questionnaire_answer_for_org_event),
+                    ))
                     .service(
                         resource("org/{org}/{event}/invite")
                             .route(post().to(api::orgs::invite_org_event)),
@@ -93,12 +96,21 @@ async fn main() -> std::io::Result<()> {
                         resource("org/{org}/{event}")
                             .route(get().to(api::orgs::get_org_event_state)),
                     )
+                    .service(
+                        resource("org/{org}/{event}/questionnaire")
+                            .route(get().to(api::questionnaire::get_questionnaire_for_org_event)),
+                    )
                     .service(resource("orgs").route(get().to(api::orgs::get_orgs)))
                     .service(resource("org").route(post().to(api::orgs::add_org)))
                     .service(
                         resource("event/{event}")
                             .route(get().to(api::events::get_event))
                             .route(put().to(api::events::update_event)),
+                    )
+                    .service(
+                        resource("event/{event}/questionnaire")
+                            .route(get().to(api::questionnaire::get_questionnaire_for_event))
+                            .route(post().to(api::questionnaire::create_questionnaire_for_event)),
                     )
                     .service(
                         resource("event/{event}/groups")
@@ -133,6 +145,18 @@ async fn main() -> std::io::Result<()> {
                             .route(post().to(api::auth::login))
                             .route(delete().to(api::auth::logout))
                             .route(get().to(api::auth::get_me)),
+                    )
+                    .service(
+                        resource("questionnaire/{id}")
+                            .route(delete().to(api::questionnaire::delete_questionnaire)),
+                    )
+                    .service(
+                        resource("questionnaire")
+                            .route(put().to(api::questionnaire::update_questionnaire)),
+                    )
+                    .service(
+                        resource("questionnaire_answer")
+                            .route(put().to(api::questionnaire::update_questionnaire_answer)),
                     ),
             )
             .build("/openapi.json")
@@ -159,6 +183,7 @@ fn initialize_db_pool() -> DbPool {
     let conn_spec = std::env::var("DATABASE_URL").expect("DATABASE_URL should be set");
     let manager = r2d2::ConnectionManager::<SqliteConnection>::new(conn_spec);
     r2d2::Pool::builder()
+        .max_size(1)
         .build(manager)
         .expect("database URL should be valid path to SQLite DB file")
 }

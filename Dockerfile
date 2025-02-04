@@ -5,6 +5,7 @@ COPY client/package.json .
 COPY client/pnpm-lock.yaml .
 RUN pnpm install
 COPY client/ .
+ENV VITE_ENV=production
 RUN pnpm run build
 RUN pnpm prune --production
 

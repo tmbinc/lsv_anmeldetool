@@ -32,6 +32,10 @@ export interface paths {
     /** get team list for an org + event */
     get: operations["get_api-v1-org-640c441034f7cd1e205777f7f2c464b4"];
   };
+  "/api/v1/org/{org}/{event}/questionnaire_answer": {
+    /** get questionaire answers for org + event */
+    get: operations["get_api-v1-org-d4383d01e537aadc8f5d0a2bde36494a"];
+  };
   "/api/v1/org/{org}/{event}/invite": {
     /** invite an org to an event */
     post: operations["post_api-v1-org-9d1624e23d71d9d47a3ddda43d4a0ee0"];
@@ -43,6 +47,10 @@ export interface paths {
   "/api/v1/org/{org}/{event}": {
     /** get event status for an org */
     get: operations["get_api-v1-org-4edb397f1ce33a3e430233fb4a2e8e52"];
+  };
+  "/api/v1/org/{org}/{event}/questionnaire": {
+    /** get questionaire for org + event */
+    get: operations["get_api-v1-org-4d5c5cb89714f7f4d5fd83d07ae2dd18"];
   };
   "/api/v1/orgs": {
     /** get list of orgs */
@@ -57,6 +65,12 @@ export interface paths {
     get: operations["get_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
     /** update event */
     put: operations["put_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
+  };
+  "/api/v1/event/{event}/questionnaire": {
+    /** get questionaire for event */
+    get: operations["get_api-v1-event-216083259df8aeef507bc5fa2036a212"];
+    /** create questionaire for event */
+    post: operations["post_api-v1-event-216083259df8aeef507bc5fa2036a212"];
   };
   "/api/v1/event/{event}/groups": {
     /** get list of groups */
@@ -107,6 +121,18 @@ export interface paths {
     post: operations["post_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
     /** logout */
     delete: operations["delete_api-v1-auth-0a4ec84191b3223053d50fc370e78726"];
+  };
+  "/api/v1/questionnaire/{id}": {
+    /** delete questionaire */
+    delete: operations["delete_api-v1-questionnaire-b5de40df4a370ee055cf689cfafdc2d4"];
+  };
+  "/api/v1/questionnaire": {
+    /** update questionaire */
+    put: operations["put_api-v1-questionnaire-4553825757f17c4aa7cc1166ac08b07c"];
+  };
+  "/api/v1/questionnaire_answer": {
+    /** update questionaire answer */
+    put: operations["put_api-v1-questionnaire_answer-577a63f9ae75b3eb44ae024d56cfea36"];
   };
 }
 
@@ -223,6 +249,22 @@ export interface components {
       state: components["schemas"]["EventOrgState"];
       /** @description teams for this event */
       teams: components["schemas"]["Team"][];
+    };
+    /** Questionnaire */
+    Questionnaire: {
+      event_id?: string | null;
+      id: string;
+      org_id?: string | null;
+      question_data: string;
+      question_text: string;
+      question_type: string;
+    };
+    /** QuestionnaireAnswer */
+    QuestionnaireAnswer: {
+      event_id: string;
+      org_id: string;
+      question_answer: string;
+      question_id: string;
     };
     Role: OneOf<["None" | "Admin", {
       /** Format: uuid */
@@ -344,6 +386,22 @@ export interface operations {
       200: {
         content: never;
       };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
     };
   };
   /** self-register a new org */
@@ -440,6 +498,38 @@ export interface operations {
       };
     };
   };
+  /** get questionaire answers for org + event */
+  "get_api-v1-org-d4383d01e537aadc8f5d0a2bde36494a": {
+    parameters: {
+      path: {
+        org: string;
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["QuestionnaireAnswer"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
   /** invite an org to an event */
   "post_api-v1-org-9d1624e23d71d9d47a3ddda43d4a0ee0": {
     parameters: {
@@ -510,6 +600,38 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["EventOrgState"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get questionaire for org + event */
+  "get_api-v1-org-4d5c5cb89714f7f4d5fd83d07ae2dd18": {
+    parameters: {
+      path: {
+        org: string;
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Questionnaire"][];
         };
       };
       /** @description Forbidden */
@@ -634,6 +756,68 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Event"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get questionaire for event */
+  "get_api-v1-event-216083259df8aeef507bc5fa2036a212": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Questionnaire"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** create questionaire for event */
+  "post_api-v1-event-216083259df8aeef507bc5fa2036a212": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Questionnaire"];
         };
       };
       /** @description Forbidden */
@@ -1075,6 +1259,99 @@ export interface operations {
   "delete_api-v1-auth-0a4ec84191b3223053d50fc370e78726": {
     responses: {
       200: {
+        content: never;
+      };
+    };
+  };
+  /** delete questionaire */
+  "delete_api-v1-questionnaire-b5de40df4a370ee055cf689cfafdc2d4": {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** update questionaire */
+  "put_api-v1-questionnaire-4553825757f17c4aa7cc1166ac08b07c": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Questionnaire"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** update questionaire answer */
+  "put_api-v1-questionnaire_answer-577a63f9ae75b3eb44ae024d56cfea36": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuestionnaireAnswer"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
         content: never;
       };
     };

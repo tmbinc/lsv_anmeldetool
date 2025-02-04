@@ -1,4 +1,7 @@
-use crate::schema::{events, groups, invite_queue, org_event, org_secrets, orgs, teams, users};
+use crate::schema::{
+    events, groups, invite_queue, org_event, org_secrets, orgs, questionnaire,
+    questionnaire_answers, teams, users,
+};
 use apistos::ApiComponent;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
@@ -338,4 +341,55 @@ pub struct InviteQueueEntry {
 pub struct OrgSecret {
     pub org_id: String,
     pub secret: String,
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Debug,
+    PartialEq,
+    Insertable,
+    Serialize,
+    Deserialize,
+    Clone,
+    AsChangeset,
+    JsonSchema,
+    ApiComponent,
+)]
+#[diesel(table_name = questionnaire)]
+#[diesel(primary_key(id))]
+pub struct Questionnaire {
+    pub id: String,
+    pub event_id: Option<String>,
+    pub org_id: Option<String>,
+    pub question_text: String,
+    pub question_type: String,
+    pub question_data: String,
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Debug,
+    PartialEq,
+    Insertable,
+    Serialize,
+    Deserialize,
+    Clone,
+    AsChangeset,
+    ApiComponent,
+    JsonSchema,
+)]
+#[diesel(table_name = questionnaire_answers)]
+#[diesel(belongs_to(Questionnaire))]
+#[diesel(belongs_to(Org))]
+#[diesel(belongs_to(Event))]
+#[diesel(primary_key(question_id, event_id, org_id))]
+pub struct QuestionnaireAnswer {
+    pub question_id: String,
+    pub event_id: String,
+    pub org_id: String,
+    pub question_answer: String,
 }

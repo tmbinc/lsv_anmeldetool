@@ -29,14 +29,19 @@
     Select,
     type SelectOptionType,
     ButtonGroup,
+    Modal,
   } from "flowbite-svelte";
 
   import Groups from "./Groups.svelte";
+  import Questionnaire from "./Questionnaire.svelte";
+  import FetchErrors from "../../../FetchErrors.svelte";
+  import { ExclamationCircleOutline } from "flowbite-svelte-icons";
 
   let event: Event | null = $state(null);
   let event_changed = $state(false);
   let event_orgs: EventOrg[] = $state([]);
   let other_orgs: Org[] = $state([]);
+  let fetch_errors: FetchErrors;
 
   const states: SelectOptionType<string>[] = [
     { name: "Not enlisted", value: "NotEnlisted", disabled: true },
@@ -54,11 +59,15 @@
     const resp = await request.result;
     if (resp.ok) {
       event = resp.data;
+    } else {
+      fetch_errors.check(resp);
     }
 
     const resp_event_orgs = await getEventOrgs({ event: event_id }).result;
     if (resp_event_orgs.ok) {
       event_orgs = resp_event_orgs.data;
+    } else {
+      fetch_errors.check(resp_event_orgs);
     }
 
     const resp_nonevent_orgs = await listOrgs({}).result;
@@ -76,6 +85,8 @@
             (event_orgs) => event_orgs.org.id == other_org.id
           ) == -1
       );
+    } else {
+      fetch_errors.check(resp_nonevent_orgs);
     }
     sort();
   });
@@ -139,6 +150,7 @@
 </script>
 
 <main>
+  <FetchErrors bind:this={fetch_errors} />
   {#if event}
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div>
@@ -203,6 +215,7 @@
     <Button href="/event/{event_id}/">Public Self-Registration Link</Button>
 
     <Groups {event_id} />
+    <Questionnaire {event_id} />
 
     <Table>
       <TableHead>
@@ -289,4 +302,5 @@
       </TableBody>
     </Table>
   {/if}
+
 </main>

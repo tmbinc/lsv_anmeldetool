@@ -59,6 +59,15 @@ export const authOrgLogin = apity.path('/api/v1/org/{org}/auth').method('post').
 export const inviteOrgToEvent = apity.path('/api/v1/org/{org}/{event}/invite').method("post").create();
 export const listInvites = apity.path('/api/v1/invites').method('get').create();
 
+export const createQuestionnaire = apity.path('/api/v1/event/{event}/questionnaire').method('post').create();
+export const getQuestionnaireForEvent = apity.path('/api/v1/event/{event}/questionnaire').method('get').create();
+export const updateQuestionnaire = apity.path('/api/v1/questionnaire').method('put').create();
+export const deleteQuestionnaire = apity.path('/api/v1/questionnaire/{id}').method('delete').create();
+export const getQuestionnaireForOrgEvent = apity.path('/api/v1/org/{org}/{event}/questionnaire').method('get').create();
+
+export const getQuestionnaireAnswerForOrgEvent = apity.path('/api/v1/org/{org}/{event}/questionnaire_answer').method('get').create();
+export const updateQuestionnaireAnswer = apity.path('/api/v1/questionnaire_answer').method('put').create();
+
 export type Invite = components["schemas"]["Invite"];
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];
@@ -68,3 +77,5 @@ export type Team = components["schemas"]["Team"];
 export type NewTeam = components["schemas"]["NewTeam"];
 export type Group = components["schemas"]["Group"];
 export type EventOrgState = components["schemas"]["EventOrgState"];
+export type Questionnaire = components["schemas"]["Questionnaire"];
+export type QuestionnaireAnswer = components["schemas"]["QuestionnaireAnswer"];
