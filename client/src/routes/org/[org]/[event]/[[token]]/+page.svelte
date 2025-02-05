@@ -133,6 +133,11 @@
           org_event_state = resp.data;
           finalized =
             org_event_state == "Submitted" || org_event_state == "Verified";
+
+          // On first login, set team status to "updated"
+          if (org_event_state == "Invited" && login_token) {
+            unsubmit_teams();
+          }
         }
       }
     );
