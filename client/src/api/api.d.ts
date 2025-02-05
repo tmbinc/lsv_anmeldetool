@@ -258,6 +258,8 @@ export interface components {
       question_data: string;
       question_text: string;
       question_type: string;
+      /** Format: int32 */
+      sort: number;
     };
     /** QuestionnaireAnswer */
     QuestionnaireAnswer: {

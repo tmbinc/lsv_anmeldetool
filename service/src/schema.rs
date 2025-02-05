@@ -66,6 +66,7 @@ diesel::table! {
         question_text -> Text,
         question_type -> Text,
         question_data -> Text,
+        sort -> Integer,
     }
 }
 

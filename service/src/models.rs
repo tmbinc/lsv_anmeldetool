@@ -366,6 +366,7 @@ pub struct Questionnaire {
     pub question_text: String,
     pub question_type: String,
     pub question_data: String,
+    pub sort: i32,
 }
 
 #[derive(

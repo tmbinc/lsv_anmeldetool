@@ -19,6 +19,21 @@ mod utils;
 
 type DbPool = r2d2::Pool<r2d2::ConnectionManager<SqliteConnection>>;
 
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+
+fn run_migrations(
+    connection: &mut SqliteConnection,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+    // This will run the necessary migrations.
+    //
+    // See the documentation for `MigrationHarness` for
+    // all available methods.
+    connection.run_pending_migrations(MIGRATIONS)?;
+
+    Ok(())
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().ok();
@@ -26,6 +41,11 @@ async fn main() -> std::io::Result<()> {
 
     // initialize DB pool outside of `HttpServer::new` so that it is shared across all workers
     let pool = initialize_db_pool();
+
+    {
+        let mut connection = pool.get().expect("DB connection failed for migration");
+        run_migrations(&mut connection).expect("failed to run migrations");
+    }
 
     let port: u16 = std::env::var("PORT")
         .unwrap_or("8080".to_string())

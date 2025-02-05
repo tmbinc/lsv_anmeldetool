@@ -24,7 +24,11 @@
     updateQuestionnaire,
     type Questionnaire,
   } from "../../../../api/api";
-  import { ExclamationCircleOutline } from "flowbite-svelte-icons";
+  import {
+    ArrowDownOutline,
+    ArrowUpOutline,
+    ExclamationCircleOutline,
+  } from "flowbite-svelte-icons";
 
   let questionnaire: Questionnaire[] = $state([]);
   let edit_mode = $state(false);
@@ -37,7 +41,7 @@
     { name: "Checkbox", value: "Checkbox" },
     { name: "Multiple Choice", value: "MultipleChoice" },
     { name: "Radio", value: "Radio" },
-    { name: "Single Input Field, use __ as placeholder", value: "SingleInput" },
+    { name: "__ Field", value: "SingleInput" },
   ];
 
   onMount(async () => {
@@ -45,6 +49,7 @@
       .result;
     if (resp.ok) {
       questionnaire = resp.data;
+      sort_questionnaire();
     }
   });
 
@@ -76,6 +81,7 @@
       } else {
         changed = changed.filter((item) => item != id);
       }
+      sort_questionnaire();
     }
   }
 
@@ -89,6 +95,10 @@
       );
       question_to_delete = null;
     }
+  }
+
+  function sort_questionnaire() {
+    questionnaire.sort((q1, q2) => q1.sort - q2.sort);
   }
 </script>
 
@@ -131,6 +141,19 @@
           <TableBodyCell>
             {#if edit_mode}
               <ButtonGroup>
+                <Button
+                  on:click={() => {
+                    question.sort--;
+                    change(question.id);
+                  }}><ArrowUpOutline /></Button
+                >
+                <Button>{question.sort}</Button>
+                <Button
+                  on:click={() => {
+                    question.sort++;
+                    change(question.id);
+                  }}><ArrowDownOutline /></Button
+                >
                 <Button
                   on:click={() => update(question.id)}
                   color="green"

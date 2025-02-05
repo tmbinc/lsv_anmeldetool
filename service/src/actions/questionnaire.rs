@@ -38,6 +38,7 @@ pub fn create_questionnaire(
         question_text: "".into(),
         question_type: "".into(),
         question_data: "".into(),
+        sort: 0,
     };
 
     diesel::insert_into(questionnaire::table)

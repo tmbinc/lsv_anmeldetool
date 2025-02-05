@@ -52,25 +52,27 @@
       org: org_id,
     }).result;
     if (resp.ok) {
-      questionnaire = resp.data.map((question) => {
-        if (!responses.has(question.id)) {
-          responses.set(question.id, {
-            event_id: event_id,
-            org_id: org_id,
-            question_id: question.id,
-            question_answer: "",
-          });
-        }
-        return {
-          ...question,
-          answer: responses.get(question.id)?.question_answer,
-          checkbox: [],
-          items: question.question_data.split("\n").map((option, index) => ({
-            name: option,
-            value: index.toString(),
-          })),
-        };
-      });
+      questionnaire = resp.data
+        .sort((q0, q1) => q0.sort - q1.sort)
+        .map((question) => {
+          if (!responses.has(question.id)) {
+            responses.set(question.id, {
+              event_id: event_id,
+              org_id: org_id,
+              question_id: question.id,
+              question_answer: "",
+            });
+          }
+          return {
+            ...question,
+            answer: responses.get(question.id)?.question_answer,
+            checkbox: [],
+            items: question.question_data.split("\n").map((option, index) => ({
+              name: option,
+              value: index.toString(),
+            })),
+          };
+        });
     }
   });
 
