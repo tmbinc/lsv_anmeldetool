@@ -103,67 +103,56 @@
 </script>
 
 <div>
-  <Table class="flex flex-col mb-4">
-    <TableBody>
-      {#each questionnaire as question}
-        <TableBodyRow class="flex flex-col mb-4">
-          <TableBodyCell class="flex flex-col mb-4">
-            {@html question.question_text}
-          </TableBodyCell>
-          <TableBodyCell>
-            {#if question.question_type == "Freeform"}
-              <Textarea
-                class="w-xl"
-                bind:value={question.answer}
-                on:input={() => change(question.id)}
-              />
-            {:else if question.question_type == "Checkbox"}
-              <Checkbox
-                bind:value={question.answer}
-                on:change={() => change(question.id)}
-                >{question.question_data}</Checkbox
-              >
-            {:else if question.question_type == "MultipleChoice"}
-              <Select
-                items={question.items}
-                bind:value={question.answer}
-                on:change={() => change(question.id)}
-              />
-            {:else if question.question_type == "Radio"}
-              {#each question.items as item}
-                <Radio
-                  value={item.value}
-                  bind:group={question.answer}
-                  on:change={() => change(question.id)}>{item.name}</Radio
-                >
-              {/each}
-            {:else if question.question_type == "SingleInput"}
-              <div class="inline-block">
-                {question.question_data.split("__")[0]}
-                <Input
-                  class="inline-block w-16"
-                  bind:value={question.answer}
-                  on:change={() => change(question.id)}
-                />
-                {question.question_data.split("__")[1]}
-              </div>
-            {/if}
-          </TableBodyCell>
-        </TableBodyRow>
-      {/each}
-      <TableBodyRow>
-        <TableBodyCell>
-          <Button
-            color="green"
-            disabled={changed.length == 0}
-            onclick={() => {
-              save();
-            }}
-            >{#if changed.length == 0}Gespeichert.{:else}Speichern...{/if}</Button
-          ></TableBodyCell
+  {#each questionnaire as question}
+    <div>
+      {@html question.question_text}
+    </div>
+    {#if question.question_type == "Freeform"}
+      <Textarea
+        class="w-xl"
+        rows={5}
+        bind:value={question.answer}
+        on:input={() => change(question.id)}
+      />
+    {:else if question.question_type == "Checkbox"}
+      <Checkbox
+        bind:value={question.answer}
+        on:change={() => change(question.id)}>{question.question_data}</Checkbox
+      >
+    {:else if question.question_type == "MultipleChoice"}
+      <Select
+        items={question.items}
+        bind:value={question.answer}
+        on:change={() => change(question.id)}
+      />
+    {:else if question.question_type == "Radio"}
+      {#each question.items as item}
+        <Radio
+          value={item.value}
+          bind:group={question.answer}
+          on:change={() => change(question.id)}>{item.name}</Radio
         >
-        <TableBodyCell></TableBodyCell>
-      </TableBodyRow>
-    </TableBody>
-  </Table>
+      {/each}
+    {:else if question.question_type == "SingleInput"}
+      <div class="inline-block">
+        {question.question_data.split("__")[0]}
+        <Input
+          class="inline-block w-16"
+          bind:value={question.answer}
+          on:change={() => change(question.id)}
+        />
+        {question.question_data.split("__")[1]}
+      </div>
+    {/if}
+  {/each}
+  {#if questionnaire.length > 0}
+    <Button
+      color="green"
+      disabled={changed.length == 0}
+      onclick={() => {
+        save();
+      }}
+      >{#if changed.length == 0}Gespeichert.{:else}Speichern...{/if}</Button
+    >
+  {/if}
 </div>

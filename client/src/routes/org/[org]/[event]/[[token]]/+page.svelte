@@ -23,6 +23,7 @@
     Button,
     ButtonGroup,
     Checkbox,
+    FloatingLabelInput,
     Group,
     Input,
     Label,
@@ -94,6 +95,9 @@
     const resp = await request.result;
     if (resp.ok) {
       org = resp.data;
+      org.contact_email = org.contact_email || "";
+      org.contact_name = org.contact_name || "";
+      org.contact_phone = org.contact_phone || "";
     } else {
       fetch_error.check(resp);
       all_good = false;
@@ -111,6 +115,11 @@
     const teams_resp = await teams_request.result;
     if (teams_resp.ok) {
       teams = teams_resp.data;
+      // To fix null not being handeable in <FloatingInput>
+      teams.forEach((x) => {
+        x.contact_name = x.contact_name || "";
+        x.contact_phone = x.contact_phone || "";
+      });
     } else {
       fetch_error.check(teams_resp);
       all_good = false;
@@ -152,6 +161,8 @@
       name: "Team " + (teams.length + 1).toString(),
     }).result;
     if (res.ok) {
+      res.data.contact_name = "";
+      res.data.contact_phone = "";
       teams.push(res.data);
     }
   }
@@ -221,7 +232,7 @@
   });
 </script>
 
-<main class="px-10 pt-6 flex flex-col gap-4">
+<main class="px-2 md:px-10 pt-6 flex flex-col gap-4">
   <FetchErrors admin={false} bind:this={fetch_error} />
   {#if login_error}
     <LoadError
@@ -274,46 +285,41 @@
             required
           />
         </div>
-        <div>
-          <Label for="org_contact_name"
-            >Kontaktperson für Organisatorisches (muss nicht am Turniertag
-            anwesend sein):</Label
-          >
-          <Input
-            class="w-100"
-            id="org_contact_name"
-            type="text"
-            on:input={() => (org_changed = true)}
-            bind:value={org.contact_name}
-            placeholder="Name"
-            required
-          />
-        </div>
-        <div>
-          <Label for="org_contact_email">Email-Adresse:</Label>
 
-          <Input
-            class="w-100"
-            id="org_contact_email"
-            type="text"
-            on:input={() => (org_changed = true)}
-            bind:value={org.contact_email}
-            placeholder="Email-Addresse"
-            required
-          />
-        </div>
         <div>
-          <Label for="org_contact_phone">Telefon:</Label>
+          Kontaktperson für Organisatorisches (muss nicht am Turniertag anwesend
+          sein):
+        </div>
+        <div
+          id="exampleWrapper"
+          class="grid gap-6 items-end w-full md:grid-cols-3"
+        >
+          {#if org.contact_name !== null}
+            <FloatingLabelInput
+              style="outlined"
+              type="text"
+              on:input={() => (org_changed = true)}
+              bind:value={org.contact_name}>Name</FloatingLabelInput
+            >
+          {/if}
 
-          <Input
-            class="w-100"
-            id="org_contact_phone"
-            type="text"
-            on:input={() => (org_changed = true)}
-            bind:value={org.contact_phone}
-            placeholder="Telefon"
-            required
-          />
+          {#if org.contact_email !== null}
+            <FloatingLabelInput
+              style="outlined"
+              type="email"
+              on:input={() => (org_changed = true)}
+              bind:value={org.contact_email}>Email</FloatingLabelInput
+            >
+          {/if}
+
+          {#if org.contact_phone !== null}
+            <FloatingLabelInput
+              style="outlined"
+              type="tel"
+              on:input={() => (org_changed = true)}
+              bind:value={org.contact_phone}>Telefon</FloatingLabelInput
+            >
+          {/if}
         </div>
       </div>
 
@@ -337,34 +343,34 @@
       Ort und telefonisch erreichbar ist!
     </p>
 
-    <Table>
-      <TableHead class=" flex-col lg:flex-row  mb-4 lg:block hidden">
+    <Table class="table-fixed">
+      <TableHead class="flex-col lg:flex-row lg:block hidden">
         <TableHeadCell>Team-Name</TableHeadCell>
         <TableHeadCell>Altersgruppe</TableHeadCell>
         <TableHeadCell>Ansprechpartner (Name)</TableHeadCell>
-        <TableHeadCell>Telefon</TableHeadCell>
         <TableHeadCell>Bearbeiten</TableHeadCell>
       </TableHead>
       <TableBody>
         {#if teams.length == 0}
-          <TableBodyRow class="flex flex-col lg:flex-row  mb-4">
+          <TableBodyRow class="flex flex-col lg:flex-row">
             <TableBodyCell>Bitte mindestens ein Team hinzufügen!</TableBodyCell>
-            <TableBodyCell></TableBodyCell>
             <TableBodyCell></TableBodyCell>
             <TableBodyCell></TableBodyCell>
             <TableBodyCell></TableBodyCell>
           </TableBodyRow>
         {/if}
         {#each teams as team}
-          <TableBodyRow class="flex flex-col lg:flex-row mb-4">
+          <TableBodyRow class="flex flex-col lg:flex-row">
             <TableBodyCell
               ><Label class="block lg:hidden">Team-Name</Label>
-              <Input
+              <FloatingLabelInput
+                style="outlined"
+                type="text"
                 disabled={finalized}
-                bind:value={team.name}
                 oninput={() => change_team(team.id)}
-              /></TableBodyCell
-            >
+                bind:value={team.name}>Team-Name</FloatingLabelInput
+              >
+            </TableBodyCell>
             <TableBodyCell>
               <Label class="block lg:hidden">Altersgruppe</Label>
               <Select
@@ -376,18 +382,27 @@
               />
             </TableBodyCell>
             <TableBodyCell
-              ><Label class="block lg:hidden">Ansprechpartner (Name)</Label
-              ><Input
-                bind:value={team.contact_name}
-                oninput={() => change_team(team.id)}
-              /></TableBodyCell
-            >
-            <TableBodyCell
-              ><Label class="block lg:hidden">Telefon</Label><Input
-                bind:value={team.contact_phone}
-                oninput={() => change_team(team.id)}
-              /></TableBodyCell
-            >
+              ><Label class="block lg:hidden">Ansprechpartner</Label>
+
+              {#if team.contact_name !== null}
+                <FloatingLabelInput
+                  style="outlined"
+                  type="text"
+                  disabled={finalized}
+                  oninput={() => change_team(team.id)}
+                  bind:value={team.contact_name}>Name</FloatingLabelInput
+                >
+              {/if}
+              {#if team.contact_phone !== null}
+                <FloatingLabelInput
+                  style="outlined"
+                  type="text"
+                  disabled={finalized}
+                  oninput={() => change_team(team.id)}
+                  bind:value={team.contact_phone}>Telefon</FloatingLabelInput
+                >
+              {/if}
+            </TableBodyCell>
             <TableBodyCell>
               {#if org_event_state != "Verified"}
                 <ButtonGroup>
@@ -426,7 +441,7 @@
             </TableBodyCell>
           </TableBodyRow>
         {/each}
-        <TableBodyRow class="flex flex-col lg:flex-row  mb-4">
+        <TableBodyRow class="flex flex-col lg:flex-row ">
           <TableBodyCell>
             <Button
               disabled={finalized}
@@ -438,14 +453,14 @@
             >Status: {state_description[org_event_state]}</TableBodyCell
           >
           <TableBodyCell></TableBodyCell>
-          <TableBodyCell></TableBodyCell>
           <TableBodyCell>
             {#if org_event_state == "Invited" || org_event_state == "Registered" || org_event_state == "Updated"}
               <Button
                 color="red"
                 on:click={() => (submit_modal = true)}
-                disabled={teams.length == 0 || teams_changed.length != 0}
-                >Anmeldung finalisieren</Button
+                disabled={teams.length == 0 ||
+                  teams_changed.length != 0 ||
+                  questionnaire_changes}>Anmeldung finalisieren</Button
               >
             {/if}
             {#if org_event_state == "Submitted" || org_event_state == "Verified"}
@@ -461,7 +476,7 @@
     <Modal bind:open={team_delete_modal} size="xs" autoclose>
       <div class="text-center">
         <ExclamationCircleOutline
-          class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+          class="mx-auto text-gray-400 w-12 h-12 dark:text-gray-200"
         />
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
           Soll dieses Team wirklich gelöscht werden?
@@ -478,7 +493,7 @@
     <Modal bind:open={submit_modal} size="xs" autoclose>
       <div class="text-center">
         <ExclamationCircleOutline
-          class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+          class="mx-auto text-gray-400 w-12 h-12 dark:text-gray-200"
         />
         {#if org_event_state == "Invited" || org_event_state == "Registered" || org_event_state == "Updated"}
           <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
