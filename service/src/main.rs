@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use actix_cors::Cors;
 use actix_identity::IdentityMiddleware;
 use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
@@ -56,6 +58,11 @@ async fn main() -> std::io::Result<()> {
 
     let secret_key = Key::generate();
 
+    let email_config = Arc::new(
+        api::mail::Config::load_from_file("Email.toml")
+            .expect("Failed to load email configuration file Email.toml"),
+    );
+
     HttpServer::new(move || {
         let spec = Spec {
             info: Info {
@@ -73,6 +80,8 @@ async fn main() -> std::io::Result<()> {
             .document(spec)
             // add DB pool handle to app data; enables use of `web::Data<DbPool>` extractor
             .app_data(web::Data::new(pool.clone()))
+            // Add email config
+            .app_data(web::Data::new(email_config.clone()))
             // add request logger middleware
             .wrap(middleware::Logger::default())
             // Authentication
@@ -111,7 +120,11 @@ async fn main() -> std::io::Result<()> {
                         resource("org/{org}/{event}/invite")
                             .route(post().to(api::orgs::invite_org_event)),
                     )
-                    .service(resource("invites").route(get().to(api::orgs::list_invites)))
+                    .service(
+                        resource("invites")
+                            .route(get().to(api::orgs::list_invites))
+                            .route(post().to(api::mail::send_one_invite)),
+                    )
                     .service(
                         resource("org/{org}/{event}")
                             .route(get().to(api::orgs::get_org_event_state)),

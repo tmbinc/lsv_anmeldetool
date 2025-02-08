@@ -16,6 +16,7 @@ diesel = { version = "2", features = ["sqlite", "r2d2", "uuid", "chrono"] }
 diesel_migrations = { version = "2.2.0", features = ["sqlite"] }
 dotenvy = "0.15"
 env_logger = "0.11.6"
+lettre = { version = "0.11", features = ["builder", "smtp-transport", "rustls-tls"] }
 log = "0.4.24"
 once_cell = "1.20.2"
 r2d2 = "0.8.10"
@@ -24,5 +25,6 @@ schemars = { package = "apistos-schemars", version = "0.8" }
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.137"
 sha256 = "1.5.0"
+toml = "0.8.20"
 uid = "0.1.8"
 uuid = { version = "1.6", features = ["v4", "v7", "serde"] }

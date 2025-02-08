@@ -18,6 +18,7 @@ pub enum ErrorResponse {
     NotFound(String),
     Conflict(String),
     Unauthorized(String),
+    Internal(String),
     Other,
 }
 
@@ -34,6 +35,7 @@ impl ResponseError for ErrorResponse {
             ErrorResponse::NotFound(_) => StatusCode::NOT_FOUND,
             ErrorResponse::Conflict(_) => StatusCode::CONFLICT,
             ErrorResponse::Unauthorized(_) => StatusCode::UNAUTHORIZED,
+            ErrorResponse::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorResponse::Other => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

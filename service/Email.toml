@@ -1,0 +1,4 @@
+from = "Turnieranmeldungen <anmeldungen@lsv1873.de>" 
+user = "smtp_user"
+pwd = "password"
+server = "smtpserver.example.com" 
