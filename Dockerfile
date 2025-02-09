@@ -14,7 +14,7 @@ WORKDIR /usr/src/api-service
 RUN apk add --no-cache musl-dev
 
 # Update this to whatever database provider you use
-RUN apk add --no-cache sqlite-dev sqlite
+RUN apk add --no-cache sqlite-dev sqlite openssl-dev
 ENV RUSTFLAGS="-C target-feature=-crt-static" 
 RUN cargo install diesel_cli --no-default-features --features sqlite
 
@@ -30,7 +30,7 @@ RUN cargo build --release
 
 FROM alpine:latest
 WORKDIR /app
-RUN apk add --no-cache sqlite-dev sqlite libgcc ca-certificates 
+RUN apk add --no-cache sqlite-dev sqlite libgcc ca-certificates openssl-dev
 COPY --from=builder /usr/src/api-service/target/release/service /app
 COPY --from=builder /usr/src/api-service/db.sqlite3 /app/db.sqlite3
 
