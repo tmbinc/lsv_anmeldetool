@@ -42,8 +42,10 @@ export const createTeam = apity.path('/api/v1/team').method('post').create();
 export const updateTeam = apity.path('/api/v1/team').method('put').create();
 export const deleteTeam = apity.path('/api/v1/team/{team}').method('delete').create();
 export const getTeam = apity.path('/api/v1/team/{team}').method('get').create();
+export const setTeamPresent = apity.path('/api/v1/team/{team}/present').method('put').create();
 
 export const getGroupsForEvent = apity.path('/api/v1/event/{event}/groups').method('get').create();
+export const getGroup = apity.path('/api/v1/group/{group}').method('get').create();
 export const deleteGroup = apity.path('/api/v1/group/{group}').method('delete').create();
 export const updateGroup = apity.path('/api/v1/group').method('put').create();
 export const createGroup = apity.path('/api/v1/event/{event}/groups').method('post').create();
@@ -58,6 +60,7 @@ export const authOrgLogin = apity.path('/api/v1/org/{org}/auth').method('post').
 
 export const inviteOrgToEvent = apity.path('/api/v1/org/{org}/{event}/invite').method("post").create();
 export const listInvites = apity.path('/api/v1/invites').method('get').create();
+export const sendInvite = apity.path('/api/v1/invites').method('post').create();
 
 export const createQuestionnaire = apity.path('/api/v1/event/{event}/questionnaire').method('post').create();
 export const getQuestionnaireForEvent = apity.path('/api/v1/event/{event}/questionnaire').method('get').create();

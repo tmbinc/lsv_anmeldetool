@@ -30,6 +30,34 @@ pub async fn get_groups(
     Ok(Json(orgs))
 }
 
+#[api_operation(summary = "get group by id", skip_args = "user")]
+pub async fn get_group(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+    group_id: Path<Uuid>,
+) -> Result<Json<Group>, ErrorResponse> {
+    match user.role {
+        Role::Admin | Role::None | Role::Org(_) => {}
+    };
+
+    let group_id = group_id.into_inner();
+
+    let group = web::block(move || {
+        let mut conn = pool.get()?;
+
+        actions::groups::get_group_by_id(&mut conn, &group_id)
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    match group {
+        Some(group) => Ok(Json(group)),
+        None => Err(ErrorResponse::NotFound(format!(
+            "No group found with UID: {group_id}"
+        ))),
+    }
+}
+
 #[api_operation(summary = "add a group", skip_args = "user")]
 pub async fn add_group(
     pool: web::Data<DbPool>,

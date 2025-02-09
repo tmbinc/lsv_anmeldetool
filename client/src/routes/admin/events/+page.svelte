@@ -138,6 +138,8 @@
                 {/if}
                 <Button color="blue" href="/admin/event/{event.id}"
                   >Edit Details</Button
+                ><Button color="yellow" href="/admin/teams/{event.id}"
+                  >Team List</Button
                 ></ButtonGroup
               ></TableBodyCell
             >

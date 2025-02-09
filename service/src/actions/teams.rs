@@ -64,3 +64,15 @@ pub fn get_team_by_id(
         .first::<Team>(conn)
         .optional()?)
 }
+
+pub fn set_team_present(
+    conn: &mut SqliteConnection,
+    team_id: &Uuid,
+    ready: bool,
+) -> Result<(), DbError> {
+    diesel::update(schema::teams::table)
+        .filter(schema::teams::id.eq(team_id.to_string()))
+        .set(schema::teams::present.eq(ready))
+        .execute(conn)?;
+    Ok(())
+}

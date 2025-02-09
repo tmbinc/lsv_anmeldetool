@@ -6,7 +6,9 @@ use crate::models::{NewTeam, Role, Team};
 use crate::{actions, DbPool};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
-use apistos::api_operation;
+use apistos::{api_operation, ApiComponent};
+use schemars::JsonSchema;
+use serde::Deserialize;
 use uuid::Uuid;
 
 #[api_operation(summary = "get team list for an org + event", skip_args = "user")]
@@ -185,4 +187,41 @@ pub async fn get_team(
             "No team found with UID: {team_uid}"
         ))),
     }
+}
+
+#[derive(Deserialize, ApiComponent, JsonSchema)]
+pub struct TeamReady {
+    team_id: Uuid,
+    ready: bool,
+}
+
+#[api_operation(summary = "update team readiness", skip_args = "user")]
+pub async fn set_team_present(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+    team_ready: Json<TeamReady>,
+) -> Result<Json<String>, ErrorResponse> {
+    let team_ready = team_ready.into_inner();
+
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
+    let event_org = web::block(move || -> Result<(), DbError> {
+        let mut conn = pool.get()?;
+
+        Ok(actions::teams::set_team_present(
+            &mut conn,
+            &team_ready.team_id,
+            team_ready.ready,
+        )?)
+    })
+    .await;
+
+    let _event_org = event_org?.map_err(error::ErrorInternalServerError)?;
+
+    Ok(Json("ok".to_string()))
 }

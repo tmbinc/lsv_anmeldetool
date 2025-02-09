@@ -1,10 +1,11 @@
 use actix_web::web::Json;
 use actix_web::{error, web};
-use apistos::api_operation;
+use apistos::{api_operation, ApiComponent};
 use lettre::message::{Body, Mailbox};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
 use log::{error, info};
+use schemars::JsonSchema;
 use serde::Deserialize;
 use std::fs::read_to_string;
 use std::sync::Arc;
@@ -38,6 +39,11 @@ impl Config {
     }
 }
 
+#[derive(JsonSchema, Deserialize, ApiComponent)]
+pub struct MailConfirm {
+    send: bool,
+}
+
 #[api_operation(
     summary = "send a single invite",
     skip_args = "user",
@@ -47,6 +53,7 @@ pub async fn send_one_invite(
     pool: web::Data<DbPool>,
     config: web::Data<Arc<Config>>,
     user: LoggedUser,
+    confirm: web::Json<MailConfirm>,
 ) -> Result<Json<String>, ErrorResponse> {
     match user.role {
         Role::Admin => {}
@@ -54,6 +61,11 @@ pub async fn send_one_invite(
             return Err(ErrorResponse::Unauthorized("".to_string()));
         }
     };
+
+    // This is really just so we have a non-empty POST content.
+    if !confirm.send {
+        return Err(ErrorResponse::Unauthorized("need confirmation".to_string()));
+    }
 
     let result = web::block(move || -> Result<Json<String>, ErrorResponse> {
         let mut conn = pool.get().map_err(error::ErrorInternalServerError)?;
@@ -97,7 +109,7 @@ pub async fn send_one_invite(
             let body = format!(
                 "Hallo, {}!
 
-vielen Dank für die Registrierung bei dem Turnier \"{}\".
+Vielen Dank für die Registrierung bei dem Turnier \"{}\".
 
 Zur Anmeldung der Mannschaften benutzen Sie bitte den folgenden Link:
 
@@ -131,7 +143,7 @@ Vielen Dank!",
 
             println!("sending {:?}", email);
 
-            return match mailer.send(&email) {
+            let email_res = match mailer.send(&email) {
                 Ok(_) => {
                     info!("Message to {} sent", to_email);
 
@@ -152,6 +164,8 @@ Vielen Dank!",
                     )))
                 }
             };
+
+            email_res
         } else {
             Ok(Json("No invites in queue".into()))
         }

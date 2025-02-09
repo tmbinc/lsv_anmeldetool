@@ -43,6 +43,8 @@ export interface paths {
   "/api/v1/invites": {
     /** get invites */
     get: operations["get_api-v1-invites-4a7e45dfc0832f05a15444003398849c"];
+    /** send a single invite */
+    post: operations["post_api-v1-invites-4a7e45dfc0832f05a15444003398849c"];
   };
   "/api/v1/org/{org}/{event}": {
     /** get event status for an org */
@@ -83,6 +85,8 @@ export interface paths {
     put: operations["put_api-v1-group-44e4a130606b544f6ab5a1532e35bc29"];
   };
   "/api/v1/group/{group}": {
+    /** get group by id */
+    get: operations["get_api-v1-group-0b9bee095d760068add3c5fe8a467e8b"];
     /** delete a group */
     delete: operations["delete_api-v1-group-0b9bee095d760068add3c5fe8a467e8b"];
   };
@@ -101,6 +105,10 @@ export interface paths {
     get: operations["get_api-v1-team-660a5317bb41a757a76ba890440c3a2e"];
     /** delete a team */
     delete: operations["delete_api-v1-team-660a5317bb41a757a76ba890440c3a2e"];
+  };
+  "/api/v1/team/{team}/present": {
+    /** update team readiness */
+    put: operations["put_api-v1-team-6c8d4a2aa493b478fa3918905818c1b5"];
   };
   "/api/v1/event/{event}/org/{org}": {
     /** set status for event per org */
@@ -187,6 +195,10 @@ export interface components {
       event: components["schemas"]["Event"];
       org: components["schemas"]["Org"];
       secret: string;
+    };
+    /** MailConfirm */
+    MailConfirm: {
+      send: boolean;
     };
     /**
      * NewEvent
@@ -290,6 +302,12 @@ export interface components {
       name: string;
       org: string;
       present: boolean;
+    };
+    /** TeamReady */
+    TeamReady: {
+      ready: boolean;
+      /** Format: uuid */
+      team_id: string;
     };
   };
   responses: never;
@@ -570,6 +588,37 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Invite"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** send a single invite */
+  "post_api-v1-invites-4a7e45dfc0832f05a15444003398849c": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MailConfirm"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
         };
       };
       /** @description Forbidden */
@@ -938,6 +987,37 @@ export interface operations {
       };
     };
   };
+  /** get group by id */
+  "get_api-v1-group-0b9bee095d760068add3c5fe8a467e8b": {
+    parameters: {
+      path: {
+        group: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Group"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
   /** delete a group */
   "delete_api-v1-group-0b9bee095d760068add3c5fe8a467e8b": {
     parameters: {
@@ -1098,6 +1178,37 @@ export interface operations {
     parameters: {
       path: {
         team: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** update team readiness */
+  "put_api-v1-team-6c8d4a2aa493b478fa3918905818c1b5": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TeamReady"];
       };
     };
     responses: {

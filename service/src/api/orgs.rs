@@ -376,7 +376,6 @@ pub async fn list_invites(
         let invite_queue_entries = invite_queue_entries
             .into_iter()
             .filter_map(|entry| {
-                log::info!("entry {:?}", entry);
                 let org_id = Uuid::parse_str(&entry.org_id).ok()?;
                 let event_id = &Uuid::parse_str(&entry.event_id).ok()?;
                 let org = actions::orgs::find_org_by_uid(&mut conn, &org_id).ok()??;
@@ -384,7 +383,6 @@ pub async fn list_invites(
                 let event = actions::events::find_event_by_uid(&mut conn, &event_id).ok()??;
 
                 let secret = get_org_secret(&mut conn, &org_id).ok()?;
-                log::info!("ok got everything {:?}", secret);
 
                 Some(Invite {
                     event: event,

@@ -152,7 +152,9 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(resource("group").route(put().to(api::groups::update_group)))
                     .service(
-                        resource("group/{group}").route(delete().to(api::groups::delete_group)),
+                        resource("group/{group}")
+                            .route(delete().to(api::groups::delete_group))
+                            .route(get().to(api::groups::get_group)),
                     )
                     .service(
                         resource("event/{event}/orgs").route(get().to(api::events::get_event_orgs)),
@@ -166,6 +168,10 @@ async fn main() -> std::io::Result<()> {
                         resource("team/{team}")
                             .route(get().to(api::teams::get_team))
                             .route(delete().to(api::teams::delete_team)),
+                    )
+                    .service(
+                        resource("team/{team}/present")
+                            .route(put().to(api::teams::set_team_present)),
                     )
                     .service(
                         resource("event/{event}/org/{org}")

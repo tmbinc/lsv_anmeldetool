@@ -38,7 +38,7 @@
   >
     <FooterLink href="/">Über</FooterLink>
     <FooterLink href="/privacy">Datenschutz</FooterLink>
-    <FooterLink href="mailto:Felix@Dom.ke">Kontakt</FooterLink>
+    <FooterLink href="mailto:anmeldung@lsv1873.de">Kontakt</FooterLink>
   </FooterLinkGroup>
 </Footer>
 

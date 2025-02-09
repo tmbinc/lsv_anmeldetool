@@ -343,7 +343,7 @@
       Ort und telefonisch erreichbar ist!
     </p>
 
-    <Table class="table-fixed">
+    <Table class="table-fixed" shadow>
       <TableHead class="flex-col lg:flex-row lg:block hidden">
         <TableHeadCell>Team-Name</TableHeadCell>
         <TableHeadCell>Altersgruppe</TableHeadCell>
@@ -362,7 +362,7 @@
         {#each teams as team}
           <TableBodyRow class="flex flex-col lg:flex-row">
             <TableBodyCell
-              ><Label class="block lg:hidden">Team-Name</Label>
+              ><Label class="block mb-3 lg:hidden">Team-Name</Label>
               <FloatingLabelInput
                 style="outlined"
                 type="text"
@@ -372,7 +372,7 @@
               >
             </TableBodyCell>
             <TableBodyCell>
-              <Label class="block lg:hidden">Altersgruppe</Label>
+              <Label class="block mb-3 lg:hidden">Altersgruppe</Label>
               <Select
                 class="mt-2"
                 items={groups}
@@ -382,7 +382,7 @@
               />
             </TableBodyCell>
             <TableBodyCell
-              ><Label class="block lg:hidden">Ansprechpartner</Label>
+              ><Label class="block mb-3 lg:hidden">Ansprechpartner</Label>
 
               {#if team.contact_name !== null}
                 <FloatingLabelInput
