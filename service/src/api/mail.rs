@@ -1,6 +1,7 @@
 use actix_web::web::Json;
 use actix_web::{error, web};
 use apistos::{api_operation, ApiComponent};
+use lettre::message::header::ContentType;
 use lettre::message::{Body, Mailbox};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
@@ -137,6 +138,7 @@ Vielen Dank!",
                         ErrorResponse::Internal(format!("invalid email: {:?}", to_email))
                     })?,
                 ))
+                .header(ContentType::TEXT_PLAIN)
                 .subject(subject)
                 .body(Body::new(body))
                 .expect("failed to build message");
