@@ -149,8 +149,11 @@
   }
 </script>
 
-<main>
+<main class="px-2 md:px-10 pt-6 flex flex-col gap-4">
   <FetchErrors bind:this={fetch_errors} />
+  <div>
+    <Button color="yellow" href="/admin/teams/{event_id}">Team List</Button>
+  </div>
   {#if event}
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div>
@@ -217,90 +220,114 @@
     <Groups {event_id} />
     <Questionnaire {event_id} />
 
-    <Table>
-      <TableHead>
-        <TableHeadCell>Name</TableHeadCell>
-        <TableHeadCell>State</TableHeadCell>
-        <TableHeadCell></TableHeadCell>
-      </TableHead>
-      <TableBody>
-        {#if event_orgs != null}
-          {#each event_orgs as event_org}
-            <TableBodyRow
-              class={{
-                NotEnlisted: "bg-red-300",
-                Registered: "bg-red-300",
-                Invited: "bg-yellow-300",
-                Updated: "bg-green-300",
-                Submitted: "bg-blue-300",
-                Verified: "bg-purple-300",
-              }[event_org.state] || "bg-red-300"}
-            >
-              <TableBodyCell
-                ><a href="/admin/org/{event_org.org.id}">{event_org.org.name}</a
-                ></TableBodyCell
+    <div class="table-div-class">
+      <Table class="text-sm" shadow>
+        <TableHead class="th-class">
+          <TableHeadCell>Name</TableHeadCell>
+          <TableHeadCell>State</TableHeadCell>
+          <TableHeadCell>Edit</TableHeadCell>
+        </TableHead>
+        <TableBody>
+          {#if event_orgs != null}
+            {#each event_orgs as event_org}
+              <TableBodyRow
+                class={"tr-class " +
+                  {
+                    NotEnlisted: "bg-red-300",
+                    Registered: "bg-red-300",
+                    Invited: "bg-yellow-300",
+                    Updated: "bg-green-300",
+                    Submitted: "bg-blue-300",
+                    Verified: "bg-purple-300",
+                  }[event_org.state] || "bg-red-300"}
               >
-              <TableBodyCell>
-                <Select
-                  class="mt-2"
-                  items={states}
-                  onchange={() => update_org_state(event_org)}
-                  bind:value={event_org.state}
-                />
-              </TableBodyCell>
-              <TableBodyCell>
-                <ButtonGroup>
-                  {#if event_org.state == "Registered"}
-                    <Button color="green" on:click={() => invite_org(event_org)}
-                      >Invite</Button
-                    >
-                  {:else if event_org.state == "Invited"}
-                    <Button color="green" disabled={true}>Invite</Button>
-                  {:else if event_org.state == "Updated"}
-                    <Button
-                      color="green"
-                      on:click={() => set_org_state(event_org, "Submitted")}
-                      >Submit</Button
-                    >
-                  {:else if event_org.state == "Submitted"}
-                    <Button
-                      color="green"
-                      on:click={() => set_org_state(event_org, "Verified")}
-                      >Verify</Button
-                    >
-                  {:else if event_org.state == "Verified"}
-                    <Button color="green" disabled={true}>Verify</Button>
-                  {/if}
-
-                  <Button color="red" onclick={() => remove(event_org.org)}
-                    >Remove</Button
-                  >
-                  <Button color="blue" href="/org/{event_org.org.id}/{event_id}"
-                    >Teams</Button
-                  ></ButtonGroup
+                <TableBodyCell class="td-class"
+                  ><a href="/admin/org/{event_org.org.id}"
+                    >{event_org.org.name}</a
+                  ></TableBodyCell
                 >
-              </TableBodyCell>
-            </TableBodyRow>
-          {/each}
-        {/if}
-      </TableBody>
-    </Table>
-    <h2>Unassigned:</h2>
-    <Table>
-      <TableBody>
-        {#if other_orgs != null}
-          {#each other_orgs as org}
-            <TableBodyRow>
-              <TableBodyCell>{org.name}</TableBodyCell>
-              <TableBodyCell><i>not assigned</i></TableBodyCell>
-              <TableBodyCell
-                ><Button onclick={() => add(org)}>Add</Button></TableBodyCell
-              >
-            </TableBodyRow>
-          {/each}
-        {/if}
-      </TableBody>
-    </Table>
-  {/if}
+                <TableBodyCell class="td-class">
+                  <Select
+                    class="mt-2"
+                    items={states}
+                    onchange={() => update_org_state(event_org)}
+                    bind:value={event_org.state}
+                  />
+                </TableBodyCell>
+                <TableBodyCell class="td-class">
+                  <ButtonGroup>
+                    {#if event_org.state == "Registered"}
+                      <Button
+                        color="green"
+                        on:click={() => invite_org(event_org)}>Invite</Button
+                      >
+                    {:else if event_org.state == "Invited"}
+                      <Button color="green" disabled={true}>Invite</Button>
+                    {:else if event_org.state == "Updated"}
+                      <Button
+                        color="green"
+                        on:click={() => set_org_state(event_org, "Submitted")}
+                        >Submit</Button
+                      >
+                    {:else if event_org.state == "Submitted"}
+                      <Button
+                        color="green"
+                        on:click={() => set_org_state(event_org, "Verified")}
+                        >Verify</Button
+                      >
+                    {:else if event_org.state == "Verified"}
+                      <Button color="green" disabled={true}>Verify</Button>
+                    {/if}
 
+                    <Button color="red" onclick={() => remove(event_org.org)}
+                      >Remove</Button
+                    >
+                    <Button
+                      color="blue"
+                      href="/org/{event_org.org.id}/{event_id}">Teams</Button
+                    ></ButtonGroup
+                  >
+                </TableBodyCell>
+              </TableBodyRow>
+            {/each}
+          {/if}
+        </TableBody>
+      </Table>
+    </div>
+    <h2>Unassigned:</h2>
+    <div class="table-div-class">
+      <Table class="text-sm">
+        <TableBody>
+          {#if other_orgs != null}
+            {#each other_orgs as org}
+              <TableBodyRow class="tr-class">
+                <TableBodyCell class="td-class">{org.name}</TableBodyCell>
+                <TableBodyCell class="td-class"
+                  ><i>not assigned</i></TableBodyCell
+                >
+                <TableBodyCell class="td-class"
+                  ><Button onclick={() => add(org)}>Add</Button></TableBodyCell
+                >
+              </TableBodyRow>
+            {/each}
+          {/if}
+        </TableBody>
+      </Table>
+    </div>
+  {/if}
 </main>
+
+<style lang="postcss">
+  :global(.td-class) {
+    @apply px-4 py-3;
+  }
+  :global(.tr-class) {
+    @apply flex flex-col mb-4 sm:table-row;
+  }
+  :global(.th-class) {
+    @apply flex flex-col mb-4 sm:table-header-group;
+  }
+  :global(.table-div-class) {
+    @apply flex sm:justify-normal justify-center ml-4 sm:ml-0;
+  }
+</style>

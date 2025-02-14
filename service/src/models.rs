@@ -35,6 +35,7 @@ pub struct Org {
     pub contact_name: Option<String>,
     pub contact_phone: Option<String>,
     pub last_update: NaiveDateTime,
+    pub slug: String,
 }
 
 /// New org details.

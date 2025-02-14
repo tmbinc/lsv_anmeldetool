@@ -10,15 +10,22 @@
   } from "../../../../api/api";
 
   import { page } from "$app/state";
-  import { Button } from "flowbite-svelte";
+  import {
+    Button,
+    Table,
+    TableBody,
+    TableBodyCell,
+    TableBodyRow,
+  } from "flowbite-svelte";
   import FetchErrors from "../../../FetchErrors.svelte";
 
   let event_id = page.params.event_id;
   let fetch_errors: FetchErrors;
 
   let groups = $state(new Map<string, GroupTeamStats>());
+  let all_ready = $state(0);
+  let all_total = $state(0);
   const event_orgs: EventOrg[] = $state([]);
-  $inspect(groups);
 
   type GroupTeamStats = {
     group: Group;
@@ -62,7 +69,6 @@
               if (group) {
                 group.ready += ready ? 1 : 0;
                 group.total += 1;
-                console.log(team.group_id, ready, group);
               }
             }
           }
@@ -74,20 +80,57 @@
       fetch_errors.check(resp_event_orgs);
     }
     groups = new_groups;
+    all_total = groups
+      .values()
+      .map((g) => g.total)
+      .reduce((sum, number) => sum + number, 0);
+    all_ready = groups
+      .values()
+      .map((g) => g.ready)
+      .reduce((sum, number) => sum + number, 0);
   });
 </script>
 
-<div class="m-6">
+<div class="sm:m-6">
   <FetchErrors bind:this={fetch_errors} />
 
-  <h1 class="text-7xl">Groups</h1>
-  {#each [...groups.entries()] as [k, group]}
-    <div class="mb-5">
-      <Button href="/admin/teams/{page.params.event_id}/{group.group.id}">
-        {group.group.name}
-      </Button>
-      {group.ready} of
-      {group.total} Teams ready.
-    </div>
-  {/each}
+  <div class="text-7xl">Groups</div>
+  <div>
+    <Table shadow hoverable>
+      <TableBody>
+        {#each [...groups.entries()] as [k, group]}
+          <TableBodyRow
+            class={group.total == group.ready
+              ? "bg-green-300 hover:bg-green-200"
+              : "bg-red-300 hover:bg-red-200"}
+          >
+            <TableBodyCell>
+              <Button
+                class="w-full"
+                href="/admin/teams/{page.params.event_id}/{group.group.id}"
+              >
+                {group.group.name}
+              </Button>
+            </TableBodyCell>
+            <TableBodyCell>
+              <div class="text-center">
+                {group.ready} of
+                {group.total} Teams ready.
+              </div>
+            </TableBodyCell>
+          </TableBodyRow>
+        {/each}
+        <TableBodyRow
+          ><TableBodyCell>
+            <Button href="/admin/teams/{page.params.event_id}/all">all</Button>
+          </TableBodyCell><TableBodyCell>
+            <div class="text-center">
+              Total: {all_total}
+              of {all_ready} Teams ready.
+            </div>
+          </TableBodyCell></TableBodyRow
+        >
+      </TableBody>
+    </Table>
+  </div>
 </div>

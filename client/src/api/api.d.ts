@@ -248,6 +248,7 @@ export interface components {
       name: string;
       name_additional?: string | null;
       public: boolean;
+      slug: string;
     };
     /** OrgAuthLoginData */
     OrgAuthLoginData: {

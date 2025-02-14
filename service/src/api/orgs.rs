@@ -250,7 +250,7 @@ pub async fn self_register_org(
         match event {
             Some(event) => {
                 if event.public {
-                    let new_org = actions::orgs::insert_new_org(&mut conn, "temp")?;
+                    let new_org = actions::orgs::insert_new_org(&mut conn, &data.name)?;
 
                     let new_org = Org {
                         name: data.name,

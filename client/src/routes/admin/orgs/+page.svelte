@@ -88,7 +88,6 @@
       <div
         class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"
       ></div>
-
       <h1 class="text-2xl font-semibold text-gray-900">Loading Details...</h1>
     </div>
   {:else}
@@ -98,6 +97,7 @@
         <TableHeadCell>Contact Name</TableHeadCell>
         <TableHeadCell>Contact Email</TableHeadCell>
         <TableHeadCell>Contact Phone</TableHeadCell>
+        <TableHeadCell>Slug</TableHeadCell>
         <TableHeadCell>Public</TableHeadCell>
         <TableHeadCell>Edit</TableHeadCell>
       </TableHead>
@@ -133,6 +133,13 @@
                 disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.contact_phone}
+              /></TableBodyCell
+            >
+            <TableBodyCell
+              ><Input
+                disabled={!edit_mode}
+                oninput={() => change(org.id)}
+                bind:value={org.slug}
               /></TableBodyCell
             >
             <TableBodyCell>

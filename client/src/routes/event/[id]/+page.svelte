@@ -2,8 +2,17 @@
   import { page } from "$app/state";
   import { onMount } from "svelte";
   import { createOrgSelfReg, getEvent, type Event } from "../../../api/api";
-  import { Button, FloatingLabelInput, Helper, Modal } from "flowbite-svelte";
-  import { ExclamationCircleOutline } from "flowbite-svelte-icons";
+  import {
+    Alert,
+    Button,
+    FloatingLabelInput,
+    Helper,
+    Modal,
+  } from "flowbite-svelte";
+  import {
+    CheckCircleOutline,
+    ExclamationCircleOutline,
+  } from "flowbite-svelte-icons";
   import Loading from "../../Loading.svelte";
   import LoadError from "../../LoadError.svelte";
 
@@ -80,10 +89,16 @@
     <LoadError text="Laden fehlgeschlagen!" />
   {:else if submitted}
     <div class="w-full mt-24 items-center justify-center gap-4">
-      <h1 class="text-2xl font-semibold text-gray-900">
-        Anmeldung erfolgreich gespeichert!
-      </h1>
-      <p>
+      <div class="inline">
+        <CheckCircleOutline
+          color="green"
+          class="mx-auto mb-4 w-12 h-12 inline"
+        />
+        <div class="text-2xl font-semibold text-gray-900 inline">
+          Anmeldung erfolgreich gespeichert!
+        </div>
+      </div>
+      <p class="mb-10">
         Sie bekommen in den nächsten Tagen eine Email an {contact_email} mit weiteren
         Informationen.
       </p>
@@ -117,6 +132,16 @@
         </div>
       {/if}
 
+      {#if new Date(event?.begin || 0) < new Date()}
+        <Alert>Dieses Turnier liegt in der Vergangenheit.</Alert>
+      {:else if new Date(event?.public_reg_until || 0) < new Date()}
+        <Alert
+          >Die Anmeldefrist für dieses Turnier ist bereit abgelaufen. Eine
+          Anmeldung über dieses Formular kann trotzdem vorgenommen werden, aber
+          wir können eine Teilnahme nicht garantieren.
+        </Alert>
+      {/if}
+
       Abfolge:
       <ol class="ps-5 mt-2 space-y-1 list-decimal list-inside">
         <li>
@@ -126,12 +151,14 @@
         <li>
           Wir versenden dann einen Link an die angegebene E-Mail-Adresse. Unter
           diesem Link können dann die teilnehmenden Mannschaften {#if event?.public_reg_until}bis
-            zum {new Date(event.public_reg_until).toLocaleDateString()}{/if}
+            zum {new Date(
+              event?.public_reg_until || 0
+            ).toLocaleDateString()}{/if}
           gemeldet werden.
         </li>
         <li>
           Am Turniertag {#if event?.begin}({new Date(
-              event.begin
+              event?.begin || 0
             ).toLocaleDateString()}){/if} werden die Anmeldungen vor Ort bestätigt.
         </li>
       </ol>

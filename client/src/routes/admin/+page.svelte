@@ -3,10 +3,14 @@
   import { authLogin } from "../../api/api";
 </script>
 
-<div>Admin Page</div>
+<main class="m-10 flex-row">
+  <div class="text-center mb-5">Admin Page</div>
 
-<ButtonGroup>
-  <Button href="/admin/orgs">Edit orgs...</Button>
-  <Button href="/admin/teams">Edit teams...</Button>
-  <Button href="/admin/events">Edit events...</Button>
-</ButtonGroup>
+  <div class="text-center">
+    <ButtonGroup>
+      <Button href="/admin/orgs">Edit orgs...</Button>
+      <Button href="/admin/teams">Edit teams...</Button>
+      <Button href="/admin/events">Edit events...</Button>
+    </ButtonGroup>
+  </div>
+</main>

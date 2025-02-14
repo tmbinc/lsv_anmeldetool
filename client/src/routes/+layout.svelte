@@ -32,7 +32,7 @@
 <slot />
 
 <div></div>
-<Footer>
+<Footer class="mx-10">
   <FooterLinkGroup
     ulClass="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0"
   >
@@ -48,6 +48,6 @@
 
 <style lang="postcss">
   :global(html) {
-    background-color: theme(colors.gray.100);
+    background-color: theme(colors.gray.50);
   }
 </style>

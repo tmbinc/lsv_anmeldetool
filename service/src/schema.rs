@@ -55,6 +55,7 @@ diesel::table! {
         contact_name -> Nullable<Text>,
         contact_phone -> Nullable<Text>,
         last_update -> Timestamp,
+        slug -> Text,
     }
 }
 
