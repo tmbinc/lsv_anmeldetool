@@ -427,11 +427,13 @@
                   >
                 </ButtonGroup>
               {:else}
-                <Checkbox
-                  bind:checked={team.present}
-                  oninput={() => change_team(team.id)}
-                  >Anwesenheit erklärt</Checkbox
-                >
+                {#if reg_event?.allow_set_present}
+                  <Checkbox
+                    bind:checked={team.present}
+                    oninput={() => change_team(team.id)}
+                    >Anwesenheit erklärt</Checkbox
+                  >
+                {/if}
                 <Button
                   on:click={() => update_team(team.id)}
                   color="green"

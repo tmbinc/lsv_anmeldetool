@@ -71,6 +71,12 @@ export const getQuestionnaireForOrgEvent = apity.path('/api/v1/org/{org}/{event}
 export const getQuestionnaireAnswerForOrgEvent = apity.path('/api/v1/org/{org}/{event}/questionnaire_answer').method('get').create();
 export const updateQuestionnaireAnswer = apity.path('/api/v1/questionnaire_answer').method('put').create();
 
+export const setPairings = apity.path('/api/v1/event/{event}/pairings/{group}/{round}').method('put').create();
+export const getPairings = apity.path('/api/v1/event/{event}/pairings').method('get').create();
+
+export const setRooms = apity.path('/api/v1/event/{event}/rooms/{group}').method('put').create();
+export const getRooms = apity.path('/api/v1/event/{event}/rooms').method('get').create();
+
 export type Invite = components["schemas"]["Invite"];
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];
@@ -82,3 +88,7 @@ export type Group = components["schemas"]["Group"];
 export type EventOrgState = components["schemas"]["EventOrgState"];
 export type Questionnaire = components["schemas"]["Questionnaire"];
 export type QuestionnaireAnswer = components["schemas"]["QuestionnaireAnswer"];
+export type Pairing = components["schemas"]["Pairing"];
+export type PairingForEvent = components["schemas"]["PairingForEvent"];
+export type PairingEntry = components["schemas"]["PairingEntry"];
+export type Room = components["schemas"]["Room"];

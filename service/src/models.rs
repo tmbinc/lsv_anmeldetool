@@ -1,6 +1,6 @@
 use crate::schema::{
-    events, groups, invite_queue, org_event, org_secrets, orgs, questionnaire,
-    questionnaire_answers, teams, users,
+    events, groups, invite_queue, org_event, org_secrets, orgs, pairings, questionnaire,
+    questionnaire_answers, rooms, teams, users,
 };
 use apistos::ApiComponent;
 use chrono::NaiveDateTime;
@@ -120,6 +120,7 @@ pub struct Event {
     pub public_reg_until: Option<NaiveDateTime>,
     pub begin: Option<NaiveDateTime>,
     pub description: String,
+    pub allow_set_present: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
@@ -394,4 +395,60 @@ pub struct QuestionnaireAnswer {
     pub event_id: String,
     pub org_id: String,
     pub question_answer: String,
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Debug,
+    PartialEq,
+    Insertable,
+    Serialize,
+    Deserialize,
+    Clone,
+    AsChangeset,
+    ApiComponent,
+    JsonSchema,
+)]
+#[diesel(table_name = pairings)]
+#[diesel(belongs_to(Event))]
+#[diesel(belongs_to(Group))]
+#[diesel(primary_key(event, round, team_home, team_guest))]
+pub struct Pairing {
+    pub event: String,
+    pub group_id: String,
+    pub round: i32,
+    pub table_num: i32,
+    pub team_home: Option<String>,
+    pub team_guest: Option<String>,
+    pub points_home: Option<i32>,
+    pub points_guest: Option<i32>,
+    pub result: Option<String>,
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Debug,
+    PartialEq,
+    Insertable,
+    Serialize,
+    Deserialize,
+    Clone,
+    AsChangeset,
+    ApiComponent,
+    JsonSchema,
+)]
+#[diesel(table_name = rooms)]
+#[diesel(belongs_to(Event))]
+#[diesel(belongs_to(Group))]
+#[diesel(primary_key(event, group_id, table_num_low, table_num_high))]
+pub struct Room {
+    pub event: String,
+    pub group_id: String,
+    pub table_num_low: i32,
+    pub table_num_high: i32,
+    pub room: String,
 }

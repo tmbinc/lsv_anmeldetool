@@ -33,7 +33,7 @@ pub async fn get_org_teams(
     let event_org = web::block(move || -> Result<Option<Vec<Team>>, DbError> {
         let mut conn = pool.get()?;
 
-        let teams = actions::teams::list_teams_by_org_event(&mut conn, org_uid, event_uid)?;
+        let teams = actions::teams::list_teams_by_org_event(&mut conn, &org_uid, &event_uid)?;
 
         Ok(Some(teams))
     })

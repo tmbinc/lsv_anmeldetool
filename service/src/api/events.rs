@@ -144,7 +144,7 @@ pub async fn get_event_orgs(
     let event_org = web::block(move || -> Result<Option<Vec<EventOrg>>, DbError> {
         let mut conn = pool.get()?;
 
-        let orgs = actions::org_event::list_event_orgs(&mut conn, event_uid)?;
+        let orgs = actions::org_event::list_event_orgs(&mut conn, &event_uid)?;
 
         Ok(match orgs {
             Some(orgs) => Some(

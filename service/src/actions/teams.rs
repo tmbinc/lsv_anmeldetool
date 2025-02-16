@@ -6,8 +6,8 @@ use uuid::Uuid;
 
 pub fn list_teams_by_org_event(
     conn: &mut SqliteConnection,
-    org_uid: Uuid,
-    event_uid: Uuid,
+    org_uid: &Uuid,
+    event_uid: &Uuid,
 ) -> Result<Vec<Team>, DbError> {
     use crate::schema::teams::dsl::*;
 

@@ -68,6 +68,22 @@ export interface paths {
     /** update event */
     put: operations["put_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
   };
+  "/api/v1/event/{event}/pairings/{group}/{round}": {
+    /** set pairings for a given event + group */
+    put: operations["put_api-v1-event-22f93462af22d1552b7828cb1461a501"];
+  };
+  "/api/v1/event/{event}/rooms/{group}": {
+    /** set rooms for a given event + group */
+    put: operations["put_api-v1-event-32fa1b098b899b8b7012a6eeb84bb174"];
+  };
+  "/api/v1/event/{event}/rooms": {
+    /** get rooms for a given event */
+    get: operations["get_api-v1-event-ef99e312f73e4b677af08a0e6c2069e8"];
+  };
+  "/api/v1/event/{event}/pairings": {
+    /** get pairings for a given event + group */
+    get: operations["get_api-v1-event-e5839bcc54123a8e476f3e95fd56d323"];
+  };
   "/api/v1/event/{event}/questionnaire": {
     /** get questionaire for event */
     get: operations["get_api-v1-event-216083259df8aeef507bc5fa2036a212"];
@@ -158,6 +174,7 @@ export interface components {
      * @description Event details
      */
     Event: {
+      allow_set_present: boolean;
       /** Format: partial-date-time */
       begin?: string | null;
       description: string;
@@ -263,6 +280,43 @@ export interface components {
       /** @description teams for this event */
       teams: components["schemas"]["Team"][];
     };
+    Pairing: {
+      event: string;
+      group_id: string;
+      /** Format: int32 */
+      points_guest?: number | null;
+      /** Format: int32 */
+      points_home?: number | null;
+      result?: string | null;
+      /** Format: int32 */
+      round: number;
+      /** Format: int32 */
+      table_num: number;
+      team_guest?: string | null;
+      team_home?: string | null;
+    };
+    PairingEntry: {
+      group: string;
+      /** Format: int32 */
+      points_guest?: number | null;
+      /** Format: int32 */
+      points_home?: number | null;
+      /** Format: int32 */
+      round: number;
+      /** Format: int32 */
+      table: number;
+      team_guest?: string | null;
+      team_guest_org?: string | null;
+      team_home?: string | null;
+      team_home_org?: string | null;
+    };
+    /** PairingForEvent */
+    PairingForEvent: {
+      event_name: string;
+      groups: components["schemas"]["Group"][];
+      pairings: components["schemas"]["PairingEntry"][];
+      rooms: components["schemas"]["Room"][];
+    };
     /** Questionnaire */
     Questionnaire: {
       event_id?: string | null;
@@ -285,6 +339,23 @@ export interface components {
       /** Format: uuid */
       Org: string;
     }]>;
+    Room: {
+      event: string;
+      group_id: string;
+      room: string;
+      /** Format: int32 */
+      table_num_high: number;
+      /** Format: int32 */
+      table_num_low: number;
+    };
+    /** SetPairingPayload */
+    SetPairingPayload: {
+      pairings: components["schemas"]["Pairing"][];
+    };
+    /** SetRoomsPayload */
+    SetRoomsPayload: {
+      rooms: components["schemas"]["Room"][];
+    };
     /** SlimUser */
     SlimUser: {
       email: string;
@@ -808,6 +879,139 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Event"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** set pairings for a given event + group */
+  "put_api-v1-event-22f93462af22d1552b7828cb1461a501": {
+    parameters: {
+      path: {
+        event: string;
+        group: string;
+        round: number;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetPairingPayload"];
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** set rooms for a given event + group */
+  "put_api-v1-event-32fa1b098b899b8b7012a6eeb84bb174": {
+    parameters: {
+      path: {
+        event: string;
+        group: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetRoomsPayload"];
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get rooms for a given event */
+  "get_api-v1-event-ef99e312f73e4b677af08a0e6c2069e8": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Room"][];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get pairings for a given event + group */
+  "get_api-v1-event-e5839bcc54123a8e476f3e95fd56d323": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["PairingForEvent"];
         };
       };
       /** @description Forbidden */

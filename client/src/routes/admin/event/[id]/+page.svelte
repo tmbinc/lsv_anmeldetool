@@ -12,6 +12,7 @@
     type EventOrg,
     type EventOrgState,
     type Org,
+    type Team,
   } from "../../../../api/api";
   import {
     Table,
@@ -154,6 +155,11 @@
   <div>
     <Button color="yellow" href="/admin/teams/{event_id}">Team List</Button>
   </div>
+  <div>
+    <Button color="yellow" href="/admin/event/{event_id}/run"
+      >Run Event...</Button
+    >
+  </div>
   {#if event}
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div>
@@ -196,6 +202,14 @@
         <Checkbox
           id="event_public"
           bind:checked={event.public}
+          on:change={() => (event_changed = true)}
+        ></Checkbox>
+      </div>
+      <div>
+        <Label for="event_set_present_ok">Set presence allowed</Label>
+        <Checkbox
+          id="event_set_present_ok"
+          bind:checked={event.allow_set_present}
           on:change={() => (event_changed = true)}
         ></Checkbox>
       </div>

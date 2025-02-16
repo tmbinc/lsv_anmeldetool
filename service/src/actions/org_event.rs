@@ -9,9 +9,9 @@ use super::orgs::find_org_by_uid;
 
 pub fn list_event_orgs(
     conn: &mut SqliteConnection,
-    event_uid: Uuid,
+    event_uid: &Uuid,
 ) -> Result<Option<Vec<(Org, EventOrgState)>>, DbError> {
-    let event = find_event_by_uid(conn, &event_uid)?;
+    let event = find_event_by_uid(conn, event_uid)?;
 
     match event {
         Some(event) => {
@@ -40,9 +40,9 @@ pub fn list_event_orgs(
 
 pub fn list_org_events(
     conn: &mut SqliteConnection,
-    org_uid: Uuid,
+    org_uid: &Uuid,
 ) -> Result<Option<Vec<(Event, EventOrgState)>>, DbError> {
-    let org = find_org_by_uid(conn, &org_uid)?;
+    let org = find_org_by_uid(conn, org_uid)?;
 
     match org {
         Some(org) => {

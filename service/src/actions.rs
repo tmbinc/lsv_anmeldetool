@@ -4,6 +4,8 @@ pub mod invite_queue;
 pub mod org_event;
 pub mod org_secrets;
 pub mod orgs;
+pub mod pairings;
 pub mod questionnaire;
+pub mod rooms;
 pub mod teams;
 pub type DbError = Box<dyn std::error::Error + Send + Sync>;

@@ -141,6 +141,19 @@ async fn main() -> std::io::Result<()> {
                             .route(put().to(api::events::update_event)),
                     )
                     .service(
+                        resource("event/{event}/pairings/{group}/{round}")
+                            .route(put().to(api::pairings::set_pairings)),
+                    )
+                    .service(
+                        resource("event/{event}/rooms/{group}")
+                            .route(put().to(api::rooms::set_rooms)),
+                    )
+                    .service(resource("event/{event}/rooms").route(get().to(api::rooms::get_rooms)))
+                    .service(
+                        resource("event/{event}/pairings")
+                            .route(get().to(api::pairings::get_pairings)),
+                    )
+                    .service(
                         resource("event/{event}/questionnaire")
                             .route(get().to(api::questionnaire::get_questionnaire_for_event))
                             .route(post().to(api::questionnaire::create_questionnaire_for_event)),

@@ -1,7 +1,9 @@
 pub mod auth;
 pub mod events;
 pub mod groups;
-pub mod orgs;
-pub mod questionnaire;
-pub mod teams;
 pub mod mail;
+pub mod orgs;
+pub mod pairings;
+pub mod questionnaire;
+pub mod rooms;
+pub mod teams;

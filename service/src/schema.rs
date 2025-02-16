@@ -8,6 +8,7 @@ diesel::table! {
         public_reg_until -> Nullable<Timestamp>,
         begin -> Nullable<Timestamp>,
         description -> Text,
+        allow_set_present -> Bool,
     }
 }
 
@@ -60,6 +61,20 @@ diesel::table! {
 }
 
 diesel::table! {
+    pairings (event, round, team_home, team_guest) {
+        event -> Text,
+        group_id -> Text,
+        round -> Integer,
+        table_num -> Integer,
+        team_home -> Nullable<Text>,
+        team_guest -> Nullable<Text>,
+        points_home -> Nullable<Integer>,
+        points_guest -> Nullable<Integer>,
+        result -> Nullable<Text>,
+    }
+}
+
+diesel::table! {
     questionnaire (id) {
         id -> Text,
         event_id -> Nullable<Text>,
@@ -77,6 +92,16 @@ diesel::table! {
         event_id -> Text,
         org_id -> Text,
         question_answer -> Text,
+    }
+}
+
+diesel::table! {
+    rooms (event, group_id, table_num_low, table_num_high) {
+        event -> Text,
+        group_id -> Text,
+        table_num_low -> Integer,
+        table_num_high -> Integer,
+        room -> Text,
     }
 }
 
@@ -107,11 +132,13 @@ diesel::joinable!(invite_queue -> orgs (org_id));
 diesel::joinable!(org_event -> events (event_id));
 diesel::joinable!(org_event -> orgs (org_id));
 diesel::joinable!(org_secrets -> orgs (org_id));
+diesel::joinable!(pairings -> groups (group_id));
 diesel::joinable!(questionnaire -> events (event_id));
 diesel::joinable!(questionnaire -> orgs (org_id));
 diesel::joinable!(questionnaire_answers -> events (event_id));
 diesel::joinable!(questionnaire_answers -> orgs (org_id));
 diesel::joinable!(questionnaire_answers -> questionnaire (question_id));
+diesel::joinable!(rooms -> groups (group_id));
 diesel::joinable!(teams -> groups (group_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
@@ -121,8 +148,10 @@ diesel::allow_tables_to_appear_in_same_query!(
     org_event,
     org_secrets,
     orgs,
+    pairings,
     questionnaire,
     questionnaire_answers,
+    rooms,
     teams,
     users,
 );

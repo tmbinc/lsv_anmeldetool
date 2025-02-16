@@ -107,7 +107,6 @@
           a.org.name.localeCompare(b.org.name) ||
           a.team.name.localeCompare(b.team.name)
       );
-      console.log(team_list);
       teams = team_list;
     } else {
       fetch_errors.check(resp_event_orgs);
@@ -127,6 +126,10 @@
   }
 
   async function download_swisschess() {
+    // TODO: write back team numbers to database.
+    // TODO: build slug -> name lookup for printing
+    // TODO: build shortened name -> full name lookup for printing
+
     const swiss_teams: SwissChessTeam[] = teams.map((n, i) => ({
       number: (i + 1).toString(),
       teamname: n.team.name,
