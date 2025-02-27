@@ -6,8 +6,6 @@
     getEvent,
     getEventOrgs,
     getGroup,
-    getGroupsForEvent,
-    getTeamsForOrgEvent,
     setPairings,
     type Event,
     type Group,
@@ -52,6 +50,7 @@
   let group: Group | null = $state(null);
   let fetch_errors: FetchErrors;
   let uploaded = $state(false);
+  let round = $state(0);
   const event_id = page.params.id;
   const group_id = page.params.group;
   let teams: PairingTeam[] = $state([]);
@@ -87,22 +86,13 @@
       const team_list: PairingTeam[] = [];
 
       for (const event_org of resp_event_orgs.data) {
-        let org_teams = await getTeamsForOrgEvent({
-          org: event_org.org.id,
-          event: event_id,
-        }).result;
-
-        if (org_teams.ok) {
-          const new_teams = org_teams.data
-            .filter((team) => team.group_id == group_id)
-            .map((team) => ({
-              team: team,
-              org: event_org.org,
-            }));
-          team_list.push(...new_teams);
-        } else {
-          fetch_errors.check(org_teams);
-        }
+        const new_teams = event_org.teams
+          .filter((team) => team.group_id == group_id)
+          .map((team) => ({
+            team: team,
+            org: event_org.org,
+          }));
+        team_list.push(...new_teams);
       }
 
       // todo: we should have the team index
@@ -137,6 +127,9 @@
     let header: string[] | undefined = undefined;
     let pairing_list: PairingDisplay[] = [];
     for (const line of lines) {
+      if (line.startsWith("Paarungsliste")) {
+        round = +line.split(" ")[2];
+      }
       const columns = line.split("\t");
       if (columns.length < 3) {
         continue;
@@ -181,7 +174,7 @@
       event: event_id,
       group_id: group_id,
       result: pairing.result,
-      round: 0,
+      round: round,
       table_num: pairing.table,
       team_guest: pairing.team_guest?.team.id,
       team_home: pairing.team_home?.team.id,
@@ -190,7 +183,7 @@
     let resp = await setPairings({
       event: event_id,
       group: group_id,
-      round: 0,
+      round: round,
       pairings: pairings_upload,
     }).result;
     if (resp.ok) {
@@ -204,8 +197,11 @@
 <main class="px-2 md:px-10 pt-6 flex flex-col gap-4">
   <FetchErrors bind:this={fetch_errors} />
 
-  <div class="text-3xl font-bold">{group?.name}</div>
+  <div class="text-3xl font-bold">{group?.name} - Round {round}</div>
 
+  <Button color="green" href="/event/{event_id}/pairings"
+    >Public Pairing Link...</Button
+  >
   <Button color="yellow" href="/admin/event/{event_id}/{group_id}/rooms"
     >Edit Room Mapping...</Button
   >

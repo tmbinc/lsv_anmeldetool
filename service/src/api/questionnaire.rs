@@ -1,11 +1,14 @@
 use crate::actions::DbError;
 use crate::api::auth::LoggedUser;
 use crate::errors::ErrorResponse;
-use crate::models::{EventOrgState, Questionnaire, QuestionnaireAnswer, Role};
+use crate::models::{EventOrgState, Org, Questionnaire, QuestionnaireAnswer, Role};
 use crate::{actions, DbPool};
 use actix_web::web::{Json, Path};
 use actix_web::{error, web};
 use apistos::api_operation;
+use apistos::ApiComponent;
+use schemars::JsonSchema;
+use serde::Serialize;
 use uuid::Uuid;
 
 #[api_operation(summary = "get questionaire for event", skip_args = "user")]
@@ -164,6 +167,82 @@ pub async fn get_questionnaire_for_org_event(
             Ok(Some(questionnaire))
         }
     })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    match success {
+        Some(success) => Ok(Json(success)),
+        None => Err(ErrorResponse::Unauthorized(
+            "org not enlisted in event".to_string(),
+        )),
+    }
+}
+
+#[derive(Serialize, JsonSchema, ApiComponent)]
+pub struct EventQuestionnaireAnswer {
+    org: Org,
+    event_org_state: EventOrgState,
+    answers: Vec<QuestionnaireAnswer>,
+}
+
+#[derive(Serialize, JsonSchema, ApiComponent)]
+pub struct EventQuestionnaireAnswers {
+    questions: Vec<Questionnaire>,
+    orgs: Vec<EventQuestionnaireAnswer>,
+}
+
+#[api_operation(
+    summary = "get questionaire answers for all orgs in event",
+    skip_args = "user"
+)]
+pub async fn get_questionnaire_answers_for_event(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+    event_uid: Path<Uuid>,
+) -> Result<Json<EventQuestionnaireAnswers>, ErrorResponse> {
+    let event_uid = event_uid.into_inner();
+
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
+    let success = web::block(
+        move || -> Result<Option<EventQuestionnaireAnswers>, DbError> {
+            let mut conn = pool.get()?;
+
+            let questions =
+                actions::questionnaire::get_questionnaire(&mut conn, Some(&event_uid), None)?;
+
+            let orgs = actions::org_event::list_event_orgs(&mut conn, &event_uid)?;
+
+            if let None = orgs {
+                return Ok(None);
+            }
+
+            let mut res = EventQuestionnaireAnswers {
+                questions,
+                orgs: Vec::new(),
+            };
+
+            for (org, event_org_state) in orgs.unwrap().into_iter() {
+                let answers = actions::questionnaire::get_questionnaire_answers(
+                    &mut conn,
+                    &event_uid,
+                    &Uuid::parse_str(&org.id).unwrap(),
+                )?;
+                res.orgs.push(EventQuestionnaireAnswer {
+                    org,
+                    answers,
+                    event_org_state,
+                });
+            }
+
+            Ok(Some(res))
+        },
+    )
     .await?
     .map_err(error::ErrorInternalServerError)?;
 

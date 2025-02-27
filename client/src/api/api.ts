@@ -70,6 +70,7 @@ export const getQuestionnaireForOrgEvent = apity.path('/api/v1/org/{org}/{event}
 
 export const getQuestionnaireAnswerForOrgEvent = apity.path('/api/v1/org/{org}/{event}/questionnaire_answer').method('get').create();
 export const updateQuestionnaireAnswer = apity.path('/api/v1/questionnaire_answer').method('put').create();
+export const getQuestionnaireAnswersForEvent = apity.path('/api/v1/event/{event}/questionnaire_answers').method('get').create();
 
 export const setPairings = apity.path('/api/v1/event/{event}/pairings/{group}/{round}').method('put').create();
 export const getPairings = apity.path('/api/v1/event/{event}/pairings').method('get').create();
@@ -92,3 +93,4 @@ export type Pairing = components["schemas"]["Pairing"];
 export type PairingForEvent = components["schemas"]["PairingForEvent"];
 export type PairingEntry = components["schemas"]["PairingEntry"];
 export type Room = components["schemas"]["Room"];
+export type EventQuestionnaireAnswers = components["schemas"]["EventQuestionnaireAnswers"];

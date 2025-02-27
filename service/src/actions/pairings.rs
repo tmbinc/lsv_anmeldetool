@@ -8,7 +8,6 @@ pub fn set_pairings(
     conn: &mut SqliteConnection,
     s_event: &Uuid,
     s_group: &Uuid,
-    s_round: i32,
     s_pairings: &[Pairing],
 ) -> Result<(), DbError> {
     use crate::schema::pairings::dsl::*;
@@ -16,8 +15,7 @@ pub fn set_pairings(
     diesel::delete(
         pairings
             .filter(event.eq(s_event.to_string()))
-            .filter(group_id.eq(s_group.to_string()))
-            .filter(round.eq(s_round)),
+            .filter(group_id.eq(s_group.to_string())),
     )
     .execute(conn)?;
 

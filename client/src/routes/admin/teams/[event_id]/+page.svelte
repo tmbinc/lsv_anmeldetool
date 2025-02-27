@@ -3,7 +3,6 @@
   import {
     getEventOrgs,
     getGroupsForEvent,
-    getTeamsForOrgEvent,
     type EventOrg,
     type Group,
     type Org,
@@ -56,24 +55,15 @@
 
     if (resp_event_orgs.ok) {
       for (const event_org of resp_event_orgs.data) {
-        let org_teams = await getTeamsForOrgEvent({
-          org: event_org.org.id,
-          event: event_id,
-        }).result;
-
-        if (org_teams.ok) {
-          for (const team of org_teams.data) {
-            const ready = team.present && event_org.state == "Verified";
-            if (team.group_id) {
-              let group = new_groups.get(team.group_id);
-              if (group) {
-                group.ready += ready ? 1 : 0;
-                group.total += 1;
-              }
+        for (const team of event_org.teams) {
+          const ready = team.present && event_org.state == "Verified";
+          if (team.group_id) {
+            let group = new_groups.get(team.group_id);
+            if (group) {
+              group.ready += ready ? 1 : 0;
+              group.total += 1;
             }
           }
-        } else {
-          fetch_errors.check(org_teams);
         }
       }
     } else {

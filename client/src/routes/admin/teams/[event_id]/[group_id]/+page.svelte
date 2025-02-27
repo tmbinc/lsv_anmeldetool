@@ -13,7 +13,6 @@
     getEventOrgs,
     getGroup,
     getGroupsForEvent,
-    getTeamsForOrgEvent,
     setTeamPresent,
     type EventOrg,
     type EventOrgState,
@@ -83,23 +82,14 @@
       const team_list: OrgTeam[] = [];
 
       for (const event_org of resp_event_orgs.data) {
-        let org_teams = await getTeamsForOrgEvent({
-          org: event_org.org.id,
-          event: event_id,
-        }).result;
-
-        if (org_teams.ok) {
-          const new_teams = org_teams.data
-            .filter((team) => group_id == "all" || team.group_id == group_id)
-            .map((team) => ({
-              org: event_org.org,
-              team: team,
-              org_state: event_org.state,
-            }));
-          team_list.push(...new_teams);
-        } else {
-          fetch_errors.check(org_teams);
-        }
+        const new_teams = event_org.teams
+          .filter((team) => group_id == "all" || team.group_id == group_id)
+          .map((team) => ({
+            org: event_org.org,
+            team: team,
+            org_state: event_org.state,
+          }));
+        team_list.push(...new_teams);
       }
 
       team_list.sort(

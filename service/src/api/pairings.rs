@@ -43,7 +43,7 @@ pub async fn set_pairings(
             p.round = round;
         }
 
-        actions::pairings::set_pairings(&mut conn, &event_uid, &group_uid, round, &data)?;
+        actions::pairings::set_pairings(&mut conn, &event_uid, &group_uid, &data)?;
         Ok(())
     })
     .await?

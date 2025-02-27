@@ -149,12 +149,17 @@ pub async fn get_event_orgs(
         Ok(match orgs {
             Some(orgs) => Some(
                 orgs.into_iter()
-                    .map(|(org, state)| EventOrg {
-                        org,
-                        state,
-                        teams: [].into(),
+                    .map(|(org, state)| {
+                        let org_id = &Uuid::parse_str(&org.id).unwrap();
+                        Ok::<_, DbError>(EventOrg {
+                            org,
+                            state,
+                            teams: actions::teams::list_teams_by_org_event(
+                                &mut conn, org_id, &event_uid,
+                            )?,
+                        })
                     })
-                    .collect(),
+                    .collect::<Result<Vec<_>, _>>()?,
             ),
             None => None,
         })

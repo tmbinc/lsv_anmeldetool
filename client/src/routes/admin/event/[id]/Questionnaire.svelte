@@ -175,17 +175,28 @@
         </TableBodyRow>
       {/each}
       <TableBodyRow>
-        <TableBodyCell
-          ><Button disabled={!edit_mode} on:click={() => new_question()}
-            >New...</Button
-          >
-          <Button
-            disabled={edit_mode}
-            onclick={() => {
-              edit_mode = true;
-            }}>Edit</Button
-          ></TableBodyCell
-        >
+        <TableBodyCell>
+          <ButtonGroup>
+            <Button
+              color="yellow"
+              disabled={!edit_mode}
+              on:click={() => new_question()}>New...</Button
+            >
+            <Button
+              color="red"
+              disabled={edit_mode}
+              onclick={() => {
+                edit_mode = true;
+              }}>Edit</Button
+            >
+
+            <Button
+              color="blue"
+              href="/admin/event/{props.event_id}/questionnaire_answers"
+              >Answers</Button
+            >
+          </ButtonGroup>
+        </TableBodyCell>
         <TableBodyCell></TableBodyCell>
       </TableBodyRow>
     </TableBody>

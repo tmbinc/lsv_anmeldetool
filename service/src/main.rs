@@ -141,6 +141,11 @@ async fn main() -> std::io::Result<()> {
                             .route(put().to(api::events::update_event)),
                     )
                     .service(
+                        resource("event/{event}/questionnaire_answers").route(
+                            get().to(api::questionnaire::get_questionnaire_answers_for_event),
+                        ),
+                    )
+                    .service(
                         resource("event/{event}/pairings/{group}/{round}")
                             .route(put().to(api::pairings::set_pairings)),
                     )

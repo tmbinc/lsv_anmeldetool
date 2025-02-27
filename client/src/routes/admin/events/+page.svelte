@@ -140,6 +140,8 @@
                   >Edit Details</Button
                 ><Button color="yellow" href="/admin/teams/{event.id}"
                   >Team List</Button
+                ><Button color="green" href="/admin/event/{event.id}/run"
+                  >Run</Button
                 ></ButtonGroup
               ></TableBodyCell
             >

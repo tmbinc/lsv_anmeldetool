@@ -40,8 +40,8 @@
 
 <div class="m-10 shadow bg-white rounded-xl">
   {#if login_ok}
-    <div class="flex-row text-center">
-      <div class="m-5">Logged in. Please navigate yourself.</div>
+    <div class="flex-row text-center m-10">
+      <div class="mt-5">Logged in. Please navigate back.</div>
     </div>
   {:else}
     {#if login_failed}

@@ -68,6 +68,10 @@ export interface paths {
     /** update event */
     put: operations["put_api-v1-event-616b52a3214d1d1a472d3a61bef77f20"];
   };
+  "/api/v1/event/{event}/questionnaire_answers": {
+    /** get questionaire answers for all orgs in event */
+    get: operations["get_api-v1-event-09be1ab5aad59adce5febf4bf74460a6"];
+  };
   "/api/v1/event/{event}/pairings/{group}/{round}": {
     /** set pairings for a given event + group */
     put: operations["put_api-v1-event-22f93462af22d1552b7828cb1461a501"];
@@ -197,6 +201,16 @@ export interface components {
     /** EventOrgStateUpdate */
     EventOrgStateUpdate: {
       state: components["schemas"]["EventOrgState"];
+    };
+    EventQuestionnaireAnswer: {
+      answers: components["schemas"]["QuestionnaireAnswer"][];
+      event_org_state: components["schemas"]["EventOrgState"];
+      org: components["schemas"]["Org"];
+    };
+    /** EventQuestionnaireAnswers */
+    EventQuestionnaireAnswers: {
+      orgs: components["schemas"]["EventQuestionnaireAnswer"][];
+      questions: components["schemas"]["Questionnaire"][];
     };
     /**
      * Group
@@ -879,6 +893,37 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Event"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get questionaire answers for all orgs in event */
+  "get_api-v1-event-09be1ab5aad59adce5febf4bf74460a6": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["EventQuestionnaireAnswers"];
         };
       };
       /** @description Forbidden */
