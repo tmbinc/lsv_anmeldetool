@@ -54,7 +54,6 @@
   function update(id: String) {
     let org_to_update = orgs.find((org) => org.id == id);
     if (org_to_update) {
-      console.log("updating", org_to_update.id);
       updateOrg({ ...org_to_update, org: org_to_update.id });
       changed = changed.filter((item) => item != id);
     }
@@ -63,7 +62,6 @@
   async function revert(id: String) {
     let i = orgs.findIndex((org) => org.id == id);
     if (i != -1) {
-      console.log("revert", orgs[i].id);
       let resp = await getOrg({ org: orgs[i].id }).result;
       if (resp.ok) {
         orgs[i] = resp.data;
@@ -136,6 +134,9 @@
               /></TableBodyCell
             >
             <TableBodyCell
+              class={orgs.filter((o) => o.slug == org.slug).length != 1
+                ? "bg-red-600"
+                : ""}
               ><Input
                 disabled={!edit_mode}
                 oninput={() => change(org.id)}

@@ -17,6 +17,7 @@
     TableBodyRow,
   } from "flowbite-svelte";
   import FetchErrors from "../../../FetchErrors.svelte";
+  import { ArrowRightOutline } from "flowbite-svelte-icons";
 
   let event_id = page.params.event_id;
   let fetch_errors: FetchErrors;
@@ -97,9 +98,15 @@
             <TableBodyCell>
               <Button
                 class="w-full"
-                href="/admin/teams/{page.params.event_id}/{group.group.id}"
+                href="/admin/teams/{page.params.event_id}/{group.group
+                  .replacement || group.group.id}"
               >
-                {group.group.name}
+                {group.group.name} &nbsp;
+                <sub>{group.group.slug}</sub>
+                {#if group.group.replacement}
+                  <ArrowRightOutline />
+                  <sub> {groups.get(group.group.replacement)?.group.name}</sub>
+                {/if}
               </Button>
             </TableBodyCell>
             <TableBodyCell>

@@ -69,6 +69,8 @@ pub fn create_group(
         id: Uuid::new_v4().to_string(),
         event_id: event_id.to_string(),
         name: group.name,
+        replacement: None,
+        slug: "".to_string(),
     };
     // TODO: verify that event actually exists
     diesel::insert_into(schema::groups::table)

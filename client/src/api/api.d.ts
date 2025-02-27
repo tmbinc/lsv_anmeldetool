@@ -220,6 +220,8 @@ export interface components {
       event_id: string;
       id: string;
       name: string;
+      replacement?: string | null;
+      slug: string;
     };
     /** Invite */
     Invite: {

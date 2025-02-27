@@ -37,8 +37,8 @@
   };
 
   type PairingDisplay = {
-    team_home: PairingTeam | null;
-    team_guest: PairingTeam | null;
+    team_home: PairingTeam | undefined;
+    team_guest: PairingTeam | null | undefined;
     points_home: number | null;
     points_guest: number | null;
     table: number;
@@ -86,12 +86,10 @@
       const team_list: PairingTeam[] = [];
 
       for (const event_org of resp_event_orgs.data) {
-        const new_teams = event_org.teams
-          .filter((team) => team.group_id == group_id)
-          .map((team) => ({
-            team: team,
-            org: event_org.org,
-          }));
+        const new_teams = event_org.teams.map((team) => ({
+          team: team,
+          org: event_org.org,
+        }));
         team_list.push(...new_teams);
       }
 
@@ -110,7 +108,7 @@
   function team_for_name(
     name: string | undefined,
     slug: string | undefined
-  ): PairingTeam | null {
+  ): PairingTeam | null | undefined {
     if (!name || !slug) {
       return null;
     }
@@ -119,7 +117,12 @@
         return team;
       }
     }
-    return null;
+
+    if (slug == "spielfrei") {
+      return null;
+    }
+
+    return undefined;
   }
 
   async function import_list() {
@@ -147,10 +150,14 @@
         const table = +(data.get("PaarNr") || "");
 
         pairing_list.push({
-          team_home: team_home,
-          points_home: +(data.get("Punkte_home") ?? ""),
+          team_home: team_home ?? undefined,
+          points_home: +(data.get("Punkte_home") ?? "")
+            .replace("(", "")
+            .replace(")", ""),
           team_guest: team_guest,
-          points_guest: +(data.get("Punkte_guest") ?? ""),
+          points_guest: +(data.get("Punkte_guest") ?? "")
+            .replace("(", "")
+            .replace(")", ""),
           result: "",
           table: table,
         });
@@ -176,8 +183,10 @@
       result: pairing.result,
       round: round,
       table_num: pairing.table,
-      team_guest: pairing.team_guest?.team.id,
       team_home: pairing.team_home?.team.id,
+      team_guest: pairing.team_guest?.team.id,
+      points_home: pairing.points_home,
+      points_guest: pairing.points_guest,
     }));
 
     let resp = await setPairings({
@@ -223,20 +232,26 @@
       {#each pairings as pairing}
         <TableBodyRow
           class={" " +
-            (pairing.team_home && pairing.team_guest
+            (pairing.team_home !== undefined && pairing.team_guest !== undefined
               ? "bg-green-200"
               : "bg-red-200")}
         >
           <TableBodyCell>{pairing.table}</TableBodyCell>
           <TableBodyCell
             >{pairing.team_home?.team.name}
-            <sub>{pairing.team_home?.org.name}</sub></TableBodyCell
+            <sub>{pairing.team_home?.org.name}</sub>
+            ({pairing.points_home})</TableBodyCell
           >
           <TableBodyCell>{pairing.result}</TableBodyCell>
-          <TableBodyCell
-            >{pairing.team_guest?.team.name}
-            <sub>{pairing.team_guest?.org.name}</sub></TableBodyCell
-          >
+          <TableBodyCell>
+            {#if pairing.team_guest !== null}
+              {pairing.team_guest?.team.name}
+              <sub>{pairing.team_guest?.org.name}</sub>
+              ({pairing.points_guest})
+            {:else}
+              <i>spielfrei</i>
+            {/if}
+          </TableBodyCell>
         </TableBodyRow>
       {/each}
     </TableBody>

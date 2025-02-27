@@ -27,8 +27,10 @@
 
 <div class="mb-6">
   {#each groups as group}
-    <div class="m-4">
-      <Button href="/admin/event/{event_id}/{group.id}/">{group.name}</Button>
-    </div>
+    {#if !group.replacement}
+      <div class="m-4">
+        <Button href="/admin/event/{event_id}/{group.id}/">{group.name}</Button>
+      </div>
+    {/if}
   {/each}
 </div>

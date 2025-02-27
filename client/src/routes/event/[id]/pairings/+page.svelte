@@ -79,6 +79,7 @@
         round = first;
 
         groups_select = groups
+          .filter((group) => !group.replacement)
           .map((group) => ({
             name: group.name,
             value: group.id,
@@ -187,7 +188,7 @@
 
     {#each groups as group}
       {#if group_selected == "*" || group_selected == group.id}
-        <div class="text-2xl">{group.name}</div>
+        <div class="text-xl">{group.name}</div>
         <div class="table-div-class">
           <Table striped={true} hoverable={true} shadow class="text-sm">
             <TableBody>
@@ -204,7 +205,7 @@
                       </div></TableBodyCell
                     >
                     <TableBodyCell class="td-class">
-                      <div>{pairing.team_home}</div>
+                      <div class="text-xl">{pairing.team_home}</div>
                       <div><sub>{pairing.team_home_org}</sub></div>
                       <div>
                         ({pairing.points_home})
@@ -213,11 +214,12 @@
                         <tt class="text-black bg-white">2</tt>
                         <tt class="bg-black text-white">3</tt>
                         <tt class="text-black bg-white">4</tt>
+                        ...
                       </div>
                     </TableBodyCell>
-                    <TableBodyCell>:</TableBodyCell>
+                    <TableBodyCell class="td-class">:</TableBodyCell>
                     <TableBodyCell class="td-class"
-                      ><div>{pairing.team_guest}</div>
+                      ><div class="text-xl">{pairing.team_guest}</div>
                       <div><sub>{pairing.team_guest_org}</sub></div>
                       <div>
                         ({pairing.points_guest})
@@ -226,6 +228,7 @@
                         <tt class="bg-black text-white">2</tt>
                         <tt class="text-black bg-white">3</tt>
                         <tt class="bg-black text-white">4</tt>
+                        ...
                       </div>
                     </TableBodyCell>
                   </TableBodyRow>
@@ -244,7 +247,7 @@
     @apply px-4 py-3;
   }
   :global(.tr-class) {
-    @apply flex flex-col mb-4 sm:table-row;
+    @apply flex flex-col mb-4 sm:table-row border-black;
   }
   :global(.table-div-class) {
     @apply flex sm:justify-normal justify-center;

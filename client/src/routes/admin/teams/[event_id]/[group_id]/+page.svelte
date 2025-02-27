@@ -3,11 +3,13 @@
   import {
     Button,
     Checkbox,
+    Label,
     TableBody,
     TableBodyCell,
     TableBodyRow,
     TableHead,
     TableHeadCell,
+    Textarea,
   } from "flowbite-svelte";
   import {
     getEventOrgs,
@@ -32,9 +34,11 @@
 
   let group: Group | undefined = $state(undefined);
   let groups: Group[] = $state([]);
-  let event_orgs: EventOrg[] = $state([]);
   let group_names = $state(new Map<string, string>());
-  let download_a: Element;
+  let group_slugs = $state(new Map<string, string>());
+  let group_replacement = $state(new Map<string, string>());
+  let slug_org_decode = $state("");
+  let slug_group_decode = $state("");
 
   type OrgTeam = {
     org: Org;
@@ -63,34 +67,51 @@
       } else {
         fetch_errors.check(resp_group);
       }
-    } else {
-      const resp_groups = await getGroupsForEvent({
-        event: event_id,
-      }).result;
-
-      if (resp_groups.ok) {
-        groups = resp_groups.data;
-      } else {
-        fetch_errors.check(resp_groups);
-      }
-      group_names = new Map(groups.map((group) => [group.id, group.name]));
     }
+
+    const resp_groups = await getGroupsForEvent({
+      event: event_id,
+    }).result;
+
+    if (resp_groups.ok) {
+      groups = resp_groups.data;
+    } else {
+      fetch_errors.check(resp_groups);
+    }
+    group_names = new Map(groups.map((group) => [group.id, group.name]));
+    group_slugs = new Map(groups.map((group) => [group.id, group.slug]));
+    group_replacement = new Map(
+      groups.map((group) => [group.id, group.replacement || group.id])
+    );
 
     const resp_event_orgs = await getEventOrgs({ event: event_id }).result;
 
     if (resp_event_orgs.ok) {
       const team_list: OrgTeam[] = [];
 
+      let slugdecode = 'Alias$(XManLand, "';
+
       for (const event_org of resp_event_orgs.data) {
         const new_teams = event_org.teams
-          .filter((team) => group_id == "all" || team.group_id == group_id)
+          .filter(
+            (team) =>
+              group_id == "all" ||
+              group_replacement.get(team.group_id || "") == group_id
+          )
           .map((team) => ({
             org: event_org.org,
             team: team,
             org_state: event_org.state,
           }));
         team_list.push(...new_teams);
+        slugdecode += event_org.org.slug + "=" + event_org.org.name + "|";
       }
+      slug_org_decode =
+        slugdecode.substring(0, slugdecode.length - 1) + '")' + "\n";
+      slug_group_decode =
+        'Alias$(XManAttr, "' +
+        groups.map((group) => group.slug + "=" + group.name).join("|") +
+        '")';
 
       team_list.sort(
         (a, b) =>
@@ -124,12 +145,20 @@
       number: (i + 1).toString(),
       teamname: n.team.name,
       federation: n.org.slug,
+      select: group_slugs.get(n.team.group_id || ""),
       rank: "0",
       state: "",
     }));
     let data = { teams: swiss_teams };
-    const blob = new Blob([JSON.stringify(data)], {
-      type: "text/plain;charset=utf-8",
+    let data_string = JSON.stringify(data);
+
+    var uint8 = new Uint8Array(data_string.length);
+    for (var i = 0; i < uint8.length; i++) {
+      uint8[i] = data_string.charCodeAt(i);
+    }
+
+    const blob = new Blob([uint8], {
+      type: "text/plain;charset=ISO-8859-1",
     });
 
     const link = document.createElement("a");
@@ -189,6 +218,7 @@
               <sup class={team.org.slug.length > 3 ? "text-red-600" : ""}
                 >{team.org.slug}</sup
               >
+              <sub>{group_slugs.get(team.team.group_id || "")}</sub>
             </TableBodyCell>
             <TableBodyCell class="td-class">
               <a href="/admin/event/{event_id}">{team.org_state}</a>
@@ -214,6 +244,10 @@
   <Button class="m-10" on:click={download_swisschess}
     >Download SwissChess Mannschaftsliste...</Button
   >
+  <Label>Urkundendruck - Schulename:</Label>
+  <Textarea value={slug_org_decode}></Textarea>
+  <Label>Urkundendruck - Altersgruppe (Achtung, Attributfeld!):</Label>
+  <Textarea value={slug_group_decode}></Textarea>
 </div>
 
 <style lang="postcss">

@@ -13,17 +13,28 @@
     ButtonGroup,
     Checkbox,
     Input,
+    Select,
     Table,
     TableBody,
     TableBodyCell,
     TableBodyRow,
     TableHead,
     TableHeadCell,
+    type SelectOptionType,
   } from "flowbite-svelte";
 
   let groups: Group[] = $state([]);
   let edit_mode = $state(false);
   let changed: string[] = $state([]);
+
+  let group_selection: SelectOptionType<string>[] = $derived(
+    [{ name: "", value: "" }].concat(
+      groups.map((group) => ({
+        name: group.name,
+        value: group.id,
+      }))
+    )
+  );
 
   onMount(async () => {
     const resp_event_orgs = await getGroupsForEvent({ event: props.event_id })
@@ -52,6 +63,12 @@
   function update(id: string) {
     let group_to_update = groups.find((group) => group.id == id);
     if (group_to_update) {
+      if (
+        group_to_update.replacement == "" ||
+        group_to_update.replacement == group_to_update.id
+      ) {
+        group_to_update.replacement = null;
+      }
       updateGroup(group_to_update);
       changed = changed.filter((item) => item != id);
     }
@@ -70,18 +87,35 @@
   <Table>
     <TableHead>
       <TableHeadCell>Name</TableHeadCell>
+      <TableHeadCell>Attribute</TableHeadCell>
+      <TableHeadCell>Merge into...</TableHeadCell>
       <TableHeadCell>Edit</TableHeadCell>
     </TableHead>
     <TableBody>
       {#each groups as group}
         <TableBodyRow>
-          <TableBodyCell>
+          <TableBodyCell class="w-6/12">
             <Input
               disabled={!edit_mode}
               bind:value={group.name}
               oninput={() => change(group.id)}
-            /></TableBodyCell
-          >
+            />
+          </TableBodyCell>
+          <TableBodyCell class="w-1/12">
+            <Input
+              disabled={!edit_mode}
+              bind:value={group.slug}
+              oninput={() => change(group.id)}
+            />
+          </TableBodyCell>
+          <TableBodyCell class="w-4/12">
+            <Select
+              disabled={!edit_mode}
+              items={group_selection}
+              bind:value={group.replacement}
+              oninput={() => change(group.id)}
+            />
+          </TableBodyCell>
           <TableBodyCell>
             {#if edit_mode}
               <ButtonGroup>

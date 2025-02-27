@@ -220,6 +220,8 @@ pub struct Group {
     pub id: String,
     pub event_id: String,
     pub name: String,
+    pub replacement: Option<String>,
+    pub slug: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]

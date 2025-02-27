@@ -17,6 +17,8 @@ diesel::table! {
         id -> Text,
         event_id -> Text,
         name -> Text,
+        replacement -> Nullable<Text>,
+        slug -> Text,
     }
 }
 
