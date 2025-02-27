@@ -219,17 +219,21 @@
                     </TableBodyCell>
                     <TableBodyCell class="td-class">:</TableBodyCell>
                     <TableBodyCell class="td-class"
-                      ><div class="text-xl">{pairing.team_guest}</div>
-                      <div><sub>{pairing.team_guest_org}</sub></div>
-                      <div>
-                        ({pairing.points_guest})
+                      >{#if pairing.team_guest !== null}<div class="text-xl">
+                          {pairing.team_guest}
+                        </div>
+                        <div><sub>{pairing.team_guest_org}</sub></div>
+                        <div>
+                          ({pairing.points_guest})
 
-                        <tt class="text-black bg-white">1</tt>
-                        <tt class="bg-black text-white">2</tt>
-                        <tt class="text-black bg-white">3</tt>
-                        <tt class="bg-black text-white">4</tt>
-                        ...
-                      </div>
+                          <tt class="text-black bg-white">1</tt>
+                          <tt class="bg-black text-white">2</tt>
+                          <tt class="text-black bg-white">3</tt>
+                          <tt class="bg-black text-white">4</tt>
+                          ...
+                        </div>{:else}
+                        <i>spielfrei</i>
+                      {/if}
                     </TableBodyCell>
                   </TableBodyRow>
                 {/if}

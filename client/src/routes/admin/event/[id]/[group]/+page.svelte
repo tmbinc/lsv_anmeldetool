@@ -6,6 +6,7 @@
     getEvent,
     getEventOrgs,
     getGroup,
+    getGroupsForEvent,
     setPairings,
     type Event,
     type Group,
@@ -54,6 +55,8 @@
   const event_id = page.params.id;
   const group_id = page.params.group;
   let teams: PairingTeam[] = $state([]);
+  let groups: Group[] = $state([]);
+  let group_replacement = $state(new Map<string, string>());
 
   $inspect(teams);
 
@@ -69,6 +72,17 @@
     } else {
       fetch_errors.check(resp);
     }
+
+    const resp_groups = await getGroupsForEvent({ event: event_id }).result;
+    if (resp_groups.ok) {
+      groups = resp_groups.data;
+    } else {
+      fetch_errors.check(resp_groups);
+    }
+
+    group_replacement = new Map(
+      groups.map((group) => [group.id, group.replacement || group.id])
+    );
 
     const resp_group = await getGroup({
       group: group_id,
@@ -86,10 +100,14 @@
       const team_list: PairingTeam[] = [];
 
       for (const event_org of resp_event_orgs.data) {
-        const new_teams = event_org.teams.map((team) => ({
-          team: team,
-          org: event_org.org,
-        }));
+        const new_teams = event_org.teams
+          .filter(
+            (team) => group_replacement.get(team.group_id || "") == group_id
+          )
+          .map((team) => ({
+            team: team,
+            org: event_org.org,
+          }));
         team_list.push(...new_teams);
       }
 
