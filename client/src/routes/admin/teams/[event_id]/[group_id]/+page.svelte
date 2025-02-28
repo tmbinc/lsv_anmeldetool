@@ -4,6 +4,7 @@
     Button,
     Checkbox,
     Label,
+    Modal,
     TableBody,
     TableBodyCell,
     TableBodyRow,
@@ -26,6 +27,10 @@
   import { page } from "$app/state";
   import { Table } from "flowbite-svelte";
   import FetchErrors from "../../../../FetchErrors.svelte";
+  import {
+    ExclamationCircleOutline,
+    QuestionCircleSolid,
+  } from "flowbite-svelte-icons";
 
   let event_id = page.params.event_id;
   let group_id = page.params.group_id;
@@ -39,6 +44,9 @@
   let group_replacement = $state(new Map<string, string>());
   let slug_org_decode = $state("");
   let slug_group_decode = $state("");
+  let confirm_changes = $state(true);
+  let verify_change = $state(false);
+  let verify_team: OrgTeam | null = $state(null);
 
   type OrgTeam = {
     org: Org;
@@ -135,6 +143,10 @@
       alert("failed to set team readiness");
     }
   }
+  async function set_team_present_verify(team: OrgTeam) {
+    verify_team = team;
+    verify_change = true;
+  }
 
   async function download_swisschess() {
     // TODO: write back team numbers to database.
@@ -184,6 +196,7 @@
   <FetchErrors bind:this={fetch_errors} />
   <div class="m-5">
     <Checkbox bind:checked={filter_ready}>Show only ready</Checkbox>
+    <Checkbox bind:checked={confirm_changes}>Confirm Changes</Checkbox>
   </div>
   <div class="table-div-class">
     <Table hoverable={true} shadow class="text-sm">
@@ -230,11 +243,22 @@
               </TableBodyCell>
             {/if}
             <TableBodyCell class="td-class">
-              <Checkbox
-                disabled={team.org_state != "Verified"}
-                bind:checked={team.team.present}
-                on:change={() => set_team_present(team)}
-              ></Checkbox>
+              {#if !confirm_changes}
+                <Checkbox
+                  disabled={team.org_state != "Verified"}
+                  bind:checked={team.team.present}
+                  on:change={() => set_team_present(team)}
+                ></Checkbox>
+              {:else}
+                <Button
+                  disabled={team.org_state != "Verified"}
+                  on:click={() => set_team_present_verify(team)}
+                >
+                  {#if team.team.present}abmelden
+                  {:else}anmelden
+                  {/if}
+                </Button>
+              {/if}
             </TableBodyCell>
           </TableBodyRow>
         {/each}
@@ -248,6 +272,31 @@
   <Textarea value={slug_org_decode}></Textarea>
   <Label>Urkundendruck - Altersgruppe (Achtung, Attributfeld!):</Label>
   <Textarea value={slug_group_decode}></Textarea>
+
+  <Modal bind:open={verify_change} size="xs" autoclose>
+    <div class="text-center">
+      <QuestionCircleSolid
+        class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+      />
+      <div class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+        <div>{verify_team?.org.name}</div>
+        <div>{group_names.get(verify_team?.team.group_id || "")}</div>
+        <div>{verify_team?.team.name}</div>
+        <div>{verify_team?.team.present ? "abmelden?" : "anmelden?"}</div>
+      </div>
+      <Button
+        color="red"
+        class="me-2"
+        on:click={() => {
+          if (verify_team) {
+            verify_team.team.present = !verify_team.team.present;
+            set_team_present(verify_team);
+          }
+        }}>Yes</Button
+      >
+      <Button color="alternative">No (Abort)</Button>
+    </div>
+  </Modal>
 </div>
 
 <style lang="postcss">

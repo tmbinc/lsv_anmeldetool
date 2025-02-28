@@ -18,6 +18,7 @@
 
   let fetch_errors: FetchErrors;
   let data: EventQuestionnaireAnswers | undefined = $state(undefined);
+  let email_addresses: Set<string> | undefined = $state(undefined);
 
   onMount(async () => {
     const request = getQuestionnaireAnswersForEvent({ event: event_id });
@@ -25,6 +26,11 @@
     if (resp.ok) {
       data = resp.data;
       data.questions.sort((a, b) => a.sort - b.sort);
+      email_addresses = new Set(
+        data.orgs.map(
+          (org) => org.org.contact_name + " <" + org.org.contact_email + ">"
+        )
+      );
     } else {
       fetch_errors.check(resp);
     }
@@ -63,4 +69,10 @@
       </TableBody>
     </Table>
   {/if}
+  <pre>
+    {#if email_addresses}
+      {#each email_addresses as email}{email}
+      {/each}
+    {/if}
+  </pre>
 </main>
