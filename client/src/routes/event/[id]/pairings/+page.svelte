@@ -87,9 +87,8 @@
           .toSorted((a, b) => a.name.localeCompare(b.name));
         groups_select.unshift({ name: "Alle", value: "*" });
 
-        orgs_select = orgs
-          .keys()
-          .toArray()
+        console.log(orgs.keys());
+        orgs_select = [...orgs.keys()]
           .map((org) => ({
             name: org,
             value: org,
