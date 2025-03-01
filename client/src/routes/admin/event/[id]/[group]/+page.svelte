@@ -255,11 +255,15 @@
               : "bg-red-200")}
         >
           <TableBodyCell>{pairing.table}</TableBodyCell>
-          <TableBodyCell
-            >{pairing.team_home?.team.name}
-            <sub>{pairing.team_home?.org.name}</sub>
-            ({pairing.points_home})</TableBodyCell
-          >
+          <TableBodyCell>
+            {#if pairing.team_home !== null}
+              {pairing.team_home?.team.name}
+              <sub>{pairing.team_home?.org.name}</sub>
+              ({pairing.points_home})
+            {:else}
+              <i>spielfrei</i>
+            {/if}
+          </TableBodyCell>
           <TableBodyCell>{pairing.result}</TableBodyCell>
           <TableBodyCell>
             {#if pairing.team_guest !== null}

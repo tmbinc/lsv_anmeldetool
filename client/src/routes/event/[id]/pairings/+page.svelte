@@ -204,17 +204,21 @@
                       </div></TableBodyCell
                     >
                     <TableBodyCell class="td-class">
-                      <div class="text-xl">{pairing.team_home}</div>
-                      <div><sub>{pairing.team_home_org}</sub></div>
-                      <div>
-                        ({pairing.points_home})
+                      {#if pairing.team_home !== null}<div class="text-xl">
+                          {pairing.team_home}
+                        </div>
+                        <div><sub>{pairing.team_home_org}</sub></div>
+                        <div>
+                          ({pairing.points_home})
 
-                        <tt class="bg-black text-white">1</tt>
-                        <tt class="text-black bg-white">2</tt>
-                        <tt class="bg-black text-white">3</tt>
-                        <tt class="text-black bg-white">4</tt>
-                        ...
-                      </div>
+                          <tt class="bg-black text-white">1</tt>
+                          <tt class="text-black bg-white">2</tt>
+                          <tt class="bg-black text-white">3</tt>
+                          <tt class="text-black bg-white">4</tt>
+                          ...
+                        </div>{:else}
+                        <i>spielfrei</i>
+                      {/if}
                     </TableBodyCell>
                     <TableBodyCell class="td-class">:</TableBodyCell>
                     <TableBodyCell class="td-class"
