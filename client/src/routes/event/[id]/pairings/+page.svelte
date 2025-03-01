@@ -128,7 +128,7 @@
     <LoadError text="Laden fehlgeschlagen!" />
   {:else}
     <div>{event_name}</div>
-    <div><Label class="text-5xl m-10">Runde {round}</Label></div>
+    <!-- <div><Label class="text-5xl m-10">Runde {round}</Label></div> -->
 
     <div class="text-center m-5">
       <Button on:click={() => (hide_config = false)}
