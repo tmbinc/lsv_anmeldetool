@@ -35,7 +35,7 @@ dark:-outline-offset-1 dark:outline-white/10"
 >
   <div>
     <FetchErrors admin={false} bind:this={fetch_errors} />
-    {#if loading}
+    <!-- {#if loading}
       <Loading />
     {:else}
       <div class="text-xl font-medium text-black dark:text-white">
@@ -63,6 +63,21 @@ dark:-outline-offset-1 dark:outline-white/10"
           </TableBody>
         </Table>
       </div>
-    {/if}
+    {/if} -->
+
+    <div class="text-center">
+      <p class="text-4xl">Willkommen auf der Anmeldeseite zum MUK-Turnier!</p>
+      <p class="m-10">
+        Vielen Dank für euer Interesse am diesjährigen MUK-Turnier! Die
+        Anmeldung startet am 15. Juni 2025 – alle weiteren Informationen folgen
+        in Kürze auf dieser Seite.
+      </p>
+
+      <img
+        class="w-3xl mx-auto object-center"
+        alt="Logo MuK-Turnier"
+        src="https://lsv1873.de/images/MuK/2023/logo-nobackground-500.png"
+      />
+    </div>
   </div>
 </main>
