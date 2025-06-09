@@ -138,7 +138,9 @@
                 {/if}
                 <Button color="blue" href="/admin/event/{event.id}"
                   >Edit Details</Button
-                ><Button color="yellow" href="/admin/teams/{event.id}"
+                ><Button
+                  color="yellow"
+                  href="/admin/event/{event.id}/run/registration"
                   >Team List</Button
                 ><Button color="green" href="/admin/event/{event.id}/run"
                   >Run</Button

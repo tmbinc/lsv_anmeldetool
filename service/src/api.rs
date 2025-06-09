@@ -5,5 +5,6 @@ pub mod mail;
 pub mod orgs;
 pub mod pairings;
 pub mod questionnaire;
+pub mod results;
 pub mod rooms;
 pub mod teams;

@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
 
   import {
+    Alert,
     Button,
     ButtonGroup,
     Checkbox,
@@ -24,7 +25,12 @@
   } from "../../../../../api/api";
   import { ExclamationCircleOutline } from "flowbite-svelte-icons";
 
-  let { active_changes = $bindable(false), event_id, org_id } = $props();
+  let {
+    active_changes = $bindable(false),
+    event_id,
+    org_id,
+    allow_user_changes,
+  } = $props();
 
   type QuestionnaireAnswered = Questionnaire & {
     answer?: string;
@@ -103,52 +109,66 @@
 </script>
 
 <div>
-  {#each questionnaire as question}
-    <div>
-      {@html question.question_text}
-    </div>
-    {#if question.question_type == "Freeform"}
-      <Textarea
-        class="w-xl"
-        rows={5}
-        bind:value={question.answer}
-        on:input={() => change(question.id)}
-      />
-    {:else if question.question_type == "Checkbox"}
-      <Checkbox
-        bind:value={question.answer}
-        on:change={() => change(question.id)}>{question.question_data}</Checkbox
+  {#if questionnaire.length > 0}
+    <p class="my-4 text-xl text-gray-500">&gt;&gt; Zusätzliches</p>
+
+    {#if !allow_user_changes}
+      <Alert
+        >Es können keine weiteren Änderungen vorgenommen werden. Bei dringenden
+        Fällen bitte per Email kontaktieren.</Alert
       >
-    {:else if question.question_type == "MultipleChoice"}
-      <Select
-        items={question.items}
-        bind:value={question.answer}
-        on:change={() => change(question.id)}
-      />
-    {:else if question.question_type == "Radio"}
-      {#each question.items as item}
-        <Radio
-          value={item.value}
-          bind:group={question.answer}
-          on:change={() => change(question.id)}>{item.name}</Radio
+    {/if}
+    {#each questionnaire as question}
+      <div>
+        {@html question.question_text}
+      </div>
+      {#if question.question_type == "Freeform"}
+        <Textarea
+          class="w-xl"
+          rows={5}
+          disabled={!allow_user_changes}
+          bind:value={question.answer}
+          on:input={() => change(question.id)}
+        />
+      {:else if question.question_type == "Checkbox"}
+        <Checkbox
+          bind:value={question.answer}
+          disabled={!allow_user_changes}
+          on:change={() => change(question.id)}
+          >{question.question_data}</Checkbox
         >
-      {/each}
-    {:else if question.question_type == "SingleInput"}
-      <div class="inline-block">
-        {question.question_data.split("__")[0]}
-        <Input
-          class="inline-block w-16"
+      {:else if question.question_type == "MultipleChoice"}
+        <Select
+          items={question.items}
+          disabled={!allow_user_changes}
           bind:value={question.answer}
           on:change={() => change(question.id)}
         />
-        {question.question_data.split("__")[1]}
-      </div>
-    {/if}
-  {/each}
-  {#if questionnaire.length > 0}
+      {:else if question.question_type == "Radio"}
+        {#each question.items as item}
+          <Radio
+            value={item.value}
+            disabled={!allow_user_changes}
+            bind:group={question.answer}
+            on:change={() => change(question.id)}>{item.name}</Radio
+          >
+        {/each}
+      {:else if question.question_type == "SingleInput"}
+        <div class="inline-block">
+          {question.question_data.split("__")[0]}
+          <Input
+            class="inline-block w-16"
+            disabled={!allow_user_changes}
+            bind:value={question.answer}
+            on:change={() => change(question.id)}
+          />
+          {question.question_data.split("__")[1]}
+        </div>
+      {/if}
+    {/each}
     <Button
       color="green"
-      disabled={changed.length == 0}
+      disabled={changed.length == 0 || !allow_user_changes}
       onclick={() => {
         save();
       }}

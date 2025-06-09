@@ -249,7 +249,7 @@ pub async fn self_register_org(
 
         match event {
             Some(event) => {
-                if event.public {
+                if event.public && event.allow_user_changes {
                     let new_org = actions::orgs::insert_new_org(&mut conn, &data.name)?;
 
                     let new_org = Org {
@@ -277,6 +277,7 @@ pub async fn self_register_org(
                     )?;
                     Ok(true)
                 } else {
+                    // Either no self-registration allowed or no user changes anymore allowed.
                     Ok(false)
                 }
             }

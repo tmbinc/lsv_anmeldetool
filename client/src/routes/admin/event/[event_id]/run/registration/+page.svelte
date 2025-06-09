@@ -6,7 +6,7 @@
     type EventOrg,
     type Group,
     type Org,
-  } from "../../../../api/api";
+  } from "../../../../../../api/api";
 
   import { page } from "$app/state";
   import {
@@ -16,7 +16,7 @@
     TableBodyCell,
     TableBodyRow,
   } from "flowbite-svelte";
-  import FetchErrors from "../../../FetchErrors.svelte";
+  import FetchErrors from "../../../../../FetchErrors.svelte";
   import { ArrowRightOutline } from "flowbite-svelte-icons";
 
   let event_id = page.params.event_id;
@@ -98,7 +98,7 @@
             <TableBodyCell>
               <Button
                 class="w-full"
-                href="/admin/teams/{page.params.event_id}/{group.group
+                href="/admin/event/{event_id}/run/registration/{group.group
                   .replacement || group.group.id}"
               >
                 {group.group.name} &nbsp;
@@ -119,7 +119,9 @@
         {/each}
         <TableBodyRow
           ><TableBodyCell>
-            <Button href="/admin/teams/{page.params.event_id}/all">all</Button>
+            <Button href="/admin/event/{event_id}/run/registration/all"
+              >all</Button
+            >
           </TableBodyCell><TableBodyCell>
             <div class="text-center">
               Total: {all_total}

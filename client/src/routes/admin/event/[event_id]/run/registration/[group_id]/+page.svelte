@@ -22,11 +22,11 @@
     type Group,
     type Org,
     type Team,
-  } from "../../../../../api/api";
+  } from "../../../../../../../api/api";
 
   import { page } from "$app/state";
   import { Table } from "flowbite-svelte";
-  import FetchErrors from "../../../../FetchErrors.svelte";
+  import FetchErrors from "../../../../../../FetchErrors.svelte";
   import {
     ExclamationCircleOutline,
     QuestionCircleSolid,

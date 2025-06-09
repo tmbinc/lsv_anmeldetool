@@ -53,7 +53,7 @@
     { name: "Verified", value: "Verified" },
   ];
 
-  const event_id = page.params.id;
+  const event_id = page.params.event_id;
 
   onMount(async () => {
     const request = getEvent({ event: event_id });
@@ -146,18 +146,24 @@
     }).result;
     if (result.ok) {
       event_org.state = "Invited";
+    } else {
+      alert("failed to invite org: " + event_org.org.name);
     }
+  }
+  async function invite_all() {
+    event_orgs.forEach((org) => {
+      if (org.state == "Registered") {
+        invite_org(org);
+      }
+    });
   }
 </script>
 
 <main class="px-2 md:px-10 pt-6 flex flex-col gap-4">
   <FetchErrors bind:this={fetch_errors} />
   <div>
-    <Button color="yellow" href="/admin/teams/{event_id}">Team List</Button>
-  </div>
-  <div>
     <Button color="yellow" href="/admin/event/{event_id}/run"
-      >Run Event...</Button
+      >Turniertag...</Button
     >
   </div>
   {#if event}
@@ -210,6 +216,25 @@
         <Checkbox
           id="event_set_present_ok"
           bind:checked={event.allow_set_present}
+          on:change={() => (event_changed = true)}
+        ></Checkbox>
+      </div>
+      <div>
+        <Label for="event_set_allow_user_changes">Allow User Changes</Label>
+        <Checkbox
+          id="event_set_allow_user_changes"
+          bind:checked={event.allow_user_changes}
+          on:change={() => (event_changed = true)}
+        ></Checkbox>
+      </div>
+      <div>
+        <Label for="event_set_results_are_public"
+          >Results are published? (Otherwise, results are restricted to admin
+          users e.g. during ceremony.)</Label
+        >
+        <Checkbox
+          id="event_set_results_are_public"
+          bind:checked={event.results_are_public}
           on:change={() => (event_changed = true)}
         ></Checkbox>
       </div>
@@ -328,6 +353,10 @@
         </TableBody>
       </Table>
     </div>
+
+    <Button on:click={() => invite_all()}
+      >Invite all Self-Registered orgs...</Button
+    >
   {/if}
 </main>
 

@@ -76,6 +76,10 @@ export interface paths {
     /** set pairings for a given event + group */
     put: operations["put_api-v1-event-22f93462af22d1552b7828cb1461a501"];
   };
+  "/api/v1/event/{event}/results/{group}/{round}": {
+    /** set results for a given event + group */
+    put: operations["put_api-v1-event-27c0f944dfda8590fa5b4ebeb75c8132"];
+  };
   "/api/v1/event/{event}/rooms/{group}": {
     /** set rooms for a given event + group */
     put: operations["put_api-v1-event-32fa1b098b899b8b7012a6eeb84bb174"];
@@ -87,6 +91,10 @@ export interface paths {
   "/api/v1/event/{event}/pairings": {
     /** get pairings for a given event + group */
     get: operations["get_api-v1-event-e5839bcc54123a8e476f3e95fd56d323"];
+  };
+  "/api/v1/event/{event}/results": {
+    /** get results for a given event + group */
+    get: operations["get_api-v1-event-3129d62da168c0e0b04d9e202779e572"];
   };
   "/api/v1/event/{event}/questionnaire": {
     /** get questionaire for event */
@@ -179,6 +187,7 @@ export interface components {
      */
     Event: {
       allow_set_present: boolean;
+      allow_user_changes: boolean;
       /** Format: partial-date-time */
       begin?: string | null;
       description: string;
@@ -187,6 +196,7 @@ export interface components {
       public: boolean;
       /** Format: partial-date-time */
       public_reg_until?: string | null;
+      results_are_public: boolean;
     };
     /** EventOrg */
     EventOrg: {
@@ -351,6 +361,27 @@ export interface components {
       question_answer: string;
       question_id: string;
     };
+    ResultEntry: {
+      group: string;
+      /** Format: int32 */
+      points_player?: number | null;
+      /** Format: int32 */
+      points_team?: number | null;
+      /** Format: int32 */
+      rank?: number | null;
+      /** Format: int32 */
+      round: number;
+      team?: string | null;
+      team_org?: string | null;
+      /** Format: int32 */
+      tie?: number | null;
+    };
+    /** ResultsForEvent */
+    ResultsForEvent: {
+      event_name: string;
+      groups: components["schemas"]["Group"][];
+      results: components["schemas"]["ResultEntry"][];
+    };
     Role: OneOf<["None" | "Admin", {
       /** Format: uuid */
       Org: string;
@@ -367,6 +398,10 @@ export interface components {
     /** SetPairingPayload */
     SetPairingPayload: {
       pairings: components["schemas"]["Pairing"][];
+    };
+    /** SetResultsPayload */
+    SetResultsPayload: {
+      results: components["schemas"]["TeamResult"][];
     };
     /** SetRoomsPayload */
     SetRoomsPayload: {
@@ -396,6 +431,21 @@ export interface components {
       ready: boolean;
       /** Format: uuid */
       team_id: string;
+    };
+    TeamResult: {
+      event: string;
+      group_id: string;
+      /** Format: int32 */
+      points_player?: number | null;
+      /** Format: int32 */
+      points_team?: number | null;
+      /** Format: int32 */
+      rank?: number | null;
+      /** Format: int32 */
+      round: number;
+      team?: string | null;
+      /** Format: int32 */
+      tie?: number | null;
     };
   };
   responses: never;
@@ -982,6 +1032,42 @@ export interface operations {
       };
     };
   };
+  /** set results for a given event + group */
+  "put_api-v1-event-27c0f944dfda8590fa5b4ebeb75c8132": {
+    parameters: {
+      path: {
+        event: string;
+        group: string;
+        round: number;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetResultsPayload"];
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
   /** set rooms for a given event + group */
   "put_api-v1-event-32fa1b098b899b8b7012a6eeb84bb174": {
     parameters: {
@@ -1059,6 +1145,37 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PairingForEvent"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get results for a given event + group */
+  "get_api-v1-event-3129d62da168c0e0b04d9e202779e572": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultsForEvent"];
         };
       };
       /** @description Forbidden */

@@ -14,7 +14,7 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-  const event_id = page.params.id;
+  const event_id = page.params.event_id;
 
   let fetch_errors: FetchErrors;
   let data: EventQuestionnaireAnswers | undefined = $state(undefined);
@@ -44,26 +44,16 @@
     <Table hoverable={true} striped={true} shadow>
       <TableHead>
         <TableHeadCell></TableHeadCell>
-        {#each data.questions as question}
-          <TableHeadCell>
-            {question.question_data}
-          </TableHeadCell>
-        {/each}
+        <TableHeadCell></TableHeadCell>
       </TableHead>
       <TableBody>
         {#each data.orgs as org}
           <TableBodyRow
             ><TableBodyCell>{org.org.name}</TableBodyCell>
-
-            {#each data.questions as question}
-              <TableBodyCell>
-                {#each org.answers as answer}
-                  {#if question.id == answer.question_id}
-                    {answer.question_answer}
-                  {/if}
-                {/each}
-              </TableBodyCell>
-            {/each}
+            <TableBodyCell
+              >{org.org.contact_name} &lt;{org.org
+                .contact_email}&gt;</TableBodyCell
+            >
           </TableBodyRow>
         {/each}
       </TableBody>

@@ -1,6 +1,6 @@
 use crate::schema::{
     events, groups, invite_queue, org_event, org_secrets, orgs, pairings, questionnaire,
-    questionnaire_answers, rooms, teams, users,
+    questionnaire_answers, results, rooms, teams, users,
 };
 use apistos::ApiComponent;
 use chrono::NaiveDateTime;
@@ -121,6 +121,8 @@ pub struct Event {
     pub begin: Option<NaiveDateTime>,
     pub description: String,
     pub allow_set_present: bool,
+    pub allow_user_changes: bool,
+    pub results_are_public: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
@@ -453,4 +455,33 @@ pub struct Room {
     pub table_num_low: i32,
     pub table_num_high: i32,
     pub room: String,
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Debug,
+    PartialEq,
+    Insertable,
+    Serialize,
+    Deserialize,
+    Clone,
+    AsChangeset,
+    ApiComponent,
+    JsonSchema,
+)]
+#[diesel(table_name = results)]
+#[diesel(belongs_to(Event))]
+#[diesel(belongs_to(Group))]
+#[diesel(primary_key(event, round, team))]
+pub struct TeamResult {
+    pub event: String,
+    pub group_id: String,
+    pub round: i32,
+    pub team: Option<String>,
+    pub rank: Option<i32>,
+    pub points_team: Option<i32>,
+    pub points_player: Option<i32>,
+    pub tie: Option<i32>,
 }

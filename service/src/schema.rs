@@ -9,6 +9,8 @@ diesel::table! {
         begin -> Nullable<Timestamp>,
         description -> Text,
         allow_set_present -> Bool,
+        allow_user_changes -> Bool,
+        results_are_public -> Bool,
     }
 }
 
@@ -98,6 +100,19 @@ diesel::table! {
 }
 
 diesel::table! {
+    results (event, round, team) {
+        event -> Text,
+        group_id -> Text,
+        round -> Integer,
+        team -> Nullable<Text>,
+        rank -> Nullable<Integer>,
+        points_team -> Nullable<Integer>,
+        points_player -> Nullable<Integer>,
+        tie -> Nullable<Integer>,
+    }
+}
+
+diesel::table! {
     rooms (event, group_id, table_num_low, table_num_high) {
         event -> Text,
         group_id -> Text,
@@ -140,6 +155,8 @@ diesel::joinable!(questionnaire -> orgs (org_id));
 diesel::joinable!(questionnaire_answers -> events (event_id));
 diesel::joinable!(questionnaire_answers -> orgs (org_id));
 diesel::joinable!(questionnaire_answers -> questionnaire (question_id));
+diesel::joinable!(results -> groups (group_id));
+diesel::joinable!(results -> teams (team));
 diesel::joinable!(rooms -> groups (group_id));
 diesel::joinable!(teams -> groups (group_id));
 
@@ -153,6 +170,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     pairings,
     questionnaire,
     questionnaire_answers,
+    results,
     rooms,
     teams,
     users,

@@ -78,6 +78,9 @@ export const getPairings = apity.path('/api/v1/event/{event}/pairings').method('
 export const setRooms = apity.path('/api/v1/event/{event}/rooms/{group}').method('put').create();
 export const getRooms = apity.path('/api/v1/event/{event}/rooms').method('get').create();
 
+export const getResults = apity.path('/api/v1/event/{event}/results').method('get').create();
+export const setResults = apity.path('/api/v1/event/{event}/results/{group}/{round}').method('put').create();
+
 export type Invite = components["schemas"]["Invite"];
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];
@@ -94,3 +97,5 @@ export type PairingForEvent = components["schemas"]["PairingForEvent"];
 export type PairingEntry = components["schemas"]["PairingEntry"];
 export type Room = components["schemas"]["Room"];
 export type EventQuestionnaireAnswers = components["schemas"]["EventQuestionnaireAnswers"];
+export type ResultEntry = components["schemas"]["ResultEntry"];
+export type ResultsForEvent = components["schemas"]["ResultsForEvent"];

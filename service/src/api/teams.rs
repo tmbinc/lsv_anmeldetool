@@ -56,28 +56,59 @@ pub async fn update_team(
     team: Json<Team>,
 ) -> Result<Json<String>, ErrorResponse> {
     // TODO: check if org exists!
-    // TODO: check if event exists!
 
-    match user.role {
-        Role::Admin => {}
-        Role::Org(org) if org.to_string() == team.org => {}
+    let is_user_edit = match user.role {
+        Role::Admin => false,
+        Role::Org(org) if org.to_string() == team.org => true,
         _ => {
             return Err(ErrorResponse::Unauthorized("".to_string()));
         }
     };
 
-    let event_org = web::block(move || -> Result<(), DbError> {
+    let success = web::block(move || -> Result<bool, DbError> {
         let mut conn = pool.get()?;
 
         let team = team.into_inner();
 
-        Ok(actions::teams::update_team(&mut conn, team)?)
+        if is_user_edit {
+            // For user edits, verify a few additional things:
+
+            if let Some(old_team) =
+                actions::teams::get_team_by_id(&mut conn, &Uuid::parse_str(&team.id)?)?
+            {
+                // Must not move teams across events or orgs
+                if old_team.event != team.event || old_team.org != team.org {
+                    return Ok(false);
+                }
+            } else {
+                // team does not exist
+                return Ok(false);
+            }
+
+            if let Some(event) =
+                actions::events::find_event_by_uid(&mut conn, &Uuid::parse_str(&team.event)?)?
+            {
+                if !event.allow_user_changes {
+                    return Ok(false);
+                }
+            } else {
+                // event does not exist (anymore?)
+                return Ok(false);
+            }
+        }
+
+        actions::teams::update_team(&mut conn, team)?;
+        Ok(true)
     })
     .await;
 
-    let _event_org = event_org?.map_err(error::ErrorInternalServerError)?;
+    let success = success?.map_err(error::ErrorInternalServerError)?;
 
-    Ok(Json("ok".to_string()))
+    if success {
+        Ok(Json("ok".to_string()))
+    } else {
+        return Err(ErrorResponse::Unauthorized("".to_string()));
+    }
 }
 
 #[api_operation(summary = "create a new team", skip_args = "user")]
@@ -89,25 +120,41 @@ pub async fn add_team(
     // TODO: check if org exists!
     // TODO: check if event exists!
 
-    match user.role {
-        Role::Admin => {}
-        Role::Org(org) if org.to_string() == team.org => {}
+    let is_user_edit = match user.role {
+        Role::Admin => false,
+        Role::Org(org) if org.to_string() == team.org => true,
         _ => {
             return Err(ErrorResponse::Unauthorized("".to_string()));
         }
     };
 
-    let event_org = web::block(move || -> Result<Team, DbError> {
+    let event_org = web::block(move || -> Result<Option<Team>, DbError> {
         let mut conn = pool.get()?;
 
         let team = team.into_inner();
-        Ok(actions::teams::create_team(&mut conn, team)?)
+
+        if is_user_edit {
+            if let Some(event) =
+                actions::events::find_event_by_uid(&mut conn, &Uuid::parse_str(&team.event)?)?
+            {
+                if !event.allow_user_changes {
+                    return Ok(None);
+                }
+            } else {
+                // event does not exist (anymore?)
+                return Ok(None);
+            }
+        }
+
+        Ok(Some(actions::teams::create_team(&mut conn, team)?))
     })
     .await;
 
-    let team = event_org?.map_err(error::ErrorInternalServerError)?;
-
-    Ok(Json(team))
+    if let Some(team) = event_org?.map_err(error::ErrorInternalServerError)? {
+        Ok(Json(team))
+    } else {
+        return Err(ErrorResponse::Unauthorized("".to_string()));
+    }
 }
 
 #[api_operation(summary = "delete a team", skip_args = "user")]
@@ -124,16 +171,31 @@ pub async fn delete_team(
         let team = get_team_by_id(&mut conn, &team_uid)?;
 
         if let Some(team) = team {
-            let authorized = match user.role {
-                Role::Admin => true,
-                Role::Org(org) if org.to_string() == team.org => true,
-                _ => false,
+            let is_user_edit = match user.role {
+                Role::Admin => false,
+                Role::Org(org) => {
+                    if org.to_string() != team.org {
+                        return Ok(None);
+                    } else {
+                        true
+                    }
+                }
+                _ => return Ok(None),
             };
-            if authorized {
-                Ok(Some(actions::teams::delete_team(&mut conn, team)?))
-            } else {
-                Ok(None)
+
+            if is_user_edit {
+                if let Some(event) =
+                    actions::events::find_event_by_uid(&mut conn, &Uuid::parse_str(&team.event)?)?
+                {
+                    if !event.allow_user_changes {
+                        return Ok(None);
+                    }
+                } else {
+                    // event does not exist (anymore?)
+                    return Ok(None);
+                }
             }
+            Ok(Some(actions::teams::delete_team(&mut conn, team)?))
         } else {
             Ok(None)
         }

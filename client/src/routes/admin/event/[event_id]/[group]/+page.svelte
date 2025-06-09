@@ -52,13 +52,11 @@
   let fetch_errors: FetchErrors;
   let uploaded = $state(false);
   let round = $state(0);
-  const event_id = page.params.id;
+  const event_id = page.params.event_id;
   const group_id = page.params.group;
   let teams: PairingTeam[] = $state([]);
   let groups: Group[] = $state([]);
   let group_replacement = $state(new Map<string, string>());
-
-  $inspect(teams);
 
   let swisschess_list = $state(`
 

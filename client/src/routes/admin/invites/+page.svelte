@@ -64,7 +64,7 @@
               >
             {/if}
             <pre>
-To: {invite.org.contact_name} &lt;{invite.org.contact_email}&gt;
+To: {invite.org.name} &lt;{invite.org.contact_email}&gt;
 
 Hallo {invite.org.name},
 

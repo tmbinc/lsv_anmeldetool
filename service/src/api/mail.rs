@@ -28,6 +28,8 @@ pub struct Config {
     pub pwd: String,
     pub server: String,
     pub from: String,
+    pub to_override: Option<String>,
+    pub bcc: Option<String>,
 }
 
 impl Config {
@@ -98,14 +100,18 @@ pub async fn send_one_invite(
 
         // If there was one, send the mail.
         if let Some(invite) = invite {
-            let to_email = invite
-                .org
-                .contact_email
+            let to_email = config
+                .to_override
+                .as_ref()
+                .or(invite.org.contact_email.as_ref())
                 .ok_or(ErrorResponse::Internal(format!(
                     "invite org {} does not have contact_email",
                     invite.org.id
                 )))?;
-            let to_name = invite.org.contact_name;
+            let to_email_bcc = config.bcc.as_ref();
+
+            // Use the org name instead of the contact name, which matches the actual text.
+            let to_name = invite.org.name.clone();
             let subject = format!("Anmeldung: {}", invite.event.name);
             let body = format!(
                 "Hallo, {}!
@@ -133,11 +139,24 @@ Vielen Dank!",
                         .expect("failed to parse from"),
                 )
                 .to(Mailbox::new(
-                    to_name,
+                    Some(to_name),
                     to_email.parse().map_err(|_| {
                         ErrorResponse::Internal(format!("invalid email: {:?}", to_email))
                     })?,
+                ));
+
+            let email = if let Some(to_email_bcc) = to_email_bcc {
+                email.bcc(Mailbox::new(
+                    None,
+                    to_email_bcc.parse().map_err(|_| {
+                        ErrorResponse::Internal(format!("invalid BCC email: {:?}", to_email))
+                    })?,
                 ))
+            } else {
+                email
+            };
+
+            let email = email
                 .header(ContentType::TEXT_PLAIN)
                 .subject(subject)
                 .body(Body::new(body))

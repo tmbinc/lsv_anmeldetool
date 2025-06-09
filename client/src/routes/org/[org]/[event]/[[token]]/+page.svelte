@@ -20,8 +20,10 @@
   } from "../../../../../api/api";
   import { page } from "$app/state";
   import {
+    Alert,
     Button,
     ButtonGroup,
+    Card,
     Checkbox,
     FloatingLabelInput,
     Group,
@@ -245,6 +247,8 @@
       Wilkommen, {org?.name}!
     </h1>
 
+    <p class="my-4 text-xl text-gray-500">&gt;&gt; Allgemeines</p>
+
     {#if org}
       <div>
         <div>
@@ -332,11 +336,59 @@
       {event_id}
       {org_id}
       bind:active_changes={questionnaire_changes}
+      allow_user_changes={reg_event?.allow_user_changes}
     />
 
-    <p class="text-xl font-medium">
-      Bitte melden Sie die Mannschaften für das Turnier {reg_event?.name}.
-    </p>
+    <p class="my-4 text-xl text-gray-500">&gt;&gt; Mannschaften</p>
+    {#if reg_event?.allow_user_changes}
+      <p class="text-xl font-medium">
+        Bitte melden Sie die Mannschaften für das Turnier {reg_event?.name}.
+      </p>
+    {:else}
+      <Alert
+        >Es können keine weiteren Änderungen an den Mannschaften mehr
+        vorgenommen werden.
+      </Alert>
+    {/if}
+
+    <Card class="p-4 sm:p-6 md:p-8">
+      <h5
+        class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white"
+      >
+        Team-Namen?
+      </h5>
+      <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
+        Bei den Team-Namen dürfen die Mannschaften gerne kreativ sein: Auf der
+        Urkunde und während des Turniers ist der Schulname ebenfalls
+        ersichtlich, und muss daher nicht explizit im Mannschaftsnamen enthalten
+        sein.
+      </p>
+      <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
+        Ein einfaches "Mannschaft 3" oder "Klasse 5a" ist natürlich auch in
+        Ordnung.
+      </p>
+      <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
+        Beispiel-Urkundentext:
+      </p>
+      <div class="text-white-600 bg-slate-300 items-center">
+        Die Mannschaft <br />
+        <p class="font-bold">
+          {#if teams.length == 0}Die Drei Könige{:else}
+            {teams[0].name}{/if}
+        </p>
+        <p>
+          {{ f: "der", m: "des", n: "des" }[org?.genus]}
+        </p>
+        <p class="font-bold">
+          {org?.name}
+        </p>
+
+        <p>
+          erreichte im Turnier der Altersklassen xyz mit xx von yy Punkten den
+          zz. Platz.
+        </p>
+      </div>
+    </Card>
 
     <p class="text-lg font-medium">
       Bei "Ansprechpartner" bitte eine Person eintragen, die am Turniertag vor
@@ -465,7 +517,7 @@
                   questionnaire_changes}>Anmeldung finalisieren</Button
               >
             {/if}
-            {#if org_event_state == "Submitted" || org_event_state == "Verified"}
+            {#if (org_event_state == "Submitted" || org_event_state == "Verified") && reg_event?.allow_user_changes}
               <Button color="red" on:click={() => (submit_modal = true)}
                 >Anmeldung bearbeiten</Button
               >

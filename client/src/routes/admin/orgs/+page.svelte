@@ -29,6 +29,11 @@
   let edit_mode = $state(false);
   let fetch_error: FetchErrors;
 
+  let import_tsv =
+    $state(`	Name der Schule	E-Mail-Adresse	postalische Adresse	Homepage	1
+Die	Test-Schule	 Test-Schule.Luebeck@schule.landsh.de	 Test-Straße 1a,  12345 Lübeck, Hansestadt 	keine Angabe	1
+`);
+
   onMount(async () => {
     loading = true;
     const request = listOrgs({}).resp.subscribe((resp) => {
@@ -77,9 +82,65 @@
       changed.push(id);
     }
   }
+
+  async function import_list() {
+    const lines = import_tsv.split("\n");
+    let header: string[] | undefined = undefined;
+
+    for (const line of lines) {
+      const columns = line.split("\t");
+      if (header) {
+        let data = new Map(columns.map((val, index) => [header[index], val]));
+        let org_name = data.get("Name der Schule") || "";
+        let org_email = data.get("E-Mail-Adresse") || "";
+        let org_address = data.get("postalische Adresse") || "";
+        let org_genus = data.get("Artikel") || "";
+
+        if (org_name) {
+          orgs.push({
+            contact_email: org_email.trim(),
+            genus: { Der: "m", Die: "f", Das: "n" }[org_genus] || "",
+            id: "import",
+            last_update: "",
+            name: org_name.trim(),
+            name_additional: org_address.trim(),
+            public: false,
+            slug: "",
+          });
+        }
+      } else {
+        header = columns;
+        header[header.findIndex((n) => n == "")] = "Artikel";
+      }
+    }
+  }
+
+  async function finish_import(org: Org) {
+    const resp = await addOrg({ name: org.name }).result;
+    if (resp.ok) {
+      let new_org = resp.data;
+      org.id = new_org.id;
+      org.last_update = new_org.last_update;
+
+      const resp_org_update = await updateOrg({ ...org, org: org.id }).result;
+      if (!resp_org_update.ok) {
+        alert("org update during import for " + org.name + "failed");
+      }
+    } else {
+      alert("org new during import for " + org.name + "failed");
+      fetch_error.check(resp);
+    }
+  }
+  async function finish_import_all() {
+    orgs.forEach((org) => {
+      if (org.id == "import") {
+        finish_import(org);
+      }
+    });
+  }
 </script>
 
-<main>
+<main class="px-2 md:px-10 pt-6 flex flex-col gap-4">
   <FetchErrors bind:this={fetch_error} />
   {#if loading}
     <div class="w-full mt-24 flex items-center justify-center gap-4">
@@ -152,19 +213,25 @@
             </TableBodyCell>
             <TableBodyCell>
               <ButtonGroup>
-                <Button color="blue" href="/admin/org/{org.id}/"
-                  >Details...</Button
-                >
-                <Button
-                  on:click={() => update(org.id)}
-                  color="green"
-                  disabled={!changed.includes(org.id)}>Save</Button
-                >
-                <Button
-                  color="red"
-                  disabled={!changed.includes(org.id)}
-                  on:click={() => revert(org.id)}>Undo</Button
-                >
+                {#if org.id != "import"}
+                  <Button color="blue" href="/admin/org/{org.id}/"
+                    >Details...</Button
+                  >
+                  <Button
+                    on:click={() => update(org.id)}
+                    color="green"
+                    disabled={!changed.includes(org.id)}>Save</Button
+                  >
+                  <Button
+                    color="red"
+                    disabled={!changed.includes(org.id)}
+                    on:click={() => revert(org.id)}>Undo</Button
+                  >
+                {:else}
+                  <Button color="red" on:click={() => finish_import(org)}
+                    >Import</Button
+                  >
+                {/if}
               </ButtonGroup>
             </TableBodyCell>
           </TableBodyRow>
@@ -179,6 +246,14 @@
     onclick={() => {
       edit_mode = true;
     }}>Edit</Button
+  >
+
+  <textarea rows="20" bind:value={import_tsv}> </textarea>
+
+  <Button disabled={!edit_mode} on:click={import_list}>Import...</Button>
+
+  <Button disabled={!edit_mode} on:click={finish_import_all}
+    >Finish import...</Button
   >
 </main>
 

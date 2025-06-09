@@ -182,6 +182,7 @@
               style="outlined"
               id="floating_outlined"
               name="floating_outlined"
+              
               bind:value={contact_name}
               type="text"
             >

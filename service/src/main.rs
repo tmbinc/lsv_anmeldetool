@@ -58,9 +58,13 @@ async fn main() -> std::io::Result<()> {
 
     let secret_key = Key::generate();
 
+    let email_config_file = std::env::var("EMAIL_CONFIG")
+        .ok()
+        .unwrap_or("Email.toml".into());
+
     let email_config = Arc::new(
-        api::mail::Config::load_from_file("Email.toml")
-            .expect("Failed to load email configuration file Email.toml"),
+        api::mail::Config::load_from_file(&email_config_file)
+            .expect("Failed to load email configuration file"),
     );
 
     HttpServer::new(move || {
@@ -150,6 +154,10 @@ async fn main() -> std::io::Result<()> {
                             .route(put().to(api::pairings::set_pairings)),
                     )
                     .service(
+                        resource("event/{event}/results/{group}/{round}")
+                            .route(put().to(api::results::set_results)),
+                    )
+                    .service(
                         resource("event/{event}/rooms/{group}")
                             .route(put().to(api::rooms::set_rooms)),
                     )
@@ -157,6 +165,10 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         resource("event/{event}/pairings")
                             .route(get().to(api::pairings::get_pairings)),
+                    )
+                    .service(
+                        resource("event/{event}/results")
+                            .route(get().to(api::results::get_results)),
                     )
                     .service(
                         resource("event/{event}/questionnaire")
