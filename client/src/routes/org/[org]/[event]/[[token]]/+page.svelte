@@ -27,6 +27,7 @@
     Checkbox,
     FloatingLabelInput,
     Group,
+    Helper,
     Input,
     Label,
     Modal,
@@ -65,6 +66,7 @@
   let org_event_state: EventOrgState = $state("NotEnlisted");
   let finalized = $state(false);
   let questionnaire_changes = $state(false);
+  let data_missing_modal = $state(false);
 
   const state_description = {
     NotEnlisted: "Not Enlisted",
@@ -172,8 +174,16 @@
   function update_team(id: string) {
     let team_to_update = teams.find((team) => team.id == id);
     if (team_to_update) {
-      updateTeam(team_to_update);
-      teams_changed = teams_changed.filter((item) => item != id);
+      let validated_team =
+        team_to_update.contact_name?.trim() &&
+        team_to_update.contact_phone?.trim();
+
+      if (!validated_team) {
+        data_missing_modal = true;
+      } else {
+        updateTeam(team_to_update);
+        teams_changed = teams_changed.filter((item) => item != id);
+      }
     }
   }
 
@@ -217,10 +227,19 @@
   }
 
   async function update_org() {
-    if (org_changed && org) {
-      const resp = await updateOrg({ ...org, org: org.id }).result;
-      if (resp.ok) {
-        org_changed = false;
+    let validate_ok =
+      org?.contact_email?.trim() &&
+      org?.contact_name?.trim() &&
+      org?.contact_phone?.trim();
+
+    if (!validate_ok) {
+      data_missing_modal = true;
+    } else {
+      if (org_changed && org) {
+        const resp = await updateOrg({ ...org, org: org.id }).result;
+        if (resp.ok) {
+          org_changed = false;
+        }
       }
     }
   }
@@ -253,15 +272,14 @@
       <div>
         <div>
           <Label for="org_name"
-            >Name der Schule, wie er auf den Urkunden gedruckt werden soll -
-            bitte auch den Artikel korrekt einstellen!</Label
+            >Name der Schule, wie er auf den Urkunden gedruckt werden soll:</Label
           >
-          <Select
+          <!-- <Select
             class="inline w-32"
             items={genera}
             onchange={() => (org_changed = true)}
             bind:value={org.genus}
-          />
+          /> -->
           <Input
             class="inline w-8/12"
             id="org_name"
@@ -296,33 +314,57 @@
         </div>
         <div
           id="exampleWrapper"
-          class="grid gap-6 items-end w-full md:grid-cols-3"
+          class="grid mt-5 gap-6 items-end w-full md:grid-cols-3"
         >
           {#if org.contact_name !== null}
-            <FloatingLabelInput
-              style="outlined"
-              type="text"
-              on:input={() => (org_changed = true)}
-              bind:value={org.contact_name}>Name</FloatingLabelInput
-            >
+            <div>
+              <FloatingLabelInput
+                style="outlined"
+                type="text"
+                on:input={() => (org_changed = true)}
+                bind:value={org.contact_name}>Name</FloatingLabelInput
+              >
+              <Helper color="red">
+                <span class="font-medium">
+                  &nbsp; {#if !org.contact_name?.trim()}Bitte einen Kontaktnamen
+                    angeben!{/if}
+                </span>
+              </Helper>
+            </div>
           {/if}
 
           {#if org.contact_email !== null}
-            <FloatingLabelInput
-              style="outlined"
-              type="email"
-              on:input={() => (org_changed = true)}
-              bind:value={org.contact_email}>Email</FloatingLabelInput
-            >
+            <div>
+              <FloatingLabelInput
+                style="outlined"
+                type="email"
+                on:input={() => (org_changed = true)}
+                bind:value={org.contact_email}>Email</FloatingLabelInput
+              >
+              <Helper color="red">
+                <span class="font-medium">
+                  &nbsp; {#if !org.contact_email?.trim()}Bitte eine
+                    Email-Adresse angeben!{/if}
+                </span>
+              </Helper>
+            </div>
           {/if}
 
           {#if org.contact_phone !== null}
-            <FloatingLabelInput
-              style="outlined"
-              type="tel"
-              on:input={() => (org_changed = true)}
-              bind:value={org.contact_phone}>Telefon</FloatingLabelInput
-            >
+            <div>
+              <FloatingLabelInput
+                style="outlined"
+                type="tel"
+                on:input={() => (org_changed = true)}
+                bind:value={org.contact_phone}>Telefon</FloatingLabelInput
+              >
+              <Helper color="red">
+                <span class="font-medium">
+                  &nbsp; {#if !org.contact_phone?.trim()}Bitte eine
+                    Telefonnummer angeben!{/if}
+                </span>
+              </Helper>
+            </div>
           {/if}
         </div>
       </div>
@@ -444,6 +486,12 @@
                   oninput={() => change_team(team.id)}
                   bind:value={team.contact_name}>Name</FloatingLabelInput
                 >
+                <Helper color="red">
+                  <span class="font-medium">
+                    &nbsp; {#if !team.contact_name?.trim()}Bitte eine
+                      Kontaktperson angeben!{/if}
+                  </span>
+                </Helper>
               {/if}
               {#if team.contact_phone !== null}
                 <FloatingLabelInput
@@ -453,6 +501,12 @@
                   oninput={() => change_team(team.id)}
                   bind:value={team.contact_phone}>Telefon</FloatingLabelInput
                 >
+                <Helper color="red">
+                  <span class="font-medium">
+                    &nbsp; {#if !team.contact_phone?.trim()}Bitte eine
+                      Telefonnummer angeben!{/if}
+                  </span>
+                </Helper>
               {/if}
             </TableBodyCell>
             <TableBodyCell>
@@ -541,6 +595,18 @@
           on:click={() => delete_team(team_to_delete)}>Ja</Button
         >
         <Button color="alternative">Nein (Abbruch)</Button>
+      </div>
+    </Modal>
+
+    <Modal bind:open={data_missing_modal} size="xs" autoclose>
+      <div class="text-center">
+        <ExclamationCircleOutline
+          class="mx-auto text-red-400 w-12 h-12 dark:text-gray-200"
+        />
+        <h3 class="mb-5 text-lg font-normal text-red-500 dark:text-gray-400">
+          Bitte die fehlenden Daten eingeben!
+        </h3>
+        <Button color="alternative">Ok</Button>
       </div>
     </Modal>
 

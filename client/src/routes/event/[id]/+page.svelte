@@ -80,7 +80,7 @@
   }
 </script>
 
-<div class="px-10 pt-6 flex flex-col gap-4">
+<div class="px-10 pt-6 flex flex-col gap-4 mb-5">
   {#if loading}
     <Loading text="Lade Turnierdetails..." />
   {:else if submitting}
@@ -182,7 +182,6 @@
               style="outlined"
               id="floating_outlined"
               name="floating_outlined"
-              
               bind:value={contact_name}
               type="text"
             >
@@ -214,8 +213,25 @@
         </div>
       </form>
     {:else}
-      Bitte benutzen Sie den Link aus der E-Mail, um sich für dieses Turnier
-      anzumelden.
+      Abfolge:
+      <ol class="ps-5 mt-2 space-y-1 list-decimal list-inside">
+        <li>
+          Die Schulen bekommen einen Link für die Anmeldung per Email
+          zugeschickt.
+        </li>
+        <li>
+          Unter diesem Link können dann die teilnehmenden Mannschaften {#if event?.public_reg_until}bis
+            zum {new Date(
+              event?.public_reg_until || 0
+            ).toLocaleDateString()}{/if}
+          gemeldet werden.
+        </li>
+        <li>
+          Am Turniertag {#if event?.begin}({new Date(
+              event?.begin || 0
+            ).toLocaleDateString()}){/if} werden die Anmeldungen vor Ort bestätigt.
+        </li>
+      </ol>
     {/if}
   {/if}
 
