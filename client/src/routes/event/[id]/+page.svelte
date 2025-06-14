@@ -114,7 +114,7 @@
       {@html event?.description}
     </div>
 
-    {#if event?.public}
+    {#if event?.self_registration_allowed}
       <h2
         class="mb-4 text-xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white"
       >

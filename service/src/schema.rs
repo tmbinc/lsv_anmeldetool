@@ -11,6 +11,7 @@ diesel::table! {
         allow_set_present -> Bool,
         allow_user_changes -> Bool,
         results_are_public -> Bool,
+        self_registration_allowed -> Bool,
     }
 }
 

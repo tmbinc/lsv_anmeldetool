@@ -45,7 +45,7 @@ dark:-outline-offset-1 dark:outline-white/10"
         <Table>
           <TableBody>
             {#each events as event}
-              <TableBodyRow class="flex flex-col md:flex-row  mb-4">
+              <TableBodyRow class="flex flex-col md:flex-row items-center mb-4">
                 <TableBodyCell>
                   {event.name}
                 </TableBodyCell>

@@ -197,6 +197,7 @@ export interface components {
       /** Format: partial-date-time */
       public_reg_until?: string | null;
       results_are_public: boolean;
+      self_registration_allowed: boolean;
     };
     /** EventOrg */
     EventOrg: {

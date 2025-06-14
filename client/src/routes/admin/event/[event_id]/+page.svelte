@@ -204,10 +204,20 @@
         />
       </div>
       <div>
-        <Label for="event_public">Self-registration allowed</Label>
+        <Label for="event_public">Public (visible on home page)</Label>
         <Checkbox
           id="event_public"
           bind:checked={event.public}
+          on:change={() => (event_changed = true)}
+        ></Checkbox>
+      </div>
+      <div>
+        <Label for="event_self_registration_allowed"
+          >Self-registration allowed</Label
+        >
+        <Checkbox
+          id="event_self_registration_allowed"
+          bind:checked={event.self_registration_allowed}
           on:change={() => (event_changed = true)}
         ></Checkbox>
       </div>

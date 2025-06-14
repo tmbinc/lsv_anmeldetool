@@ -249,7 +249,7 @@ pub async fn self_register_org(
 
         match event {
             Some(event) => {
-                if event.public && event.allow_user_changes {
+                if event.self_registration_allowed && event.allow_user_changes {
                     let new_org = actions::orgs::insert_new_org(&mut conn, &data.name)?;
 
                     let new_org = Org {
