@@ -87,7 +87,7 @@
   <Table>
     <TableHead>
       <TableHeadCell>Name</TableHeadCell>
-      <TableHeadCell>Attribute</TableHeadCell>
+      <TableHeadCell>Slug ("Attribute" in swiss-chess)</TableHeadCell>
       <TableHeadCell>Merge into...</TableHeadCell>
       <TableHeadCell>Edit</TableHeadCell>
     </TableHead>

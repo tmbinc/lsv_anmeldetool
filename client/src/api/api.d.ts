@@ -80,6 +80,12 @@ export interface paths {
     /** set results for a given event + group */
     put: operations["put_api-v1-event-27c0f944dfda8590fa5b4ebeb75c8132"];
   };
+  "/api/v1/event/{event}/timetable": {
+    /** get timetable for a given event */
+    get: operations["get_api-v1-event-0f47f13f2647148a3535420643899eff"];
+    /** set timetable for a given event + group */
+    put: operations["put_api-v1-event-0f47f13f2647148a3535420643899eff"];
+  };
   "/api/v1/event/{event}/rooms/{group}": {
     /** set rooms for a given event + group */
     put: operations["put_api-v1-event-32fa1b098b899b8b7012a6eeb84bb174"];
@@ -231,6 +237,8 @@ export interface components {
       event_id: string;
       id: string;
       name: string;
+      /** Format: int32 */
+      num_rounds: number;
       replacement?: string | null;
       slug: string;
     };
@@ -408,6 +416,10 @@ export interface components {
     SetRoomsPayload: {
       rooms: components["schemas"]["Room"][];
     };
+    /** SetTimetablePayload */
+    SetTimetablePayload: {
+      timetable: components["schemas"]["TimetableEntry"][];
+    };
     /** SlimUser */
     SlimUser: {
       email: string;
@@ -447,6 +459,35 @@ export interface components {
       team?: string | null;
       /** Format: int32 */
       tie?: number | null;
+    };
+    TimetableEntry: {
+      event: string;
+      /** Format: partial-date-time */
+      expected_time: string;
+      group_id: string;
+      /** Format: partial-date-time */
+      last_update: string;
+      name: string;
+      /** Format: int32 */
+      row_index: number;
+      state: string;
+    };
+    /** TimetableForEvent */
+    TimetableForEvent: {
+      event_name: string;
+      groups: components["schemas"]["Group"][];
+      rows: components["schemas"]["TimetableRow"][];
+    };
+    TimetableRow: {
+      /** Format: partial-date-time */
+      expected_time: string;
+      group: string;
+      /** Format: partial-date-time */
+      last_update: string;
+      name: string;
+      /** Format: int32 */
+      row_index: number;
+      state: string;
     };
   };
   responses: never;
@@ -1045,6 +1086,71 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetResultsPayload"];
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get timetable for a given event */
+  "get_api-v1-event-0f47f13f2647148a3535420643899eff": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["TimetableForEvent"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** set timetable for a given event + group */
+  "put_api-v1-event-0f47f13f2647148a3535420643899eff": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTimetablePayload"];
       };
     };
     responses: {

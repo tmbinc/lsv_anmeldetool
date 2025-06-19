@@ -71,6 +71,7 @@ pub fn create_group(
         name: group.name,
         replacement: None,
         slug: "".to_string(),
+        num_rounds: 7,
     };
     // TODO: verify that event actually exists
     diesel::insert_into(schema::groups::table)

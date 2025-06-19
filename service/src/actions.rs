@@ -9,4 +9,5 @@ pub mod questionnaire;
 pub mod results;
 pub mod rooms;
 pub mod teams;
+pub mod timetable;
 pub type DbError = Box<dyn std::error::Error + Send + Sync>;

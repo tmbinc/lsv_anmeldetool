@@ -158,6 +158,11 @@ async fn main() -> std::io::Result<()> {
                             .route(put().to(api::results::set_results)),
                     )
                     .service(
+                        resource("event/{event}/timetable")
+                            .route(put().to(api::timetable::set_timetable))
+                            .route(get().to(api::timetable::get_timetable)),
+                    )
+                    .service(
                         resource("event/{event}/rooms/{group}")
                             .route(put().to(api::rooms::set_rooms)),
                     )

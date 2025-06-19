@@ -22,6 +22,7 @@ diesel::table! {
         name -> Text,
         replacement -> Nullable<Text>,
         slug -> Text,
+        num_rounds -> Integer,
     }
 }
 
@@ -137,6 +138,18 @@ diesel::table! {
 }
 
 diesel::table! {
+    timetable (event, group_id, row_index) {
+        event -> Text,
+        group_id -> Text,
+        row_index -> Integer,
+        name -> Text,
+        expected_time -> Timestamp,
+        last_update -> Timestamp,
+        state -> Text,
+    }
+}
+
+diesel::table! {
     users (email) {
         email -> Text,
         hash -> Text,
@@ -160,6 +173,7 @@ diesel::joinable!(results -> groups (group_id));
 diesel::joinable!(results -> teams (team));
 diesel::joinable!(rooms -> groups (group_id));
 diesel::joinable!(teams -> groups (group_id));
+diesel::joinable!(timetable -> groups (group_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     events,
@@ -174,5 +188,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     results,
     rooms,
     teams,
+    timetable,
     users,
 );

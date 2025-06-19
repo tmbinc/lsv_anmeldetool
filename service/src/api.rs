@@ -8,3 +8,4 @@ pub mod questionnaire;
 pub mod results;
 pub mod rooms;
 pub mod teams;
+pub mod timetable;
