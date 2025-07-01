@@ -13,6 +13,8 @@
     type Org,
     type Pairing,
     type Team,
+    type TeamResult,
+    setResults,
   } from "../../../../../api/api";
   import {
     Button,
@@ -30,7 +32,7 @@
     ExclamationCircleOutline,
   } from "flowbite-svelte-icons";
 
-  type Result = "1:0" | "0:1" | "0.5:0.5" | "-:-" | "+:-" | "-:+" | "";
+  type GameResult = "1:0" | "0:1" | "0.5:0.5" | "-:-" | "+:-" | "-:+" | "";
 
   type PairingTeam = {
     team: Team;
@@ -43,11 +45,20 @@
     points_home: number | null;
     points_guest: number | null;
     table: number;
-    result: Result;
+    result: GameResult;
+  };
+
+  type ResultDisplay = {
+    team: PairingTeam | undefined;
+    rank: number | null;
+    points_team: number | null;
+    points_player: number | null;
+    tie: number | null;
   };
 
   let event: Event | null = $state(null);
   let pairings: PairingDisplay[] = $state([]);
+  let results: ResultDisplay[] = $state([]);
   let group: Group | null = $state(null);
   let fetch_errors: FetchErrors;
   let uploaded = $state(false);
@@ -59,6 +70,22 @@
   let group_replacement = $state(new Map<string, string>());
 
   let swisschess_list = $state(`
+
+
+Mannschafts-Rangliste: Stand nach der 2. Runde 
+Rang	MNr	Mannschaft		TWZ	ELO	NWZ	Attr.	Land	G	S	R	V	Man.Pkt.	Man.Pkt.		Brt.Pkt.	Brt.Pkt.		Buchh
+1	1	Mannschaft 3		1400	1400	1400	 	C	1	1	0	0	2	-	0	3.0	-	1.0	3.0
+2	2	Team 2		1400	1400	1400	 	C	1	0	1	0	1	-	1	2.0	-	2.0	5.0
+3	4	Team 2		1400	1400	1400	 	A	1	0	1	0	1	-	1	2.0	-	2.0	3.0
+4	3	Team 4		1400	1400	1400	 	C	1	0	0	1	0	-	2	1.0	-	3.0	5.0
+
+
+
+Paarungsliste der 2. Runde  
+PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	Erg.	Ergebnis	Erg.	At.
+1	1	Mannschaft 3		1400		 		C	(2)	-	2	Team 2		1400		 		C	(1)		-		 
+2	4	Team 2		1400		 		A	(1)	-	3	Team 4		1400		 		C	(0)		-		 
+
 
 `);
 
@@ -145,54 +172,101 @@
     const lines = swisschess_list.split("\n");
     let header: string[] | undefined = undefined;
     let pairing_list: PairingDisplay[] = [];
+    let result_list: ResultDisplay[] = [];
+
+    let have_pairing = false;
+    let have_results = false;
+    let in_pairing = false;
+    let in_results = false;
+
     for (const line of lines) {
       if (line.startsWith("Paarungsliste")) {
         round = +line.split(" ")[2];
+        have_pairing = true;
+        in_pairing = true;
+        in_results = false;
+        header = undefined;
+      }
+      if (line.startsWith("Mannschafts-Rangliste")) {
+        round = +line.split(" ")[4];
+        have_results = true;
+        in_results = true;
+        in_pairing = false;
+        header = undefined;
       }
       const columns = line.split("\t");
       if (columns.length < 3) {
         continue;
       }
       if (header) {
-        let data = new Map(columns.map((val, index) => [header[index], val]));
-        const team_home = team_for_name(
-          data.get("Mannschaft_home"),
-          data.get("Land_home")
-        );
-        const team_guest = team_for_name(
-          data.get("Mannschaft_guest"),
-          data.get("Land_guest")
-        );
-        const table = +(data.get("PaarNr") || "");
+        if (in_pairing) {
+          let data = new Map(columns.map((val, index) => [header[index], val]));
+          const team_home = team_for_name(
+            data.get("Mannschaft_home"),
+            data.get("Land_home")
+          );
+          const team_guest = team_for_name(
+            data.get("Mannschaft_guest"),
+            data.get("Land_guest")
+          );
+          const table = +(data.get("PaarNr") || "");
 
-        pairing_list.push({
-          team_home: team_home ?? undefined,
-          points_home: +(data.get("Punkte_home") ?? "")
-            .replace("(", "")
-            .replace(")", ""),
-          team_guest: team_guest,
-          points_guest: +(data.get("Punkte_guest") ?? "")
-            .replace("(", "")
-            .replace(")", ""),
-          result: "",
-          table: table,
-        });
+          pairing_list.push({
+            team_home: team_home ?? undefined,
+            points_home: +(data.get("Punkte_home") ?? "")
+              .replace("(", "")
+              .replace(")", ""),
+            team_guest: team_guest,
+            points_guest: +(data.get("Punkte_guest") ?? "")
+              .replace("(", "")
+              .replace(")", ""),
+            result: "",
+            table: table,
+          });
+        }
+
+        if (in_results) {
+          let data = new Map(columns.map((val, index) => [header[index], val]));
+          console.log(data);
+          const team = team_for_name(data.get("Mannschaft"), data.get("Land"));
+          const rank = +(data.get("Rang") || "");
+          const points_team = +(data.get("Man.Pkt._won") || "");
+          const points_player = +(data.get("Brt.Pkt._won") || "");
+          const tie = +(data.get("Buchh") || "");
+
+          result_list.push({
+            team: team ?? undefined,
+            rank: rank,
+            points_team: points_team,
+            points_player: points_player,
+            tie: tie,
+          });
+        }
       } else {
         header = columns;
-        header[header.findIndex((n) => n == "MNr")] += "_home";
-        header[header.findIndex((n) => n == "MNr")] += "_guest";
-        header[header.findIndex((n) => n == "Mannschaft")] += "_home";
-        header[header.findIndex((n) => n == "Mannschaft")] += "_guest";
-        header[header.findIndex((n) => n == "Land")] += "_home";
-        header[header.findIndex((n) => n == "Land")] += "_guest";
-        header[header.findIndex((n) => n == "Punkte")] += "_home";
-        header[header.findIndex((n) => n == "Punkte")] += "_guest";
+        if (in_pairing) {
+          header[header.findIndex((n) => n == "MNr")] += "_home";
+          header[header.findIndex((n) => n == "MNr")] += "_guest";
+          header[header.findIndex((n) => n == "Mannschaft")] += "_home";
+          header[header.findIndex((n) => n == "Mannschaft")] += "_guest";
+          header[header.findIndex((n) => n == "Land")] += "_home";
+          header[header.findIndex((n) => n == "Land")] += "_guest";
+          header[header.findIndex((n) => n == "Punkte")] += "_home";
+          header[header.findIndex((n) => n == "Punkte")] += "_guest";
+        }
+        if (in_results) {
+          header[header.findIndex((n) => n == "Man.Pkt.")] += "_won";
+          header[header.findIndex((n) => n == "Man.Pkt.")] += "_lost";
+          header[header.findIndex((n) => n == "Brt.Pkt.")] += "_won";
+          header[header.findIndex((n) => n == "Brt.Pkt.")] += "_lost";
+        }
       }
     }
     pairings = pairing_list;
+    results = result_list;
   }
 
-  async function upload_pairings() {
+  async function uploadPairings() {
     let pairings_upload: Pairing[] = pairings.map((pairing) => ({
       event: event_id,
       group_id: group_id,
@@ -217,6 +291,31 @@
       fetch_errors.check(resp);
     }
   }
+
+  async function uploadResults() {
+    let results_upload: TeamResult[] = results.map((result) => ({
+      event: event_id,
+      group_id: group_id,
+      round: round,
+      team: result.team?.team.id,
+      rank: result.rank,
+      points_team: result.points_team,
+      points_player: result.points_player,
+      tie: result.tie,
+    }));
+
+    let resp = await setResults({
+      event: event_id,
+      group: group_id,
+      round: round,
+      results: results_upload,
+    }).result;
+    if (resp.ok) {
+      uploaded = true;
+    } else {
+      fetch_errors.check(resp);
+    }
+  }
 </script>
 
 <main class="px-2 md:px-10 pt-6 flex flex-col gap-4">
@@ -231,10 +330,11 @@
     >Edit Room Mapping...</Button
   >
 
-  <Button
-    color="blue"
-    disabled={pairings.length == 0}
-    on:click={upload_pairings}>Upload this round...</Button
+  <Button color="blue" disabled={pairings.length == 0} on:click={uploadPairings}
+    >Upload PAIRINGS for round {round}...</Button
+  >
+  <Button color="blue" disabled={results.length == 0} on:click={uploadResults}
+    >Upload Results of round {round}...</Button
   >
   <div class="text-5xl">Preview</div>
   <Table shadow>
@@ -272,6 +372,35 @@
               <i>spielfrei</i>
             {/if}
           </TableBodyCell>
+        </TableBodyRow>
+      {/each}
+    </TableBody>
+  </Table>
+
+  <Table>
+    <TableHead>
+      <TableHeadCell>Team</TableHeadCell>
+      <TableHeadCell>Rank</TableHeadCell>
+      <TableHeadCell>Points (Team)</TableHeadCell>
+      <TableHeadCell>Points (Player)</TableHeadCell>
+      <TableHeadCell>Tie</TableHeadCell>
+    </TableHead>
+    <TableBody>
+      {#each results as result}
+        <TableBodyRow
+          class={" " +
+            (result.team !== undefined ? "bg-green-200" : "bg-red-200")}
+        >
+          <TableBodyCell>
+            {#if result.team !== null}
+              {result.team?.team.name}
+              <sub>{result.team?.org.name}</sub>
+            {/if}
+          </TableBodyCell>
+          <TableBodyCell>{result.rank}</TableBodyCell>
+          <TableBodyCell>{result.points_team}</TableBodyCell>
+          <TableBodyCell>{result.points_player}</TableBodyCell>
+          <TableBodyCell>{result.tie}</TableBodyCell>
         </TableBodyRow>
       {/each}
     </TableBody>

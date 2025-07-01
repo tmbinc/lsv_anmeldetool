@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import {
     getEvent,
     getGroupsForEvent,
@@ -11,6 +11,12 @@
   } from "../../../../../../api/api";
   import FetchErrors from "../../../../../FetchErrors.svelte";
   import { page } from "$app/state";
+  import Reveal from "reveal.js";
+  import { Button } from "flowbite-svelte";
+  import "reveal.js/dist/reset.css";
+  import "reveal.js/dist/reveal.css";
+  import "reveal.js/dist/theme/night.css";
+
   let event_id = page.params.event_id;
   let fetch_errors: FetchErrors;
   let loading = $state(true);
@@ -18,102 +24,86 @@
   let groups: Group[] = $state([]);
   let event_name: String = $state("");
   let results: ResultEntry[] = $state([]);
+  let reveal;
+  let started = $state(false);
 
   onMount(async () => {
     const resp_results = await getResults({
       event: page.params.event_id,
     }).result;
 
+    console.log(resp_results);
+
     if (resp_results.ok) {
       event_name = resp_results.data.event_name;
       groups = resp_results.data.groups;
-      results = resp_results.data.results;
+
+      // Sort results by (inverted) rank
+      results = resp_results.data.results.sort(
+        (a, b) => (b.rank || 0) - (a.rank || 0)
+      );
+
+      goSlide();
     } else {
       fetch_errors.check(resp_results);
     }
     loading = false;
   });
+
+  function goSlide() {
+    const deck = new Reveal(reveal);
+    deck.initialize({
+      hash: false, // always restart from scratch,
+      overview: false,
+      help: false,
+      controls: false,
+      transition: "fade",
+    });
+    started = true;
+  }
 </script>
 
 <FetchErrors bind:this={fetch_errors} />
+<!-- 
+{#if !started}
+  <Button on:click={goSlide}>Go Slideshow!</Button>
+{/if} -->
+<div class="reveal">
+  <div class="slides">
+    {#each groups as group}
+      <section>
+        <div class="tournament_name">{event_name}</div>
+        <div class="tournament_group">{group.name}</div>
 
-<head>
-  <!-- <meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-		<title>{{ event?.name }}</title>
-
-		<link rel="stylesheet" href="m/dist/reset.css">
-		<link rel="stylesheet" href="m/dist/reveal.css">
-		<link rel="stylesheet" href="m/dist/theme/night.css">
-
-  <link rel="stylesheet" href="m/plugin/highlight/monokai.css" />
-
-  -->
-
-  <style>
-    .reveal section h1 {
-      font-size: 300%;
-    }
-
-    .boxes {
-      width: 100%;
-    }
-
-    .boxestd {
-      border: 5px solid white;
-      text-align: center;
-    }
-
-    .noboxestd {
-      text-align: center;
-    }
-
-    .tournament_name {
-      font-size: 80%;
-    }
-
-    .tournament_subtitle {
-      font-size: 100%;
-    }
-
-    .mannschaft {
-      font-size: 200%;
-    }
-
-    .schule {
-      font-size: 80%;
-    }
-
-    .rank {
-      font-size: 150%;
-    }
-  </style>
-</head>
-<body>
-  <div class="reveal">
-    <div class="slides">
-      {#each groups as group}
         <section>
-          <div class="tournament_name">{event_name}</div>
-          <div class="tournament_group">{group.name}</div>
+          <h1>Preisverleihung</h1>
+        </section>
 
-          <section>
-            <h1>Preisverleihung</h1>
-          </section>
+        {#each results as result}
+          {#if result.group == group.id}
+            <section>
+              <p class="rank">{result.rank} Platz:</p>
+              <p class="mannschaft">{result.team}</p>
+              <p class="schule">
+                {result.team_genus == "f"
+                  ? "der"
+                  : result.team_genus == "m"
+                    ? "des"
+                    : result.team_genus == "n"
+                      ? "des"
+                      : ""}
+                {result.team_org}
+              </p>
+              <small
+                >mit {result.points_team}
+                {result.points_team == 1
+                  ? "Mannschaftspunkt"
+                  : "Mannschaftspunkten"}, {result.points_team}
+                {result.points_team == 1 ? "Brettpunkt" : "Brettpunkten"} und {result.tie}
+                {result.tie == 1 ? "Buchholz-Punkt" : "Buchholz-Punkten"}</small
+              >
 
-          {#each results as result}
-            {#if result.group == group.id}
-              <section>
-                <p class="rank">{result.rank} Platz:</p>
-                <p class="mannschaft">{result.team}</p>
-                <p class="schule">der {result.team_org}</p>
-                <small
-                  >mit {result.points_team} Mannschaftspunkten, {result.points_team}
-                  Brettpunkten und {result.tie} Buchholz-Punkten</small
-                >
-
-                <!-- {% if result.next_left is defined or result.next_right is defined %}
+              <!-- {% if result.next_left is defined or result.next_right is defined %}
 <hr />
 <small>N&auml;chste Mannschaften:
 
@@ -137,34 +127,49 @@ B&uuml;hne
 
 </small>
 {% endif %} -->
-              </section>
-            {/if}
-          {/each}
-        </section>
-      {/each}
-    </div>
+            </section>
+          {/if}
+        {/each}
+      </section>
+    {/each}
   </div>
+</div>
 
-  <!-- <script src="m/dist/reveal.js"></script>
-  <script src="m/plugin/notes/notes.js"></script>
-  <script src="m/plugin/markdown/markdown.js"></script>
-  <script src="m/plugin/highlight/highlight.js"></script> -->
-  <!-- <script>
-    // More info about initialization & config:
-    // - https://revealjs.com/initialization/
-    // - https://revealjs.com/config/
-    Reveal.initialize({
-      hash: false, // always restart from scratch,
-      overview: false,
-      help: false,
-      controls: false,
-      transition: "fade",
+<style>
+  .reveal section h1 {
+    font-size: 300%;
+  }
 
-      // Learn about plugins: https://revealjs.com/plugins/
-      plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
-    });
-    Reveal.configure({
-      autoSlideMethod: () => Reveal.down(),
-    });
-  </script> -->
-</body>
+  .boxes {
+    width: 100%;
+  }
+
+  .boxestd {
+    border: 5px solid white;
+    text-align: center;
+  }
+
+  .noboxestd {
+    text-align: center;
+  }
+
+  .tournament_name {
+    font-size: 80%;
+  }
+
+  .tournament_group {
+    font-size: 100%;
+  }
+
+  .mannschaft {
+    font-size: 200%;
+  }
+
+  .schule {
+    font-size: 80%;
+  }
+
+  .rank {
+    font-size: 150%;
+  }
+</style>

@@ -56,6 +56,7 @@ pub async fn set_results(
 pub struct ResultEntry {
     team: Option<String>,
     team_org: Option<String>,
+    team_genus: Option<String>,
     rank: Option<i32>,
     points_team: Option<i32>,
     points_player: Option<i32>,
@@ -128,6 +129,7 @@ pub async fn get_results(
             results_entries.push(ResultEntry {
                 team: team.map(|(_, team)| team.name.clone()),
                 team_org: team.map(|(org, _)| org.name.clone()),
+                team_genus: team.and_then(|(org, _)| org.genus.clone()),
                 rank: p.rank,
                 points_team: p.points_team,
                 points_player: p.points_player,

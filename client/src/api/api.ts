@@ -82,7 +82,7 @@ export const getResults = apity.path('/api/v1/event/{event}/results').method('ge
 export const setResults = apity.path('/api/v1/event/{event}/results/{group}/{round}').method('put').create();
 
 export const getTimetable = apity.path('/api/v1/event/{event}/timetable').method('get').create();
-export const setTimetable = apity.path('/api/v1/event/{event}/timetable').method('set').create();
+export const setTimetable = apity.path('/api/v1/event/{event}/timetable').method('put').create();
 
 export type Invite = components["schemas"]["Invite"];
 export type Org = components["schemas"]["Org"];
@@ -102,6 +102,7 @@ export type Room = components["schemas"]["Room"];
 export type EventQuestionnaireAnswers = components["schemas"]["EventQuestionnaireAnswers"];
 export type ResultEntry = components["schemas"]["ResultEntry"];
 export type ResultsForEvent = components["schemas"]["ResultsForEvent"];
+export type TeamResult = components['schemas']["TeamResult"];
 export type TimetableForEvent = components["schemas"]["TimetableForEvent"];
 export type TimetableRow = components["schemas"]["TimetableRow"];
 export type TimetableEntry = components["schemas"]["TimetableEntry"];

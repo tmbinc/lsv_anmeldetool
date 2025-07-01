@@ -381,6 +381,7 @@ export interface components {
       /** Format: int32 */
       round: number;
       team?: string | null;
+      team_genus?: string | null;
       team_org?: string | null;
       /** Format: int32 */
       tie?: number | null;
@@ -1115,6 +1116,11 @@ export interface operations {
     parameters: {
       path: {
         event: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SlimUser"];
       };
     };
     responses: {
