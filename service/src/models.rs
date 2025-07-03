@@ -72,10 +72,12 @@ pub struct Team {
     pub event: String,
     pub org: String,
     pub name: String,
-    pub present: bool,
     pub group_id: Option<String>,
     pub contact_name: Option<String>,
     pub contact_phone: Option<String>,
+    pub presence_state: String,
+    pub comment: Option<String>,
+    pub changed_since: Option<String>,
 }
 
 /// New org details.

@@ -42,7 +42,7 @@ export const createTeam = apity.path('/api/v1/team').method('post').create();
 export const updateTeam = apity.path('/api/v1/team').method('put').create();
 export const deleteTeam = apity.path('/api/v1/team/{team}').method('delete').create();
 export const getTeam = apity.path('/api/v1/team/{team}').method('get').create();
-export const setTeamPresent = apity.path('/api/v1/team/{team}/present').method('put').create();
+export const setTeamPresenceState = apity.path('/api/v1/team/presence_state').method('put').create();
 
 export const getGroupsForEvent = apity.path('/api/v1/event/{event}/groups').method('get').create();
 export const getGroup = apity.path('/api/v1/group/{group}').method('get').create();

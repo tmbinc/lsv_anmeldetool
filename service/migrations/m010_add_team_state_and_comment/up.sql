@@ -1,0 +1,4 @@
+ALTER TABLE teams ADD COLUMN presence_state TEXT NOT NULL DEFAULT "";
+ALTER TABLE teams ADD COLUMN comment TEXT;
+ALTER TABLE teams ADD COLUMN changed_since TEXT;
+ALTER TABLE teams DROP COLUMN present;

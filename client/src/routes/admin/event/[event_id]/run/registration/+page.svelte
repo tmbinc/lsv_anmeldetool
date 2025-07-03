@@ -57,7 +57,8 @@
     if (resp_event_orgs.ok) {
       for (const event_org of resp_event_orgs.data) {
         for (const team of event_org.teams) {
-          const ready = team.present && event_org.state == "Verified";
+          const ready =
+            team.presence_state == "present" && event_org.state == "Verified";
           if (team.group_id) {
             let group = new_groups.get(team.group_id);
             if (group) {

@@ -130,10 +130,12 @@ diesel::table! {
         event -> Text,
         org -> Text,
         name -> Text,
-        present -> Bool,
         group_id -> Nullable<Text>,
         contact_name -> Nullable<Text>,
         contact_phone -> Nullable<Text>,
+        presence_state -> Text,
+        comment -> Nullable<Text>,
+        changed_since -> Nullable<Text>,
     }
 }
 

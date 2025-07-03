@@ -1,0 +1,4 @@
+ALTER TABLE teams ADD COLUMN present BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE teams DROP COLUMN presence_state;
+ALTER TABLE teams DROP COLUMN comment;
+ALTER TABLE teams DROP COLUMN changed_since;

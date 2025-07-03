@@ -166,7 +166,7 @@ pub async fn get_event_orgs(
     })
     .await;
 
-    let event_org = event_org?.map_err(error::ErrorInternalServerError)?;
+    let event_org = event_org?.unwrap(); // .map_err(error::ErrorInternalServerError)?;
 
     match event_org {
         Some(event_org) => Ok(Json(event_org)),

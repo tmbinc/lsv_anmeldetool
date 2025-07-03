@@ -39,7 +39,9 @@ pub fn create_team(conn: &mut SqliteConnection, team: NewTeam) -> Result<Team, D
         group_id: None,
         contact_name: None,
         contact_phone: None,
-        present: false,
+        presence_state: "".to_string(),
+        comment: None,
+        changed_since: None,
     };
     diesel::insert_into(schema::teams::table)
         .values(&team)
@@ -65,14 +67,14 @@ pub fn get_team_by_id(
         .optional()?)
 }
 
-pub fn set_team_present(
+pub fn set_team_presence_state(
     conn: &mut SqliteConnection,
     team_id: &Uuid,
-    ready: bool,
+    presence_state: &str,
 ) -> Result<(), DbError> {
     diesel::update(schema::teams::table)
         .filter(schema::teams::id.eq(team_id.to_string()))
-        .set(schema::teams::present.eq(ready))
+        .set(schema::teams::presence_state.eq(presence_state))
         .execute(conn)?;
     Ok(())
 }

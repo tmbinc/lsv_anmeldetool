@@ -254,11 +254,11 @@ pub async fn get_team(
 #[derive(Deserialize, ApiComponent, JsonSchema)]
 pub struct TeamReady {
     team_id: Uuid,
-    ready: bool,
+    presence_state: String,
 }
 
-#[api_operation(summary = "update team readiness", skip_args = "user")]
-pub async fn set_team_present(
+#[api_operation(summary = "update team presence state", skip_args = "user")]
+pub async fn set_team_presence_state(
     pool: web::Data<DbPool>,
     user: LoggedUser,
     team_ready: Json<TeamReady>,
@@ -275,10 +275,10 @@ pub async fn set_team_present(
     let event_org = web::block(move || -> Result<(), DbError> {
         let mut conn = pool.get()?;
 
-        Ok(actions::teams::set_team_present(
+        Ok(actions::teams::set_team_presence_state(
             &mut conn,
             &team_ready.team_id,
-            team_ready.ready,
+            &team_ready.presence_state,
         )?)
     })
     .await;

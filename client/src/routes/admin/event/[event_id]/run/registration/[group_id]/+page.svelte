@@ -2,6 +2,7 @@
   import { onMount, type Component } from "svelte";
   import {
     Button,
+    ButtonGroup,
     Checkbox,
     Label,
     Modal,
@@ -16,7 +17,7 @@
     getEventOrgs,
     getGroup,
     getGroupsForEvent,
-    setTeamPresent,
+    setTeamPresenceState,
     type EventOrg,
     type EventOrgState,
     type Group,
@@ -46,6 +47,7 @@
   let slug_group_decode = $state("");
   let confirm_changes = $state(true);
   let verify_change = $state(false);
+  let verify_team_new_state: string | null = null;
   let verify_team: OrgTeam | null = $state(null);
 
   type OrgTeam = {
@@ -132,10 +134,11 @@
     }
   });
 
-  async function set_team_present(team: OrgTeam) {
-    let res = await setTeamPresent({
+  async function set_team_presence_state(team: OrgTeam, new_state: string) {
+    team.team.presence_state = new_state;
+    let res = await setTeamPresenceState({
       team_id: team.team.id,
-      ready: team.team.present,
+      presence_state: team.team.presence_state,
     }).result;
     if (res.ok) {
     } else {
@@ -143,9 +146,13 @@
       alert("failed to set team readiness");
     }
   }
-  async function set_team_present_verify(team: OrgTeam) {
+  async function set_team_presence_state_verify(
+    team: OrgTeam,
+    new_state: string
+  ) {
     verify_team = team;
     verify_change = true;
+    verify_team_new_state = new_state;
   }
 
   async function download_swisschess() {
@@ -211,12 +218,15 @@
         <TableHeadCell class="td-class">Present</TableHeadCell>
       </TableHead>
       <TableBody>
-        {#each teams.filter((t) => !filter_ready || (t.team.present && t.org_state == "Verified")) as team, index}
+        {#each teams.filter((t) => !filter_ready || (t.team.presence_state == "present" && t.org_state == "Verified")) as team, index}
           <TableBodyRow
             class={"tr-class " +
-              (team.org_state == "Verified" && team.team.present
+              (team.org_state == "Verified" &&
+              team.team.presence_state == "present"
                 ? "bg-green-300 hover:bg-green-200"
-                : "bg-red-400 hover:bg-red-300")}
+                : team.team.presence_state == "absent"
+                  ? "bg-slate-300 hover:bg-slate-200 line-through"
+                  : "bg-red-400 hover:bg-red-300")}
           >
             <TableBodyCell class="td-class">{index + 1}</TableBodyCell>
             <TableBodyCell class="td-class">
@@ -245,19 +255,43 @@
             <TableBodyCell class="td-class">
               {#if !confirm_changes}
                 <Checkbox
-                  disabled={team.org_state != "Verified"}
-                  bind:checked={team.team.present}
-                  on:change={() => set_team_present(team)}
+                  disabled={team.org_state != "Verified" ||
+                    (team.team.presence_state != "present" &&
+                      team.team.presence_state != "")}
+                  checked={team.team.presence_state == "present"}
+                  on:change={() => {
+                    set_team_presence_state(
+                      team,
+                      team.team.presence_state == "present" ? "" : "present"
+                    );
+                  }}
                 ></Checkbox>
               {:else}
-                <Button
-                  disabled={team.org_state != "Verified"}
-                  on:click={() => set_team_present_verify(team)}
-                >
-                  {#if team.team.present}abmelden
-                  {:else}anmelden
-                  {/if}
-                </Button>
+                <ButtonGroup>
+                  <Button
+                    disabled={team.org_state != "Verified" ||
+                      team.team.presence_state == "present"}
+                    on:click={() =>
+                      set_team_presence_state_verify(team, "present")}
+                  >
+                    bestätigt
+                  </Button>
+                  <Button
+                    disabled={team.org_state != "Verified" ||
+                      team.team.presence_state == ""}
+                    on:click={() => set_team_presence_state_verify(team, "")}
+                  >
+                    unbestätigt
+                  </Button>
+                  <Button
+                    disabled={team.org_state != "Verified" ||
+                      team.team.presence_state == "absent"}
+                    on:click={() =>
+                      set_team_presence_state_verify(team, "absent")}
+                  >
+                    abmelden
+                  </Button>
+                </ButtonGroup>
               {/if}
             </TableBodyCell>
           </TableBodyRow>
@@ -282,15 +316,22 @@
         <div>{verify_team?.org.name}</div>
         <div>{group_names.get(verify_team?.team.group_id || "")}</div>
         <div>{verify_team?.team.name}</div>
-        <div>{verify_team?.team.present ? "abmelden?" : "anmelden?"}</div>
+        <div>
+          {verify_team_new_state == "present"
+            ? "bestätigen?"
+            : verify_team_new_state == "absent"
+              ? "abmelden?"
+              : verify_team_new_state == ""
+                ? "ent-bestätigen?"
+                : ""}
+        </div>
       </div>
       <Button
         color="red"
         class="me-2"
         on:click={() => {
           if (verify_team) {
-            verify_team.team.present = !verify_team.team.present;
-            set_team_present(verify_team);
+            set_team_presence_state(verify_team, verify_team_new_state || "");
           }
         }}>Yes</Button
       >

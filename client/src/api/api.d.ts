@@ -134,15 +134,15 @@ export interface paths {
     /** create a new team */
     post: operations["post_api-v1-team-1d85c5df18ae253cffeaa9339e9ed5cb"];
   };
+  "/api/v1/team/presence_state": {
+    /** update team presence state */
+    put: operations["put_api-v1-team-presence_state-d8d4cd4c9d792cccbc08087e3e2e9346"];
+  };
   "/api/v1/team/{team}": {
     /** get one team by ID */
     get: operations["get_api-v1-team-660a5317bb41a757a76ba890440c3a2e"];
     /** delete a team */
     delete: operations["delete_api-v1-team-660a5317bb41a757a76ba890440c3a2e"];
-  };
-  "/api/v1/team/{team}/present": {
-    /** update team readiness */
-    put: operations["put_api-v1-team-6c8d4a2aa493b478fa3918905818c1b5"];
   };
   "/api/v1/event/{event}/org/{org}": {
     /** set status for event per org */
@@ -431,6 +431,8 @@ export interface components {
      * @description Team details.
      */
     Team: {
+      changed_since?: string | null;
+      comment?: string | null;
       contact_name?: string | null;
       contact_phone?: string | null;
       event: string;
@@ -438,11 +440,11 @@ export interface components {
       id: string;
       name: string;
       org: string;
-      present: boolean;
+      presence_state: string;
     };
     /** TeamReady */
     TeamReady: {
-      ready: boolean;
+      presence_state: string;
       /** Format: uuid */
       team_id: string;
     };
@@ -1624,6 +1626,37 @@ export interface operations {
       };
     };
   };
+  /** update team presence state */
+  "put_api-v1-team-presence_state-d8d4cd4c9d792cccbc08087e3e2e9346": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TeamReady"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
   /** get one team by ID */
   "get_api-v1-team-660a5317bb41a757a76ba890440c3a2e": {
     parameters: {
@@ -1660,37 +1693,6 @@ export interface operations {
     parameters: {
       path: {
         team: string;
-      };
-    };
-    responses: {
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** @description Forbidden */
-      403: {
-        content: never;
-      };
-      /** @description Not Found */
-      404: {
-        content: never;
-      };
-      /** @description Invalid input */
-      405: {
-        content: never;
-      };
-      /** @description Conflict */
-      409: {
-        content: never;
-      };
-    };
-  };
-  /** update team readiness */
-  "put_api-v1-team-6c8d4a2aa493b478fa3918905818c1b5": {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TeamReady"];
       };
     };
     responses: {

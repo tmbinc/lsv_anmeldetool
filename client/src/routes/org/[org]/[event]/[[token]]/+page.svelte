@@ -535,9 +535,15 @@
               {:else}
                 {#if reg_event?.allow_set_present}
                   <Checkbox
-                    bind:checked={team.present}
-                    oninput={() => change_team(team.id)}
-                    >Anwesenheit erklärt</Checkbox
+                    checked={team.presence_state == "present"}
+                    oninput={() => {
+                      if (team.presence_state == "present") {
+                        team.presence_state = "";
+                      } else {
+                        team.presence_state = "present";
+                      }
+                      change_team(team.id);
+                    }}>Anwesenheit erklärt</Checkbox
                   >
                 {/if}
                 <Button

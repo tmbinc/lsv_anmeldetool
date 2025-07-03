@@ -200,13 +200,13 @@ async fn main() -> std::io::Result<()> {
                             .route(put().to(api::teams::update_team)),
                     )
                     .service(
+                        resource("team/presence_state")
+                            .route(put().to(api::teams::set_team_presence_state)),
+                    )
+                    .service(
                         resource("team/{team}")
                             .route(get().to(api::teams::get_team))
                             .route(delete().to(api::teams::delete_team)),
-                    )
-                    .service(
-                        resource("team/{team}/present")
-                            .route(put().to(api::teams::set_team_present)),
                     )
                     .service(
                         resource("event/{event}/org/{org}")
