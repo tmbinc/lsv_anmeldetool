@@ -17,7 +17,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
-{#if !$page.url.pathname.includes("/run/ceremony")}
+{#if !$page.url.pathname.includes("/run/ceremony") && !$page.url.pathname.includes("/timetable_pairing")}
   <nav>
     <Navbar let:hidden let:toggle>
       <NavBrand href="/">

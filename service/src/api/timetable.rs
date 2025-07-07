@@ -61,6 +61,7 @@ pub struct TimetableRow {
     pub expected_time: NaiveDateTime,
     pub last_update: NaiveDateTime,
     pub state: String,
+    pub flags: String,
 }
 
 #[derive(Serialize, ApiComponent, JsonSchema)]
@@ -70,7 +71,7 @@ pub struct TimetableForEvent {
     groups: Vec<Group>,
 }
 
-#[api_operation(summary = "get timetable for a given event", skip_args = "user")]
+#[api_operation(summary = "get timetable for a given event", skip_args = "_user")]
 pub async fn get_timetable(
     pool: web::Data<DbPool>,
     _user: LoggedUser,
@@ -96,6 +97,7 @@ pub async fn get_timetable(
                 expected_time: entry.expected_time,
                 last_update: entry.last_update,
                 state: entry.state,
+                flags: entry.flags,
             })
             .collect();
 

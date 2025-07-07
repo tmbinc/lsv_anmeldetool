@@ -34,11 +34,12 @@
           let seen_active = new Set<string>();
           let new_start_times = new Set<string>();
 
+          // Ignore anything before the first "active" for each group.
           for (const row of resp.data.rows) {
             if (seen_active.has(row.group) || row.state == "active") {
               seen_active.add(row.group);
               const time = Date.parse(row.expected_time + "Z");
-              let key = time.toString() + row.state;
+              let key = time.toString() + row.flags + "_" + row.state;
 
               let r = new_timetable.get(key);
               if (!r) {
@@ -68,16 +69,18 @@
 
   type EntryWithName = {
     name: string;
+    flags: string;
     groups: string[];
   };
 
-  function timetableFor(time: string): EntryWithName[] {
-    const items = timetable.get(time) || [];
+  function timetableFor(key: string): EntryWithName[] {
+    const items = timetable.get(key) || [];
 
     let unique_names = [...new Set(items.map((item) => item.name))].sort();
 
     return unique_names.map((name) => ({
       name: name,
+      flags: items.find((f) => f.name == name)?.flags || "",
       groups: items
         .filter((f) => f.name == name)
         .map((r) => groupnames.get(r.group) || ""),
@@ -96,25 +99,42 @@
 
     <Table>
       <TableBody>
-        {#each start_times as start_time}
+        {#each start_times as key}
           <TableBodyRow
-            class={start_time.endsWith("active")
+            class={key.endsWith("_active")
               ? "bg-green-400 text-4xl"
-              : start_time.endsWith("next")
-                ? "bg-orange-400 text-4xl"
+              : key.endsWith("_next")
+                ? "bg-orange-400 text-2xl"
                 : ""}
           >
-            <TableBodyCell
-              >{new Date(parseInt(start_time))
-                .toTimeString()
-                .split(" ")[0]
-                .slice(0, 5)}</TableBodyCell
-            >
             <TableBodyCell>
-              {#each timetableFor(start_time) as row}
-                <div>
-                  {row.name} ({row.groups.sort().join(", ")})
-                </div>
+              {#if !key.endsWith("_active")}
+                {new Date(parseInt(key))
+                  .toTimeString()
+                  .split(" ")[0]
+                  .slice(0, 5)}
+              {/if}
+            </TableBodyCell>
+            <TableBodyCell>
+              {#each timetableFor(key) as row}
+                {#if row.flags.includes("p") && key.endsWith("_active")}
+                  <div>
+                    <a href="/event/{event_id}/pairings">
+                      {row.name}
+                      {#if groupnames.size != row.groups.length}
+                        ({row.groups.sort().join(", ")})
+                      {/if}
+                      <sub class="underline">(Paarungen)</sub>
+                    </a>
+                  </div>
+                {:else}
+                  <div>
+                    {row.name}
+                    {#if groupnames.size != row.groups.length}
+                      ({row.groups.sort().join(", ")})
+                    {/if}
+                  </div>
+                {/if}
               {/each}
             </TableBodyCell>
           </TableBodyRow>

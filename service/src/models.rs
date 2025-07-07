@@ -517,4 +517,5 @@ pub struct TimetableEntry {
     pub expected_time: NaiveDateTime,
     pub last_update: NaiveDateTime,
     pub state: String,
+    pub flags: String,
 }

@@ -148,6 +148,7 @@ diesel::table! {
         expected_time -> Timestamp,
         last_update -> Timestamp,
         state -> Text,
+        flags -> Text,
     }
 }
 

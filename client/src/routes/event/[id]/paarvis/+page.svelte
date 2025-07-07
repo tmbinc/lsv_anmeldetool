@@ -18,6 +18,7 @@
   import "reveal.js/dist/reset.css";
   import "reveal.js/dist/reveal.css";
   import "reveal.js/dist/theme/night.css";
+  import img from "$lib/images/logo_mhs.svg";
 
   let event_id = page.params.id;
   let fetch_errors: FetchErrors;
@@ -55,11 +56,12 @@
     });
   });
 
-  function checkTime(i) {
+  function checkTime(i: number): string {
     if (i < 10) {
-      i = "0" + i;
+      return "0" + i;
+    } else {
+      return "" + i;
     }
-    return i;
   }
 
   function startTime() {
@@ -68,11 +70,11 @@
     var m = today.getMinutes();
     var s = today.getSeconds();
     // add a zero in front of numbers<10
-    m = checkTime(m);
-    s = checkTime(s);
+    let m_s = checkTime(m);
+    let s_s = checkTime(s);
     let n = document.getElementById("time");
     if (n) {
-      n.innerHTML = h + ":" + m + ":" + s;
+      n.innerHTML = h + ":" + m_s + ":" + s_s;
     }
     let t = setTimeout(function () {
       startTime();
@@ -89,14 +91,17 @@
       transition: "fade",
     });
     deck.configure({
-      autoSlideMethod: () => Reveal.down(),
+      autoSlideMethod: () => deck.down(),
     });
     started = true;
     startTime();
   }
+
+  function roundForGroup(group: Group) {
+    return pairings.find((p) => p.group == group.id)?.round || "?";
+  }
 </script>
 
-paarvis goes here
 <FetchErrors bind:this={fetch_errors} />
 <div class="reveal">
   <div class="header">
@@ -109,7 +114,7 @@ paarvis goes here
 
   <div class="footer">(Stand: xx:xx:xx)</div>
   <div class="footer_right">
-    <img src="pics/logo_mhs.svg" />
+    <img src={img} alt="Michael Haukohl Stiftung" />
   </div>
   <div class="slides">
     <section>
@@ -128,7 +133,10 @@ paarvis goes here
       <section>
         <section>
           <p>{group.name}</p>
-          <p>Paarungsliste der 7. Runde - 13:20 Uhr (Seite 1 / 1)</p>
+          <p>
+            Paarungsliste der {roundForGroup(group)}. Runde - 13:20 Uhr (Seite 1
+            / 1)
+          </p>
           <table width="100%">
             <tbody> </tbody><tbody>
               <tr

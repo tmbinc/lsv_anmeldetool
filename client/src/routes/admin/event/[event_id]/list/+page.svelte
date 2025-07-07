@@ -9,6 +9,7 @@
   } from "../../../../../api/api";
   import FetchErrors from "../../../../FetchErrors.svelte";
   import {
+    Checkbox,
     Table,
     TableBody,
     TableBodyCell,
@@ -28,6 +29,7 @@
     "Submitted",
     "Verified",
   ];
+  let with_teams = $state(false);
 
   onMount(async () => {
     const request = getEventOrgs({ event: event_id });
@@ -47,11 +49,13 @@
 
 <main class="px-2 md:px-10 pt-6 flex flex-col gap-4">
   <FetchErrors bind:this={fetch_errors} />
+  <Checkbox bind:checked={with_teams}>With Teams</Checkbox>
 
   {#each possible_states as state}
     <div>{state}</div>
     <Table hoverable={true} striped={true} shadow>
       <TableHead>
+        <TableHeadCell></TableHeadCell>
         <TableHeadCell></TableHeadCell>
         <TableHeadCell></TableHeadCell>
       </TableHead>
@@ -66,6 +70,13 @@
               >
               <TableBodyCell>
                 {org.teams.length} Teams
+                {#if with_teams}
+                  <ul class="list-disc">
+                    {#each org.teams as team}
+                      <li>{team.name}</li>
+                    {/each}
+                  </ul>
+                {/if}
               </TableBodyCell>
             </TableBodyRow>
           {/if}

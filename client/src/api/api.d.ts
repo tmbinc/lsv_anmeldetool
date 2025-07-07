@@ -467,6 +467,7 @@ export interface components {
       event: string;
       /** Format: partial-date-time */
       expected_time: string;
+      flags: string;
       group_id: string;
       /** Format: partial-date-time */
       last_update: string;
@@ -484,6 +485,7 @@ export interface components {
     TimetableRow: {
       /** Format: partial-date-time */
       expected_time: string;
+      flags: string;
       group: string;
       /** Format: partial-date-time */
       last_update: string;
@@ -1118,11 +1120,6 @@ export interface operations {
     parameters: {
       path: {
         event: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SlimUser"];
       };
     };
     responses: {

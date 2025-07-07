@@ -95,6 +95,7 @@
           name: i[1],
           row_index: i[0],
           state: "",
+          flags: "",
         }))
         .toArray();
     }
@@ -110,6 +111,7 @@
         name: "new",
         row_index: group.rows.length,
         state: "",
+        flags: "",
       });
     }
   }
@@ -151,6 +153,7 @@
           name: r.name,
           row_index: r.row_index,
           state: r.state,
+          flags: r.flags,
         });
       }
     }
@@ -161,6 +164,22 @@
       alert("upload of timetable failed");
     } else {
       alert("upload of timetable ok");
+    }
+  }
+
+  function copyToOthers(timetable_group: TimetableColumn) {
+    timetable.forEach((group) => {
+      if (group != timetable_group) {
+        group.rows = timetable_group.rows.map((n) => ({ ...n }));
+      }
+    });
+  }
+
+  function toggleFlags(entry: TimetableRow, flags: string) {
+    if (entry.flags.includes(flags)) {
+      entry.flags = entry.flags.replaceAll(flags, "");
+    } else {
+      entry.flags += flags;
     }
   }
 </script>
@@ -179,6 +198,7 @@
   {#each timetable as timetable_group}
     <div class="flex flex-col m-5">
       {timetable_group.group.name}
+      <Button on:click={() => copyToOthers(timetable_group)}>Copy...</Button>
       {#each timetable_group.rows as row}
         <div
           class={"shadow-sm flex flex-row " +
@@ -208,6 +228,14 @@
               on:click={() =>
                 setActive(timetable_group.group.id, row.row_index)}
               ><BellActiveAltSolid /></Button
+            >
+            <Button
+              checked={row.flags.includes("p")}
+              on:click={() => toggleFlags(row, "p")}>Show Pairing Link</Button
+            >
+            <Button
+              checked={row.flags.includes("!")}
+              on:click={() => toggleFlags(row, "!")}>Include in Overview</Button
             >
           </ButtonGroup>
         </div>
