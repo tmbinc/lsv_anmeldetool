@@ -1,5 +1,6 @@
 use crate::actions::DbError;
 use crate::api::auth::LoggedUser;
+use crate::api::sse::SseState;
 use crate::errors::ErrorResponse;
 use crate::models::Room;
 use crate::models::{Group, Pairing, Role};
@@ -20,6 +21,7 @@ pub struct SetPairingPayload {
 #[api_operation(summary = "set pairings for a given event + group", skip_args = "user")]
 pub async fn set_pairings(
     pool: web::Data<DbPool>,
+    sse: web::Data<SseState>,
     user: LoggedUser,
     path: Path<(Uuid, Uuid, i32)>,
     data: Json<SetPairingPayload>,
@@ -49,6 +51,8 @@ pub async fn set_pairings(
     .await?
     // map diesel query errors to a 500 error response
     .map_err(error::ErrorInternalServerError)?;
+
+    sse.pairing_updated(&event_uid, &group_uid, round).await;
 
     Ok(Json(data))
 }

@@ -22,6 +22,8 @@ mod utils;
 type DbPool = r2d2::Pool<r2d2::ConnectionManager<SqliteConnection>>;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+
+use crate::api::sse::Broadcaster;
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
 fn run_migrations(
@@ -67,6 +69,8 @@ async fn main() -> std::io::Result<()> {
             .expect("Failed to load email configuration file"),
     );
 
+    let broadcaster = Broadcaster::create();
+
     HttpServer::new(move || {
         let spec = Spec {
             info: Info {
@@ -86,6 +90,10 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             // Add email config
             .app_data(web::Data::new(email_config.clone()))
+            //SSE broadcaster
+            .app_data(web::Data::new(api::sse::SseState {
+                broadcaster: Arc::clone(&broadcaster),
+            }))
             // add request logger middleware
             .wrap(middleware::Logger::default())
             // Authentication
@@ -153,6 +161,7 @@ async fn main() -> std::io::Result<()> {
                         resource("event/{event}/pairings/{group}/{round}")
                             .route(put().to(api::pairings::set_pairings)),
                     )
+                    .service(resource("event/{event}/sse").route(get().to(api::sse::sse)))
                     .service(
                         resource("event/{event}/results/{group}/{round}")
                             .route(put().to(api::results::set_results)),

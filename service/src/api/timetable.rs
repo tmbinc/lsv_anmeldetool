@@ -1,5 +1,6 @@
 use crate::actions::DbError;
 use crate::api::auth::LoggedUser;
+use crate::api::sse::SseState;
 use crate::errors::ErrorResponse;
 use crate::models::{Group, Role, TimetableEntry};
 use crate::{actions, DbPool};
@@ -22,6 +23,7 @@ pub struct SetTimetablePayload {
 )]
 pub async fn set_timetable(
     pool: web::Data<DbPool>,
+    sse: web::Data<SseState>,
     user: LoggedUser,
     path: Path<Uuid>,
     data: Json<SetTimetablePayload>,
@@ -49,6 +51,8 @@ pub async fn set_timetable(
     .await?
     // map diesel query errors to a 500 error response
     .map_err(error::ErrorInternalServerError)?;
+
+    sse.timetable_changed(&event_uid).await;
 
     Ok(Json(data))
 }

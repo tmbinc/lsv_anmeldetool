@@ -3,6 +3,7 @@
   import {
     getPairings,
     getTimetable,
+    readSse,
     type EventOrg,
     type Group,
     type PairingEntry,
@@ -11,16 +12,6 @@
   import { page } from "$app/state";
   import Loading from "../../../Loading.svelte";
   import LoadError from "../../../LoadError.svelte";
-  import {
-    Button,
-    Label,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
 
   let loading = $state(true);
   let failed_load = $state(false);
@@ -31,16 +22,15 @@
   let groupnames = $state(new Map<string, string>());
 
   const event_orgs: EventOrg[] = $state([]);
-  let groups: Group[] = $state([]);
   let groups_pairings: Group[] = $state([]);
 
   let pairings: PairingEntry[] = $state([]);
-  let reveal;
-  let started = $state(false);
   let orgs: Set<string> = new Set();
 
   onMount(async () => {
-    getTimetable({ event: event_id }).resp.subscribe((resp) => {
+    let timetable_request = getTimetable({ event: event_id });
+
+    timetable_request.resp.subscribe((resp) => {
       if (resp) {
         if (resp.ok) {
           event_name = resp.data.event_name;
@@ -92,7 +82,9 @@
         }
       }
     });
-    getPairings({ event: event_id }).resp.subscribe((resp) => {
+    let pairing_request = getPairings({ event: event_id });
+
+    pairing_request.resp.subscribe((resp) => {
       if (resp?.ok) {
         pairings = resp.data.pairings;
         groups_pairings = resp.data.groups;
@@ -111,6 +103,19 @@
         }
       }
     });
+
+    const evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
+    evtSource.onmessage = function (event) {
+      console.log(event);
+      var dataobj = JSON.parse(event.data);
+      console.log(dataobj);
+      if (dataobj.kind == "pairing") {
+        pairing_request.reload();
+      }
+      if (dataobj.kind == "timetable") {
+        timetable_request.reload();
+      }
+    };
   });
 
   type EntryWithName = {

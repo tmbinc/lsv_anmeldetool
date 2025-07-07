@@ -76,6 +76,14 @@ export interface paths {
     /** set pairings for a given event + group */
     put: operations["put_api-v1-event-22f93462af22d1552b7828cb1461a501"];
   };
+  "/api/v1/event/{event}/sse": {
+    /** read SSE */
+    get: operations["get_api-v1-event-c75ee2cb262d7198504f47ae0a83472a"];
+  };
+  "/api/v1/event/{event}/sse_send": {
+    /** send SSE */
+    get: operations["get_api-v1-event-247d1d0e9af4187c835008bb5a47adc8"];
+  };
   "/api/v1/event/{event}/results/{group}/{round}": {
     /** set results for a given event + group */
     put: operations["put_api-v1-event-27c0f944dfda8590fa5b4ebeb75c8132"];
@@ -1077,6 +1085,21 @@ export interface operations {
       409: {
         content: never;
       };
+    };
+  };
+  /** read SSE */
+  "get_api-v1-event-c75ee2cb262d7198504f47ae0a83472a": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+    };
+  };
+  /** send SSE */
+  "get_api-v1-event-247d1d0e9af4187c835008bb5a47adc8": {
+    responses: {
     };
   };
   /** set results for a given event + group */

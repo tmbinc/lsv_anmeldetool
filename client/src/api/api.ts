@@ -84,6 +84,8 @@ export const setResults = apity.path('/api/v1/event/{event}/results/{group}/{rou
 export const getTimetable = apity.path('/api/v1/event/{event}/timetable').method('get').create();
 export const setTimetable = apity.path('/api/v1/event/{event}/timetable').method('put').create();
 
+export const readSse = apity.path('/api/v1/event/{event}/sse').method('get').create();
+
 export type Invite = components["schemas"]["Invite"];
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];
