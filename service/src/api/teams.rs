@@ -1,6 +1,7 @@
 use crate::actions::teams::get_team_by_id;
 use crate::actions::DbError;
 use crate::api::auth::LoggedUser;
+use crate::api::sse::SseState;
 use crate::errors::ErrorResponse;
 use crate::models::{NewTeam, Role, Team};
 use crate::{actions, DbPool};
@@ -260,6 +261,7 @@ pub struct TeamReady {
 #[api_operation(summary = "update team presence state", skip_args = "user")]
 pub async fn set_team_presence_state(
     pool: web::Data<DbPool>,
+    sse: web::Data<SseState>,
     user: LoggedUser,
     team_ready: Json<TeamReady>,
 ) -> Result<Json<String>, ErrorResponse> {
@@ -271,6 +273,8 @@ pub async fn set_team_presence_state(
             return Err(ErrorResponse::Unauthorized("".to_string()));
         }
     };
+
+    let presence_state = team_ready.presence_state.clone();
 
     let event_org = web::block(move || -> Result<(), DbError> {
         let mut conn = pool.get()?;
@@ -284,6 +288,8 @@ pub async fn set_team_presence_state(
     .await;
 
     let _event_org = event_org?.map_err(error::ErrorInternalServerError)?;
+
+    sse.team_changed(&team_ready.team_id, &presence_state).await;
 
     Ok(Json("ok".to_string()))
 }

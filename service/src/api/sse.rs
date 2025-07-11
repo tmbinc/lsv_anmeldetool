@@ -73,9 +73,11 @@ impl Broadcaster {
         println!("starting creation");
         let (tx, rx) = tokio::sync::mpsc::channel(10);
 
-        tx.send(sse::Event::Data(sse::Data::new("connected")))
-            .await
-            .unwrap();
+        tx.send(sse::Event::Data(sse::Data::new(
+            "{\"kind\": \"connected\"}",
+        )))
+        .await
+        .unwrap();
         println!("creating new clients success {:?}", tx);
         self.inner.lock().clients.push(tx);
         sse::Sse::from_infallible_receiver(rx).with_retry_duration(Duration::from_secs(10))
@@ -107,6 +109,13 @@ struct ChangedMessage {
     round: Option<i32>,
 }
 
+#[derive(Serialize, ApiComponent, JsonSchema)]
+struct TeamChangedMessage {
+    kind: &'static str,
+    team: Uuid,
+    state: String,
+}
+
 impl SseState {
     pub async fn timetable_changed(&self, event: &Uuid) {
         let msg = ChangedMessage {
@@ -119,12 +128,24 @@ impl SseState {
             .broadcast(&serde_json::to_string(&msg).unwrap_or("invalid".into()))
             .await;
     }
+
     pub async fn pairing_updated(&self, event: &Uuid, group: &Uuid, round: i32) {
         let msg = ChangedMessage {
             kind: "pairing",
             event: event.clone(),
             group: Some(group.clone()),
             round: Some(round),
+        };
+        self.broadcaster
+            .broadcast(&serde_json::to_string(&msg).unwrap_or("invalid".into()))
+            .await;
+    }
+
+    pub async fn team_changed(&self, team: &Uuid, state: &str) {
+        let msg = TeamChangedMessage {
+            kind: "team_changed",
+            team: team.clone(),
+            state: state.to_string(),
         };
         self.broadcaster
             .broadcast(&serde_json::to_string(&msg).unwrap_or("invalid".into()))

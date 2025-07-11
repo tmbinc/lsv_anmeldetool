@@ -50,7 +50,8 @@ pub async fn set_pairings(
     })
     .await?
     // map diesel query errors to a 500 error response
-    .map_err(error::ErrorInternalServerError)?;
+    //.map_err(error::ErrorInternalServerError)?;
+    .unwrap();
 
     sse.pairing_updated(&event_uid, &group_uid, round).await;
 

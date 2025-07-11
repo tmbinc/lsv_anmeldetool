@@ -146,6 +146,21 @@
       alert("failed to set team readiness");
     }
   }
+
+  const evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
+  evtSource.onmessage = function (event) {
+    var dataobj = JSON.parse(event.data);
+    if (dataobj.kind == "team_changed") {
+      let ch_team = dataobj.team;
+      let ch_state = dataobj.state;
+      teams.forEach((team) => {
+        if (team.team.id == ch_team) {
+          team.team.presence_state = ch_state;
+        }
+      });
+    }
+  };
+
   async function set_team_presence_state_verify(
     team: OrgTeam,
     new_state: string

@@ -23,6 +23,7 @@ diesel::table! {
         replacement -> Nullable<Text>,
         slug -> Text,
         num_rounds -> Integer,
+        color -> Text,
     }
 }
 

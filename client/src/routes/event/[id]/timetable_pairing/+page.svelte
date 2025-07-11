@@ -82,6 +82,7 @@
         }
       }
     });
+
     let pairing_request = getPairings({ event: event_id });
 
     pairing_request.resp.subscribe((resp) => {
@@ -196,14 +197,8 @@
 
   <div class="float:bottom columns-4 text-white">
     {#each groups_pairings.filter((f) => !f.replacement) as group, group_index (group.id)}
-      <div
-        class={"mb-10 overflow-clip " +
-          ["bg-blue-700", "bg-green-700", "bg-orange-700"][group_index % 3]}
-      >
-        <p>{group.name}</p>
-        <p>
-          Paarungsliste der {roundForGroup(group)}. Runde
-        </p>
+      <div class={"mb-10 overflow-clip bg-" + group.color + "-500"}>
+        <p class="text-3xl">{group.name} - Runde {roundForGroup(group)}</p>
         <table
           class="table-fixed border-separate border-spacing-2 border border-gray-400 dark:border-gray-500"
         >
@@ -219,7 +214,7 @@
             {#each { length: 10 }}
               {#each pairings as pairing}
                 {#if pairing.group == group.id}
-                  <tr class="">
+                  <tr class="break-inside-avoid">
                     <td class="py-0 px-1">{pairing.table}</td><td
                       class="py-0 px-1 overflow-clip"
                     >

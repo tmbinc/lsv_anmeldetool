@@ -228,6 +228,7 @@ pub struct Group {
     pub replacement: Option<String>,
     pub slug: String,
     pub num_rounds: i32,
+    pub color: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]

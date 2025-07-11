@@ -88,12 +88,13 @@
     <TableHead>
       <TableHeadCell>Name</TableHeadCell>
       <TableHeadCell>Slug ("Attribute" in swiss-chess)</TableHeadCell>
+      <TableHeadCell>Color</TableHeadCell>
       <TableHeadCell>Merge into...</TableHeadCell>
       <TableHeadCell>Edit</TableHeadCell>
     </TableHead>
     <TableBody>
       {#each groups as group}
-        <TableBodyRow>
+        <TableBodyRow class="bg-{group.color}-100">
           <TableBodyCell class="w-6/12">
             <Input
               disabled={!edit_mode}
@@ -105,6 +106,13 @@
             <Input
               disabled={!edit_mode}
               bind:value={group.slug}
+              oninput={() => change(group.id)}
+            />
+          </TableBodyCell>
+          <TableBodyCell class="w-1/12">
+            <Input
+              disabled={!edit_mode}
+              bind:value={group.color}
               oninput={() => change(group.id)}
             />
           </TableBodyCell>

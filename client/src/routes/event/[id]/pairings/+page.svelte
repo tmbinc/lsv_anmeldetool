@@ -108,10 +108,10 @@
         room.table_num_low <= table &&
         room.table_num_high >= table
       ) {
-        return room.room;
+        return "(" + room.room + ")";
       }
     }
-    return null;
+    return "";
   }
 
   function update_local_storage() {
@@ -197,10 +197,8 @@
                     <TableBodyCell class="td-class">
                       <div>Runde {pairing.round}</div>
                       <div>
-                        Brett {pairing.table} ({findRoom(
-                          group.id,
-                          pairing.table
-                        )})
+                        Brett {pairing.table}
+                        {findRoom(group.id, pairing.table)}
                       </div></TableBodyCell
                     >
                     <TableBodyCell class="td-class">

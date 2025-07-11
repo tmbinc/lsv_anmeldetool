@@ -11,5 +11,6 @@ export default defineConfig({
 				secure: false, // important or cookies will not work
 			}
 		}
-	}
+	},
+	logLevel: "info",
 });

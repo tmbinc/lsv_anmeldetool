@@ -54,10 +54,18 @@ dark:-outline-offset-1 dark:outline-white/10"
                     Datum: {new Date(event.begin).toLocaleDateString()}
                   {/if}
                 </TableBodyCell>
-                <TableBodyCell
-                  ><Button href="/event/{event.id}">Zur Anmeldung...</Button
-                  ></TableBodyCell
-                >
+                {#if event.allow_set_present}
+                  <TableBodyCell
+                    ><Button href="/event/{event.id}/timetable"
+                      >Zeitplan...</Button
+                    ></TableBodyCell
+                  >
+                {:else}
+                  <TableBodyCell
+                    ><Button href="/event/{event.id}">Zur Anmeldung...</Button
+                    ></TableBodyCell
+                  >
+                {/if}
               </TableBodyRow>
             {/each}
           </TableBody>
