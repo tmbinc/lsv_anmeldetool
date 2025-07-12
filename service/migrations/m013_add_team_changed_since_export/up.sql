@@ -1,0 +1,1 @@
+ALTER TABLE teams ADD COLUMN changed_since_export BOOLEAN NOT NULL DEFAULT TRUE;

@@ -78,6 +78,7 @@ pub struct Team {
     pub presence_state: String,
     pub comment: Option<String>,
     pub changed_since: Option<String>,
+    pub changed_since_export: bool,
 }
 
 /// New org details.

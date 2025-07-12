@@ -137,6 +137,7 @@ diesel::table! {
         presence_state -> Text,
         comment -> Nullable<Text>,
         changed_since -> Nullable<Text>,
+        changed_since_export -> Bool,
     }
 }
 

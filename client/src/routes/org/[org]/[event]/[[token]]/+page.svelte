@@ -525,7 +525,7 @@
                   >
                   <Button
                     color="red"
-                    disabled={finalized}
+                    disabled={finalized || !reg_event?.allow_user_changes}
                     on:click={() => {
                       team_to_delete = team.id;
                       team_delete_modal = true;

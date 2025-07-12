@@ -201,6 +201,10 @@ async fn main() -> std::io::Result<()> {
                             .route(get().to(api::groups::get_group)),
                     )
                     .service(
+                        resource("group/{group}/changed_since_export")
+                            .route(delete().to(api::groups::clear_changed_since_export)),
+                    )
+                    .service(
                         resource("event/{event}/orgs").route(get().to(api::events::get_event_orgs)),
                     )
                     .service(

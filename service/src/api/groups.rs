@@ -142,3 +142,32 @@ pub async fn delete_group(
         ))),
     }
 }
+
+#[api_operation(summary = "clear changed_since_export for group", skip_args = "user")]
+pub async fn clear_changed_since_export(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+    group_uid: Path<Uuid>,
+) -> Result<Json<String>, ErrorResponse> {
+    let group_uid = group_uid.into_inner();
+
+    match user.role {
+        Role::Admin => {}
+        _ => {
+            return Err(ErrorResponse::Unauthorized("".to_string()));
+        }
+    };
+
+    let event_org = web::block(move || -> Result<(), DbError> {
+        let mut conn = pool.get()?;
+
+        Ok(actions::teams::clear_change_for_group(
+            &mut conn, &group_uid,
+        )?)
+    })
+    .await;
+
+    let _event_org = event_org?.map_err(error::ErrorInternalServerError)?;
+
+    Ok(Json("ok".to_string()))
+}

@@ -69,7 +69,7 @@ pub async fn update_team(
     let success = web::block(move || -> Result<bool, DbError> {
         let mut conn = pool.get()?;
 
-        let team = team.into_inner();
+        let mut team = team.into_inner();
 
         if is_user_edit {
             // For user edits, verify a few additional things:
@@ -97,6 +97,9 @@ pub async fn update_team(
                 return Ok(false);
             }
         }
+
+        // Force change flags
+        team.changed_since_export = true;
 
         actions::teams::update_team(&mut conn, team)?;
         Ok(true)

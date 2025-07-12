@@ -128,6 +128,10 @@ export interface paths {
     /** delete a group */
     delete: operations["delete_api-v1-group-0b9bee095d760068add3c5fe8a467e8b"];
   };
+  "/api/v1/group/{group}/changed_since_export": {
+    /** clear changed_since_export for group */
+    delete: operations["delete_api-v1-group-d8212f5147a935d21f14aa23761218c8"];
+  };
   "/api/v1/event/{event}/orgs": {
     /** get org list for a given event */
     get: operations["get_api-v1-event-45c1132012c55c1196f21c335b92f888"];
@@ -437,6 +441,7 @@ export interface components {
      */
     Team: {
       changed_since?: string | null;
+      changed_since_export: boolean;
       comment?: string | null;
       contact_name?: string | null;
       contact_phone?: string | null;
@@ -1516,6 +1521,37 @@ export interface operations {
   };
   /** delete a group */
   "delete_api-v1-group-0b9bee095d760068add3c5fe8a467e8b": {
+    parameters: {
+      path: {
+        group: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** clear changed_since_export for group */
+  "delete_api-v1-group-d8212f5147a935d21f14aa23761218c8": {
     parameters: {
       path: {
         group: string;

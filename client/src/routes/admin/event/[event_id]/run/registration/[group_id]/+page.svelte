@@ -14,6 +14,7 @@
     Textarea,
   } from "flowbite-svelte";
   import {
+    clearChangeSinceExport,
     getEventOrgs,
     getGroup,
     getGroupsForEvent,
@@ -29,6 +30,8 @@
   import { Table } from "flowbite-svelte";
   import FetchErrors from "../../../../../../FetchErrors.svelte";
   import {
+    BadgeCheckOutline,
+    BadgeCheckSolid,
     ExclamationCircleOutline,
     QuestionCircleSolid,
   } from "flowbite-svelte-icons";
@@ -47,8 +50,9 @@
   let slug_group_decode = $state("");
   let confirm_changes = $state(true);
   let verify_change = $state(false);
-  let verify_team_new_state: string | null = null;
+  let verify_team_new_state: string | null = $state(null);
   let verify_team: OrgTeam | null = $state(null);
+  let also_clear_changes_modal = $state(false);
 
   type OrgTeam = {
     org: Org;
@@ -141,6 +145,7 @@
       presence_state: team.team.presence_state,
     }).result;
     if (res.ok) {
+      team.team.changed_since_export = true;
     } else {
       fetch_errors.check(res);
       alert("failed to set team readiness");
@@ -170,19 +175,30 @@
     verify_team_new_state = new_state;
   }
 
-  async function download_swisschess() {
+  async function download_swisschess(clear_flags: boolean) {
     // TODO: write back team numbers to database.
     // TODO: build slug -> name lookup for printing
     // TODO: build shortened name -> full name lookup for printing
+    let exported_groups: string[] = [];
 
     const swiss_teams: SwissChessTeam[] = teams.map((n, i) => ({
       number: (i + 1).toString(),
       teamname: n.team.name,
       federation: n.org.slug,
-      select: group_slugs.get(n.team.group_id || ""),
+      select: group_slugs.get(n.team.group_id ?? ""),
       rank: "0",
       state: "",
     }));
+
+    if (clear_flags) {
+      teams.forEach((team) => {
+        if (!exported_groups.includes(team.team.group_id ?? "")) {
+          exported_groups.push(team.team.group_id ?? "");
+        }
+        team.team.changed_since_export = false;
+      });
+    }
+
     let data = { teams: swiss_teams };
     let data_string = JSON.stringify(data);
 
@@ -202,6 +218,12 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    if (clear_flags) {
+      exported_groups.forEach((group_id) => {
+        clearChangeSinceExport({ group: group_id }).resp;
+      });
+    }
   }
 </script>
 
@@ -243,7 +265,15 @@
                   ? "bg-slate-300 hover:bg-slate-200 line-through"
                   : "bg-red-400 hover:bg-red-300")}
           >
-            <TableBodyCell class="td-class">{index + 1}</TableBodyCell>
+            <TableBodyCell class="td-class"
+              >{index + 1}
+
+              {#if team.team.changed_since_export}
+                <BadgeCheckOutline />
+              {:else}
+                <BadgeCheckSolid />
+              {/if}
+            </TableBodyCell>
             <TableBodyCell class="td-class">
               <span class="font-bold">
                 {team.team.name.substring(0, 32)}</span
@@ -314,8 +344,11 @@
       </TableBody>
     </Table>
   </div>
-  <Button class="m-10" on:click={download_swisschess}
-    >Download SwissChess Mannschaftsliste...</Button
+  <Button
+    class="m-10"
+    on:click={() => {
+      also_clear_changes_modal = true;
+    }}>Download SwissChess Mannschaftsliste...</Button
   >
   <Label>Urkundendruck - Schulename:</Label>
   <Textarea value={slug_org_decode}></Textarea>
@@ -351,6 +384,38 @@
         }}>Yes</Button
       >
       <Button color="alternative">No (Abort)</Button>
+    </div>
+  </Modal>
+
+  <Modal bind:open={also_clear_changes_modal} size="xs" autoclose>
+    <div class="text-center">
+      <QuestionCircleSolid
+        class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+      />
+      <div class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+        <div>Swiss-Chess Export</div>
+        <div>
+          Sollen die angezeigten Teams nach dem Export als exportiert markiert
+          werden?
+        </div>
+      </div>
+      <Button
+        color="red"
+        class="me-2"
+        on:click={() => {
+          also_clear_changes_modal = false;
+
+          download_swisschess(true);
+        }}>Yes</Button
+      >
+      <Button
+        color="alternative"
+        on:click={() => {
+          also_clear_changes_modal = false;
+
+          download_swisschess(false);
+        }}>No</Button
+      >
     </div>
   </Modal>
 </div>
