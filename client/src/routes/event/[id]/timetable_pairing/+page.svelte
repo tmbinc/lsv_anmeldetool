@@ -211,25 +211,23 @@
             </tr>
           </thead>
           <tbody>
-            {#each { length: 10 }}
-              {#each pairings as pairing}
-                {#if pairing.group == group.id}
-                  <tr class="break-inside-avoid">
-                    <td class="py-0 px-1">{pairing.table}</td><td
-                      class="py-0 px-1 overflow-clip"
-                    >
-                      <div>{pairing.team_home}</div>
-                      <div>
-                        <sub>{pairing.team_home_org}</sub>
-                      </div></td
-                    >
-                    <td class="py-0 px-1 overflow-clip">
-                      <div>{pairing.team_guest}</div>
-                      <div><sub>{pairing.team_guest_org}</sub></div>
-                    </td></tr
+            {#each pairings as pairing}
+              {#if pairing.group == group.id}
+                <tr class="break-inside-avoid">
+                  <td class="py-0 px-1">{pairing.table}</td><td
+                    class="py-0 px-1 overflow-clip"
                   >
-                {/if}
-              {/each}
+                    <div>{pairing.team_home}</div>
+                    <div>
+                      <sub>{pairing.team_home_org}</sub>
+                    </div></td
+                  >
+                  <td class="py-0 px-1 overflow-clip">
+                    <div>{pairing.team_guest}</div>
+                    <div><sub>{pairing.team_guest_org}</sub></div>
+                  </td></tr
+                >
+              {/if}
             {/each}
           </tbody>
         </table>

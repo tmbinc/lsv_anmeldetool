@@ -45,7 +45,10 @@
 
       // Sort results by (inverted) rank
       results = resp_results.data.results
-        .sort((a, b) => (b.rank || 0) - (a.rank || 0))
+        .sort(
+          (a, b) =>
+            a.group.localeCompare(b.group) || (b.rank || 0) - (a.rank || 0)
+        )
         .map((entry) => ({
           ...entry,
           next_left: null,
@@ -54,31 +57,35 @@
 
       function findRank(
         results: ResultEntryCeremony[],
-        group: String,
-        rank: number
+        result: ResultEntryCeremony,
+        delta: number
       ): ResultEntryCeremony | undefined {
-        return results.find(
-          (entry) => entry.group == group && entry.rank == rank
-        );
+        let index = results.findIndex((r) => r == result);
+        return results[index + delta];
       }
 
-      results.forEach((result) => {
-        let rank_left = 0,
-          rank_right = 0;
-        if ((result.rank ?? 0) % 2 == 1) {
-          rank_left = result.rank ? result.rank - 1 : 0;
-          rank_right = result.rank ? result.rank - 2 : 0;
+      results.forEach((result, index) => {
+        let delta_left = 0,
+          delta_right = 0;
+
+        if (index % 2 == 1) {
+          delta_left = 1;
+          delta_right = 2;
         } else {
-          rank_right = result.rank ? result.rank - 1 : 0;
-          rank_left = result.rank ? result.rank - 2 : 0;
+          delta_right = 1;
+          delta_left = 2;
         }
+
+        let team_left = results[index + delta_left];
+        let team_right = results[index + delta_right];
+
         result.next_left =
-          rank_left > 3
-            ? (findRank(results, result.group, rank_left) ?? null)
+          team_left?.group == result.group && (team_left?.rank ?? 0) > 3
+            ? team_left
             : null;
         result.next_right =
-          rank_right > 3
-            ? (findRank(results, result.group, rank_right) ?? null)
+          team_right?.group == result.group && (team_right?.rank ?? 0) > 3
+            ? team_right
             : null;
       });
 
@@ -151,8 +158,11 @@
                     <tbody>
                       <tr>
                         <td width="30%" class="boxestd">
+                          <div class="team_badge">A</div>
                           {#if result.next_left}
-                            {result.next_left.team}
+                            <div class="team_small">
+                              {result.next_left.team}
+                            </div>
                             <div class="schule_small">
                               ({result.next_left.team_org})
                             </div>
@@ -160,8 +170,11 @@
                         </td>
                         <td width="40%" class="noboxestd"> B&uuml;hne </td>
                         <td width="30%" class="boxestd">
+                          <div class="team_badge">B</div>
                           {#if result.next_right}
-                            {result.next_right.team}
+                            <div class="team_small">
+                              {result.next_right.team}
+                            </div>
                             <div class="schule_small">
                               ({result.next_right.team_org})
                             </div>
@@ -216,6 +229,21 @@
 
   .schule_small {
     font-size: 50%;
+  }
+
+  .team_small {
+    font-size: 70%;
+  }
+
+  .team_badge {
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    border-radius: 50%;
+    font-size: 50px;
+    color: #000;
+    text-align: center;
+    background: #fff;
   }
 
   .rank {

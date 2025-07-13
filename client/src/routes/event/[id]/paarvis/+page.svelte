@@ -128,7 +128,7 @@
               entry = pairings_per_group[n - 1];
             }
 
-            const PAGE_LEN = 2;
+            const PAGE_LEN = 10;
             let pages = entry[1];
             let page = pages.find((f) => f.length < PAGE_LEN);
             if (page == undefined) {
