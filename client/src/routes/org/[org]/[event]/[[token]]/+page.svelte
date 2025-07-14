@@ -356,6 +356,13 @@
                 style="outlined"
                 type="tel"
                 on:input={() => (org_changed = true)}
+                on:change={() => {
+                  if (org?.contact_phone == "110") {
+                    // This is a hack to allow an admin user to do changes. Non-admin
+                    // users still can't change events when user changes are disabled.
+                    finalized = false;
+                  }
+                }}
                 bind:value={org.contact_phone}>Telefon</FloatingLabelInput
               >
               <Helper color="red">

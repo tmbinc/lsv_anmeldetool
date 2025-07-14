@@ -39,9 +39,11 @@
     if (resp.ok) {
       event_orgs = resp.data;
       email_addresses = new Set(
-        event_orgs.map(
-          (org) => org.org.contact_name + " <" + org.org.contact_email + ">"
-        )
+        event_orgs
+          .filter((e) => e.teams.length != 0)
+          .map(
+            (org) => org.org.contact_name + " <" + org.org.contact_email + ">"
+          )
       );
     } else {
       fetch_errors.check(resp);
@@ -74,7 +76,7 @@
               <TableBodyRow
                 ><TableBodyCell>{org.org.name}</TableBodyCell>
                 <TableBodyCell>
-                  ({index + 1})
+                  {index + 1}
                 </TableBodyCell>
 
                 <TableBodyCell>
