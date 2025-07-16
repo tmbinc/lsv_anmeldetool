@@ -287,11 +287,19 @@
               ></TableBodyCell
             >
             <TableBodyCell class="td-class">
-              <a href="/org/{team.org.id}/{event_id}">{team.org.name}</a>
-              <sup class={team.org.slug.length > 3 ? "text-red-600" : ""}
-                >{team.org.slug}</sup
-              >
-              <sub>{group_slugs.get(team.team.group_id || "")}</sub>
+              <div>
+                <a href="/org/{team.org.id}/{event_id}">{team.org.name}</a>
+                <sup class={team.org.slug.length > 3 ? "text-red-600" : ""}
+                  >{team.org.slug}</sup
+                >
+                <sub>{group_slugs.get(team.team.group_id || "")}</sub>
+              </div>
+              <div class="text-[10px] overflow-clip">
+                {team.team.contact_name}
+                (<a href="tel:{team.team.contact_phone}"
+                  >{team.team.contact_phone}</a
+                >)
+              </div>
             </TableBodyCell>
             <TableBodyCell class="td-class">
               <a href="/admin/event/{event_id}">{team.org_state}</a>

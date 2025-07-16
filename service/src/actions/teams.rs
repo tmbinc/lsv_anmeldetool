@@ -75,10 +75,7 @@ pub fn set_team_presence_state(
 ) -> Result<(), DbError> {
     diesel::update(schema::teams::table)
         .filter(schema::teams::id.eq(team_id.to_string()))
-        .set((
-            schema::teams::presence_state.eq(presence_state),
-            schema::teams::changed_since_export.eq(true),
-        ))
+        .set((schema::teams::presence_state.eq(presence_state),))
         .execute(conn)?;
     Ok(())
 }
