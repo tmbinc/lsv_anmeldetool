@@ -164,7 +164,6 @@
       presence_state: team.team.presence_state,
     }).result;
     if (res.ok) {
-      team.team.changed_since_export = true;
     } else {
       fetch_errors.check(res);
       alert("failed to set team readiness");

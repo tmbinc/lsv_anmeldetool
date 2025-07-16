@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import {
     getPairings,
     type Group,
@@ -53,9 +53,12 @@
   };
 
   const event_id = page.params.id;
+  let evtSource: EventSource | null = null;
 
   onMount(async () => {
-    getPairings({ event: event_id }).resp.subscribe((resp) => {
+    let pairing_request = getPairings({ event: event_id });
+
+    pairing_request.resp.subscribe((resp) => {
       if (resp?.ok) {
         pairings = resp.data.pairings;
         groups = resp.data.groups;
@@ -99,6 +102,18 @@
         loading = false;
       }
     });
+
+    evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
+    evtSource.onmessage = function (event) {
+      var dataobj = JSON.parse(event.data);
+      if (dataobj.kind == "pairing") {
+        pairing_request.reload();
+      }
+    };
+  });
+
+  onDestroy(() => {
+    evtSource?.close();
   });
 
   function findRoom(group_id: string, table: number) {
