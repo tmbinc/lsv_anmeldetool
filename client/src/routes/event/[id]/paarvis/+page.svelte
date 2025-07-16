@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { onDestroy, onMount, tick } from "svelte";
   import {
     getEvent,
     getGroupsForEvent,
@@ -20,7 +20,8 @@
   import "reveal.js/dist/reset.css";
   import "reveal.js/dist/reveal.css";
   import "reveal.js/dist/theme/night.css";
-  import img from "$lib/images/logo_mhs.svg";
+  import img_sponsor from "$lib/images/logo_mhs.svg";
+  import img_schachverein from "$lib/images/Logo_Final_Schachverein.png";
 
   let event_id = page.params.id;
   let fetch_errors: FetchErrors;
@@ -34,12 +35,13 @@
   let started = $state(false);
   let orgs: Set<string> = new Set();
   let start_times: string[] = $state([]);
+  let row_items_per_group: [string, TimetableRow[]][] = $state([]);
   let timetable = $state(new Map<string, TimetableRow[]>());
   let groupnames = $state(new Map<string, string>());
   let last_update = $state("");
-
   let pairings_per_group: [Group, PairingEntry[][]][] = $state([]);
-
+  let evtSource: EventSource | null = null;
+  $inspect(start_times);
   onMount(async () => {
     let timetable_request = getTimetable({ event: event_id });
 
@@ -55,6 +57,8 @@
 
           let seen_active = new Set<string>();
           let new_start_times = new Set<string>();
+
+          row_items_per_group = [];
 
           // Ignore anything before the first "active" for each group.
           for (const row of resp.data.rows) {
@@ -78,6 +82,16 @@
                 r.push(row);
               }
               new_start_times.add(key);
+
+              let r_group = row_items_per_group.find((r) => r[0] == row.group);
+              let r_group_rows: TimetableRow[];
+              if (!r_group) {
+                r_group_rows = [];
+                row_items_per_group.push([row.group, r_group_rows]);
+              } else {
+                r_group_rows = r_group[1];
+              }
+              r_group_rows.push(row);
             }
           }
 
@@ -91,6 +105,7 @@
 
           last_update = currentTime();
 
+          goSlide();
           loading = false;
         } else {
           failed_load = true;
@@ -108,6 +123,8 @@
         pairings.sort((a, b) => a.table - b.table);
         let rounds = new Set<number>();
 
+        orgs.clear();
+
         for (let pairing of pairings) {
           if (pairing.team_home_org) {
             orgs.add(pairing.team_home_org);
@@ -117,6 +134,8 @@
           }
           rounds.add(pairing.round);
         }
+
+        pairings_per_group = [];
 
         // Split pairings into a.) groups and b.) chunks of PAGE_LEN;
         pairings.forEach((pairing) => {
@@ -128,7 +147,7 @@
               entry = pairings_per_group[n - 1];
             }
 
-            const PAGE_LEN = 10;
+            const PAGE_LEN = 8;
             let pages = entry[1];
             let page = pages.find((f) => f.length < PAGE_LEN);
             if (page == undefined) {
@@ -146,11 +165,9 @@
       }
     });
 
-    const evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
+    evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
     evtSource.onmessage = function (event) {
-      console.log(event);
       var dataobj = JSON.parse(event.data);
-      console.log(dataobj);
       if (dataobj.kind == "pairing") {
         pairing_request.reload();
       }
@@ -167,6 +184,10 @@
       return "" + i;
     }
   }
+
+  onDestroy(() => {
+    evtSource?.close();
+  });
 
   function currentTime() {
     var today = new Date();
@@ -196,6 +217,7 @@
       loop: true,
       help: false,
       controls: false,
+      hash: true,
       transition: "fade",
     });
     deck.configure({
@@ -240,11 +262,35 @@
     <div id="time"></div>
   </div>
 
-  <div class="footer">(Stand: {last_update})</div>
+  <div class="header_left">(Stand: {last_update})</div>
   <div class="footer_right">
-    <img src={img} alt="Michael Haukohl Stiftung" />
+    <img src={img_sponsor} alt="Michael Haukohl Stiftung" />
   </div>
   <div class="slides">
+    <section>
+      <section>
+        <div>Willkommen beim</div>
+        <h2>{event_name}</h2>
+      </section>
+      <section>
+        <div>Diese Veranstaltung wird ausgerichtet vom</div>
+        <div>Lübecker Schachverein von 1873 e.V.</div>
+        <div>
+          <img src={img_schachverein} alt="Lübecker Schachverein" width="50%" />
+        </div>
+        <h2>www.lsv1873.de</h2>
+      </section>
+      <section>
+        <h3>
+          Diese Veranstaltung wird unterstützt von der Michael-Haukohl-Stiftung
+        </h3>
+        <h1>
+          <div>
+            <img src={img_sponsor} alt="Michael Haukohl Stiftung" width="50%" />
+          </div>
+        </h1>
+      </section>
+    </section>
     <section>
       <div>Willkommen!</div>
       <h2>{event_name}</h2>
@@ -265,6 +311,66 @@
         {/each}
       </ul>
     </section>
+
+    {#each groups as group}
+      <section>
+        <section>
+          <h1>
+            {#each row_items_per_group
+              .filter((p) => p[0] == group.id)
+              .map((p) => p[1]) as rows}
+              {#each rows.filter((f) => f.state == "active") as row}
+                {row.name}
+              {/each}
+            {/each}
+          </h1>
+
+          <p>{event_name}</p>
+          <p><small>{group.name}</small></p>
+
+          {#each row_items_per_group
+            .filter((p) => p[0] == group.id)
+            .map((p) => p[1]) as rows}
+            {#each rows.filter((f) => f.state == "next") as row}
+              {new Date(row.expected_time + "Z")
+                .toTimeString()
+                .split(" ")[0]
+                .slice(0, 5)} Uhr:
+              {row.name}
+            {/each}
+          {/each}
+        </section>
+
+        <section>
+          <div>Diese Veranstaltung wird ausgerichtet vom</div>
+          <div>Lübecker Schachverein von 1873 e.V.</div>
+          <div>
+            <img
+              src={img_schachverein}
+              alt="Lübecker Schachverein"
+              width="50%"
+            />
+          </div>
+          <h2>www.lsv1873.de</h2>
+        </section>
+        <section>
+          <h3>
+            Diese Veranstaltung wird unterstützt von der
+            Michael-Haukohl-Stiftung
+          </h3>
+          <h1>
+            <div>
+              <img
+                src={img_sponsor}
+                alt="Michael Haukohl Stiftung"
+                width="50%"
+              />
+            </div>
+          </h1>
+        </section>
+      </section>
+    {/each}
+
     {#each pairings_per_group as [group, pages]}
       <section>
         {#each pages as page, index}
@@ -275,22 +381,42 @@
               / {pages.length})
             </p>
 
-            <table width="100%">
-              <tbody> </tbody><tbody>
+            <table width="100%" class="table-fixed">
+              <tbody>
                 <tr
-                  ><td>Tisch</td><td>Mannschaft 1 (Brett 1 schwarz)</td><td
+                  ><td width="5%" class="overflow-hidden">Tisch</td><td
+                    width="40%"
+                    class="overflow-hidden">Mannschaft 1 (Brett 1 schwarz)</td
+                  ><td width="40%" class="overflow-hidden"
                     >Mannschaft 2 (Brett 1 weiß)</td
                   ></tr
                 >
 
                 {#each page as pairing}
                   <tr
-                    ><td>{pairing.table}</td><td
-                      >{pairing.team_home}
-                      <sub>{pairing.team_home_org}</sub></td
                     ><td
-                      >{pairing.team_guest}
-                      <sub>{pairing.team_guest_org}</sub></td
+                      width="5%"
+                      class="overflow-hidden whitespace-nowrap p-0"
+                      >{pairing.table}</td
+                    ><td
+                      width="40%"
+                      class="overflow-hidden whitespace-nowrap p-0"
+                    >
+                      <div class="pairing_teamname">
+                        {pairing.team_home}
+                      </div>
+                      <div class="pairing_orgname">
+                        {pairing.team_home_org}
+                      </div></td
+                    ><td
+                      width="40%"
+                      class="overflow-hidden whitespace-nowrap p-0"
+                      ><div class="pairing_teamname">
+                        {pairing.team_guest || "spielfrei"}
+                      </div>
+                      <div class="pairing_orgname">
+                        {pairing.team_guest_org}
+                      </div></td
                     ></tr
                   >
                 {/each}
@@ -346,18 +472,35 @@
     right: 1em;
     font-size: 1em;
   }
+
+  .reveal .header_left {
+    position: absolute;
+    top: 1em;
+    left: 1em;
+    font-size: 0.5em;
+  }
+
   .reveal .footer {
     position: absolute;
     bottom: 1em;
     left: 4em;
     font-size: 0.5em;
   }
-  .reveal .footer_right {
+
+  .reveal .footer_left {
     position: absolute;
     bottom: 1em;
     right: 7em;
     font-size: 0.5em;
   }
+
+  .reveal .footer_right {
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
+    font-size: 0.5em;
+  }
+
   .reveal section table {
     display: inline-block;
     font-size: 0.8em;
@@ -369,5 +512,19 @@
     font-size: 1.5em;
     line-height: 1.2em;
     vertical-align: top;
+  }
+
+  .reveal table td {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+
+  .pairing_orgname {
+    font-size: 0.4em;
+    line-height: 1.4em;
+  }
+
+  .pairing_teamname {
+    font-size: 0.8em;
   }
 </style>

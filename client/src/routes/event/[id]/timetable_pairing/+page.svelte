@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import {
     getPairings,
     getTimetable,
@@ -12,6 +12,7 @@
   import { page } from "$app/state";
   import Loading from "../../../Loading.svelte";
   import LoadError from "../../../LoadError.svelte";
+  import { Checkbox } from "flowbite-svelte";
 
   let loading = $state(true);
   let failed_load = $state(false);
@@ -26,6 +27,8 @@
 
   let pairings: PairingEntry[] = $state([]);
   let orgs: Set<string> = new Set();
+  let evtSource: EventSource | null = null;
+  let enabled_groups: string[] = $state([]);
 
   onMount(async () => {
     let timetable_request = getTimetable({ event: event_id });
@@ -74,6 +77,10 @@
 
           groupnames = new Map(groups.map((group) => [group.id, group.name]));
 
+          if (enabled_groups) {
+            enabled_groups = groups.map((group) => group.id);
+          }
+
           start_times = [...new_start_times].sort((a, b) => a.localeCompare(b));
 
           loading = false;
@@ -105,7 +112,7 @@
       }
     });
 
-    const evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
+    evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
     evtSource.onmessage = function (event) {
       console.log(event);
       var dataobj = JSON.parse(event.data);
@@ -117,6 +124,10 @@
         timetable_request.reload();
       }
     };
+  });
+
+  onDestroy(() => {
+    evtSource?.close();
   });
 
   type EntryWithName = {
@@ -197,10 +208,18 @@
 
   <div class="float:bottom columns-4 text-white">
     {#each groups_pairings.filter((f) => !f.replacement) as group, group_index (group.id)}
-      <div class={"mb-10 overflow-clip bg-" + group.color + "-500"}>
+      <div
+        class={"mb-10 overflow-clip bg-" + group.color + "-500"}
+        role="button"
+        tabindex="0"
+        ondblclick={() => {
+          enabled_groups = enabled_groups?.filter((f) => f != group.id);
+        }}
+        hidden={!enabled_groups?.includes(group.id)}
+      >
         <p class="text-3xl">{group.name} - Runde {roundForGroup(group)}</p>
         <table
-          class="table-fixed border-separate border-spacing-2 border border-gray-400 dark:border-gray-500"
+          class="table-fixed border-separate border-spacing-0 border border-gray-400 dark:border-gray-500"
         >
           <thead>
             <tr>
@@ -211,23 +230,26 @@
             </tr>
           </thead>
           <tbody>
-            {#each pairings as pairing}
-              {#if pairing.group == group.id}
-                <tr class="break-inside-avoid">
-                  <td class="py-0 px-1">{pairing.table}</td><td
-                    class="py-0 px-1 overflow-clip"
-                  >
-                    <div>{pairing.team_home}</div>
-                    <div>
-                      <sub>{pairing.team_home_org}</sub>
-                    </div></td
-                  >
-                  <td class="py-0 px-1 overflow-clip">
-                    <div>{pairing.team_guest}</div>
-                    <div><sub>{pairing.team_guest_org}</sub></div>
-                  </td></tr
+            {#each pairings.filter((p) => p.group == group.id) as pairing, pairing_index}
+              <tr
+                class={"break-inside-avoid " +
+                  (pairing_index % 2
+                    ? "bg-" + group.color + "-700"
+                    : "bg-" + group.color + "-600")}
+              >
+                <td class="py-0 px-1">{pairing.table}</td><td
+                  class="py-0 px-1 overflow-clip"
                 >
-              {/if}
+                  <div>{pairing.team_home}</div>
+                  <div>
+                    <sub>{pairing.team_home_org}</sub>
+                  </div></td
+                >
+                <td class="py-0 px-1 overflow-clip">
+                  <div>{pairing.team_guest ?? "spielfrei"}</div>
+                  <div><sub>{pairing.team_guest_org}</sub></div>
+                </td></tr
+              >
             {/each}
           </tbody>
         </table>

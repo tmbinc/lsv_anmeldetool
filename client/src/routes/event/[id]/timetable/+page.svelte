@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { getTimetable, type TimetableRow } from "../../../../api/api";
   import { page } from "$app/state";
   import Loading from "../../../Loading.svelte";
@@ -19,9 +19,12 @@
   let start_times: string[] = $state([]);
   let timetable = $state(new Map<string, TimetableRow[]>());
   let groupnames = $state(new Map<string, string>());
+  let timetable_resp;
+  let evtSource: EventSource | null = null;
 
   onMount(async () => {
-    getTimetable({ event: event_id }).resp.subscribe((resp) => {
+    let timetable_request = getTimetable({ event: event_id });
+    timetable_request.resp.subscribe((resp) => {
       if (resp) {
         if (resp.ok) {
           event_name = resp.data.event_name;
@@ -65,6 +68,19 @@
         }
       }
     });
+    evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
+    evtSource.onmessage = function (event) {
+      console.log(event);
+      var dataobj = JSON.parse(event.data);
+      console.log(dataobj);
+      if (dataobj.kind == "timetable") {
+        timetable_request.reload();
+      }
+    };
+  });
+
+  onDestroy(() => {
+    evtSource?.close();
   });
 
   type EntryWithName = {

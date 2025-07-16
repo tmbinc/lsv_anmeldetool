@@ -21,15 +21,15 @@
         >Registrierung</NavLi
       >
       <NavLi href="/admin/event/{event_id}/run/timetable/">Zeitplanung</NavLi>
-      <NavLi href="/event/{event_id}/paarvis/">paarvis</NavLi>
-      <NavLi href="/event/{event_id}/timetable_pairing/"
-        >timetable_pairing</NavLi
-      >
       <NavLi href="/event/{event_id}/timetable/">timetable</NavLi>
       <NavLi href="/admin/event/{event_id}/run/results/"
-        >Turnierleitungsfunktionen</NavLi
+        >Ergebnisse melden</NavLi
       >
-      <NavLi href="/admin/event/{event_id}/run/ceremony/">Siegerehrung</NavLi>
+      <NavLi href="/event/{event_id}/paarvis/">B:paarvis</NavLi>
+      <NavLi href="/event/{event_id}/timetable_pairing/"
+        >B:timetable_pairing</NavLi
+      >
+      <NavLi href="/admin/event/{event_id}/run/ceremony/">B:Siegerehrung</NavLi>
     </NavUl>
   </Navbar>
 </nav>

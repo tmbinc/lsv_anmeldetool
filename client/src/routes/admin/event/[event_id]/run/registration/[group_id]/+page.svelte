@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, type Component } from "svelte";
+  import { onDestroy, onMount, type Component } from "svelte";
   import {
     Button,
     ButtonGroup,
@@ -53,6 +53,7 @@
   let verify_team_new_state: string | null = $state(null);
   let verify_team: OrgTeam | null = $state(null);
   let also_clear_changes_modal = $state(false);
+  let evtSource: EventSource | null = null;
 
   type OrgTeam = {
     org: Org;
@@ -136,6 +137,24 @@
     } else {
       fetch_errors.check(resp_event_orgs);
     }
+
+    evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
+    evtSource.onmessage = function (event) {
+      var dataobj = JSON.parse(event.data);
+      if (dataobj.kind == "team_changed") {
+        let ch_team = dataobj.team;
+        let ch_state = dataobj.state;
+        teams.forEach((team) => {
+          if (team.team.id == ch_team) {
+            team.team.presence_state = ch_state;
+          }
+        });
+      }
+    };
+  });
+
+  onDestroy(() => {
+    evtSource?.close();
   });
 
   async function set_team_presence_state(team: OrgTeam, new_state: string) {
@@ -151,20 +170,6 @@
       alert("failed to set team readiness");
     }
   }
-
-  const evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
-  evtSource.onmessage = function (event) {
-    var dataobj = JSON.parse(event.data);
-    if (dataobj.kind == "team_changed") {
-      let ch_team = dataobj.team;
-      let ch_state = dataobj.state;
-      teams.forEach((team) => {
-        if (team.team.id == ch_team) {
-          team.team.presence_state = ch_state;
-        }
-      });
-    }
-  };
 
   async function set_team_presence_state_verify(
     team: OrgTeam,
