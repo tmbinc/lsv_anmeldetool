@@ -274,12 +274,12 @@
           <Label for="org_name"
             >Name der Schule, wie er auf den Urkunden gedruckt werden soll:</Label
           >
-          <!-- <Select
+          <Select
             class="inline w-32"
             items={genera}
             onchange={() => (org_changed = true)}
             bind:value={org.genus}
-          /> -->
+          />
           <Input
             class="inline w-8/12"
             id="org_name"
@@ -426,7 +426,7 @@
             {teams[0].name}{/if}
         </p>
         <p>
-          {{ f: "der", m: "des", n: "des" }[org?.genus]}
+          {"" + { f: "der", m: "des", n: "des" }[org?.genus || ""]}
         </p>
         <p class="font-bold">
           {org?.name}

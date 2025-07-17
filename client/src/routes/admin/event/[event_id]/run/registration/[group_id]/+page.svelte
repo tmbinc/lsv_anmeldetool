@@ -119,7 +119,13 @@
             org_state: event_org.state,
           }));
         team_list.push(...new_teams);
-        slugdecode += event_org.org.slug + "=" + event_org.org.name + "|";
+        slugdecode +=
+          event_org.org.slug +
+          "=" +
+          { f: "der", m: "des", n: "des" }[event_org.org.genus || ""] +
+          " " +
+          event_org.org.name +
+          "|";
       }
       slug_org_decode =
         slugdecode.substring(0, slugdecode.length - 1) + '")' + "\n";
