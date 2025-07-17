@@ -234,8 +234,8 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
           console.log(data);
           const team = team_for_name(data.get("Mannschaft"), data.get("Land"));
           const rank = +(data.get("Rang") || "");
-          const points_team = +(data.get("Man.Pkt._won") || "");
-          const points_player = +(data.get("Brt.Pkt._won") || "");
+          const points_team = Math.floor(+(data.get("Man.Pkt._won") || ""));
+          const points_player = Math.floor(+(data.get("Brt.Pkt._won") || ""));
           const tie = Math.floor(+(data.get("Buchh") || "")); // FIXME
 
           result_list.push({
