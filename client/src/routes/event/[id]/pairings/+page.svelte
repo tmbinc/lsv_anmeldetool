@@ -212,7 +212,7 @@
                     <TableBodyCell class="td-class">
                       <div>Runde {pairing.round}</div>
                       <div>
-                        Brett {pairing.table}
+                        Tisch {pairing.table}
                         {findRoom(group.id, pairing.table)}
                       </div></TableBodyCell
                     >

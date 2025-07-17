@@ -234,18 +234,18 @@
               <tr
                 class={"break-inside-avoid " +
                   (pairing_index % 2
-                    ? "bg-" + group.color + "-700"
-                    : "bg-" + group.color + "-600")}
+                    ? "bg-" + group.color + "-800"
+                    : "bg-" + group.color + "-400")}
               >
-                <td class="py-0 px-1">{pairing.table}</td><td
-                  class="py-0 px-1 overflow-clip"
-                >
+                <td class="py-0 px-1 border-b-2 border-b-black"
+                  >{pairing.table}</td
+                ><td class="py-0 px-1 overflow-clip border-b-2 border-b-black">
                   <div>{pairing.team_home}</div>
                   <div>
                     <sub>{pairing.team_home_org}</sub>
                   </div></td
                 >
-                <td class="py-0 px-1 overflow-clip">
+                <td class="py-0 px-1 overflow-clip border-b-2 border-b-black">
                   <div>{pairing.team_guest ?? "spielfrei"}</div>
                   <div><sub>{pairing.team_guest_org}</sub></div>
                 </td></tr
