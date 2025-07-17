@@ -151,39 +151,36 @@
 
               {#if result.next_left || result.next_right}
                 <hr />
-                <small
-                  >N&auml;chste Mannschaften:
 
-                  <table class="reveal boxes">
-                    <tbody>
-                      <tr>
-                        <td width="30%" class="boxestd">
-                          <div class="team_badge">A</div>
-                          {#if result.next_left}
-                            <div class="team_small">
-                              {result.next_left.team}
-                            </div>
-                            <div class="schule_small">
-                              ({result.next_left.team_org})
-                            </div>
-                          {/if}
-                        </td>
-                        <td width="40%" class="noboxestd"> B&uuml;hne </td>
-                        <td width="30%" class="boxestd">
-                          <div class="team_badge">B</div>
-                          {#if result.next_right}
-                            <div class="team_small">
-                              {result.next_right.team}
-                            </div>
-                            <div class="schule_small">
-                              ({result.next_right.team_org})
-                            </div>
-                          {/if}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </small>
+                <p>
+                  <small
+                    >Es machen sich bitte fertig, und kommen auf der linken
+                    Seite zur Bühne:</small
+                  >
+                </p>
+
+                <ul>
+                  {#if result.next_left}
+                    <li>
+                      <span class="team_small">
+                        {result.next_left.team}
+                      </span>
+                      <span class="schule_small">
+                        ({result.next_left.team_org})
+                      </span>
+                    </li>
+                  {/if}
+                  {#if result.next_right}
+                    <li>
+                      <span class="team_small">
+                        {result.next_right.team}
+                      </span>
+                      <span class="schule_small">
+                        ({result.next_right.team_org})
+                      </span>
+                    </li>
+                  {/if}
+                </ul>
               {/if}
             </section>
           {/if}
@@ -228,11 +225,11 @@
   }
 
   .schule_small {
-    font-size: 50%;
+    font-size: 80%;
   }
 
   .team_small {
-    font-size: 70%;
+    font-size: 100%;
   }
 
   .team_badge {
