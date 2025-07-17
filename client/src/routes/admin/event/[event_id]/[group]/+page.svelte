@@ -200,7 +200,9 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
       }
       if (header) {
         if (in_pairing) {
-          let data = new Map(columns.map((val, index) => [header[index], val]));
+          let data = new Map(
+            columns.map((val, index) => [header![index], val])
+          );
           const team_home = team_for_name(
             data.get("Mannschaft_home"),
             data.get("Land_home")
@@ -226,13 +228,15 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
         }
 
         if (in_results) {
-          let data = new Map(columns.map((val, index) => [header[index], val]));
+          let data = new Map(
+            columns.map((val, index) => [header![index], val])
+          );
           console.log(data);
           const team = team_for_name(data.get("Mannschaft"), data.get("Land"));
           const rank = +(data.get("Rang") || "");
           const points_team = +(data.get("Man.Pkt._won") || "");
           const points_player = +(data.get("Brt.Pkt._won") || "");
-          const tie = +(data.get("Buchh") || "");
+          const tie = Math.floor(+(data.get("Buchh") || "")); // FIXME
 
           result_list.push({
             team: team ?? undefined,
