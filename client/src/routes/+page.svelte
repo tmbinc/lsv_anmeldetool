@@ -54,7 +54,21 @@ dark:-outline-offset-1 dark:outline-white/10"
                     Datum: {new Date(event.begin).toLocaleDateString()}
                   {/if}
                 </TableBodyCell>
-                {#if event.allow_set_present}
+                {#if !event.registration_active}
+                  <TableBodyCell>
+                    <Button disabled={true}>
+                      {#if event.registration_start_date}
+                        <i
+                          >Anmeldung ab dem {new Date(
+                            event.registration_start_date
+                          ).toLocaleDateString()}
+                        </i>
+                      {:else}
+                        <i>noch keine Registrierung möglich</i>
+                      {/if}
+                    </Button>
+                  </TableBodyCell>
+                {:else if event.allow_set_present}
                   <TableBodyCell
                     ><Button href="/event/{event.id}/timetable"
                       >Zeitplan...</Button

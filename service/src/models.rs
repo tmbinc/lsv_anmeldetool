@@ -127,6 +127,8 @@ pub struct Event {
     pub allow_user_changes: bool,
     pub results_are_public: bool,
     pub self_registration_allowed: bool,
+    pub registration_active: bool,
+    pub registration_start_date: Option<NaiveDateTime>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]

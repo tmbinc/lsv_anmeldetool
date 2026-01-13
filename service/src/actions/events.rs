@@ -58,6 +58,8 @@ pub fn insert_new_event(conn: &mut SqliteConnection, nm: &str) -> Result<models:
         allow_user_changes: true,
         results_are_public: false,
         self_registration_allowed: false,
+        registration_active: false,
+        registration_start_date: None,
     };
 
     diesel::insert_into(events)

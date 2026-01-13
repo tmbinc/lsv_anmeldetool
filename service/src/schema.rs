@@ -12,6 +12,8 @@ diesel::table! {
         allow_user_changes -> Bool,
         results_are_public -> Bool,
         self_registration_allowed -> Bool,
+        registration_active -> Bool,
+        registration_start_date -> Nullable<Timestamp>,
     }
 }
 

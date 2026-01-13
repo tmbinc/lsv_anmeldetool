@@ -11,6 +11,7 @@
   } from "flowbite-svelte";
   import "../app.css";
   import { page } from "$app/stores";
+  import img_verein from "$lib/images/Logo_Final_Schachverein.png";
 </script>
 
 <svelte:head>
@@ -21,11 +22,7 @@
   <nav>
     <Navbar let:hidden let:toggle>
       <NavBrand href="/">
-        <img
-          src="https://lsv1873.de/images/Joa/Logo_Final_Schachverein.png"
-          class="mr-3 h-6 sm:h-9"
-          alt="LSV1873 Logo"
-        />
+        <img src={img_verein} class="mr-3 h-6 sm:h-9" alt="LSV1873 Logo" />
         <span
           class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
         >

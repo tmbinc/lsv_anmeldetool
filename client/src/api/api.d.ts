@@ -210,6 +210,9 @@ export interface components {
       public: boolean;
       /** Format: partial-date-time */
       public_reg_until?: string | null;
+      registration_active: boolean;
+      /** Format: partial-date-time */
+      registration_start_date?: string | null;
       results_are_public: boolean;
       self_registration_allowed: boolean;
     };

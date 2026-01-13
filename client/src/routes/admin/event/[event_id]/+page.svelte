@@ -193,6 +193,19 @@
         />
       </div>
       <div>
+        <Label for="event_registration_start_date"
+          >Registration Start Time -- FIXME: format _must be_ <pre>2022-01-19T18:15:36.283</pre></Label
+        >
+        <Input
+          id="event_registration_start_date"
+          type="text"
+          on:input={() => (event_changed = true)}
+          bind:value={event.registration_start_date}
+          placeholder="Registration Start Date"
+          required
+        />
+      </div>
+      <div>
         <Label for="event_public_reg_until">Registration End Time</Label>
         <Input
           id="event_public_reg_until"
@@ -208,6 +221,14 @@
         <Checkbox
           id="event_public"
           bind:checked={event.public}
+          on:change={() => (event_changed = true)}
+        ></Checkbox>
+      </div>
+      <div>
+        <Label for="event_registration_active">Registration active</Label>
+        <Checkbox
+          id="event_registration_active"
+          bind:checked={event.registration_active}
           on:change={() => (event_changed = true)}
         ></Checkbox>
       </div>
