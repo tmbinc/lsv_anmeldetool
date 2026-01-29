@@ -152,7 +152,7 @@
             unsubmit_teams();
           }
         }
-      }
+      },
     );
 
     loading = !all_good;
@@ -265,6 +265,14 @@
     <h1 class="text-3xl font-bold underline">
       Wilkommen, {org?.name}!
     </h1>
+
+    <p class="my-4 text-xl text-gray-500">
+      &gt;&gt; Allgemeine Turnierinformation
+    </p>
+
+    <div class="w-full gap-4">
+      {@html reg_event?.description}
+    </div>
 
     <p class="my-4 text-xl text-gray-500">&gt;&gt; Allgemeines</p>
 
@@ -440,15 +448,15 @@
     </Card>
 
     <p class="text-lg font-medium">
-      Bei "Ansprechpartner" bitte eine Person eintragen, die am Turniertag vor
-      Ort und telefonisch erreichbar ist!
+      Bei "Teamleitung" bitte eine Person eintragen, die am Turniertag vor Ort
+      und telefonisch erreichbar ist!
     </p>
 
     <Table class="table-fixed" shadow>
       <TableHead class="flex-col lg:flex-row lg:block hidden">
         <TableHeadCell>Team-Name</TableHeadCell>
         <TableHeadCell>Altersgruppe</TableHeadCell>
-        <TableHeadCell>Ansprechpartner (Name)</TableHeadCell>
+        <TableHeadCell>Teamleitung (Name)</TableHeadCell>
         <TableHeadCell>Bearbeiten</TableHeadCell>
       </TableHead>
       <TableBody>
@@ -483,7 +491,7 @@
               />
             </TableBodyCell>
             <TableBodyCell
-              ><Label class="block mb-3 lg:hidden">Ansprechpartner</Label>
+              ><Label class="block mb-3 lg:hidden">Teamleitung</Label>
 
               {#if team.contact_name !== null}
                 <FloatingLabelInput
