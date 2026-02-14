@@ -106,6 +106,10 @@ export interface paths {
     /** get results for a given event + group */
     get: operations["get_api-v1-event-3129d62da168c0e0b04d9e202779e572"];
   };
+  "/api/v1/event/{event}/team_count": {
+    /** get event team count */
+    get: operations["get_api-v1-event-0816b7eec05af50528930336ba2dc8dd"];
+  };
   "/api/v1/event/{event}/questionnaire": {
     /** get questionaire for event */
     get: operations["get_api-v1-event-216083259df8aeef507bc5fa2036a212"];
@@ -330,9 +334,9 @@ export interface components {
     Pairing: {
       event: string;
       group_id: string;
-      /** Format: int32 */
+      /** Format: float */
       points_guest?: number | null;
-      /** Format: int32 */
+      /** Format: float */
       points_home?: number | null;
       result?: string | null;
       /** Format: int32 */
@@ -344,9 +348,9 @@ export interface components {
     };
     PairingEntry: {
       group: string;
-      /** Format: int32 */
+      /** Format: float */
       points_guest?: number | null;
-      /** Format: int32 */
+      /** Format: float */
       points_home?: number | null;
       /** Format: int32 */
       round: number;
@@ -384,18 +388,18 @@ export interface components {
     };
     ResultEntry: {
       group: string;
-      /** Format: int32 */
+      /** Format: float */
       points_player?: number | null;
-      /** Format: int32 */
+      /** Format: float */
       points_team?: number | null;
-      /** Format: int32 */
+      /** Format: float */
       rank?: number | null;
       /** Format: int32 */
       round: number;
       team?: string | null;
       team_genus?: string | null;
       team_org?: string | null;
-      /** Format: int32 */
+      /** Format: float */
       tie?: number | null;
     };
     /** ResultsForEvent */
@@ -464,16 +468,16 @@ export interface components {
     TeamResult: {
       event: string;
       group_id: string;
-      /** Format: int32 */
+      /** Format: float */
       points_player?: number | null;
-      /** Format: int32 */
+      /** Format: float */
       points_team?: number | null;
-      /** Format: int32 */
+      /** Format: float */
       rank?: number | null;
       /** Format: int32 */
       round: number;
       team?: string | null;
-      /** Format: int32 */
+      /** Format: float */
       tie?: number | null;
     };
     TimetableEntry: {
@@ -1311,6 +1315,37 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ResultsForEvent"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get event team count */
+  "get_api-v1-event-0816b7eec05af50528930336ba2dc8dd": {
+    parameters: {
+      path: {
+        event: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": number;
         };
       };
       /** @description Forbidden */

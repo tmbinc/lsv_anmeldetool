@@ -77,8 +77,8 @@ diesel::table! {
         table_num -> Integer,
         team_home -> Nullable<Text>,
         team_guest -> Nullable<Text>,
-        points_home -> Nullable<Integer>,
-        points_guest -> Nullable<Integer>,
+        points_home -> Nullable<Float>,
+        points_guest -> Nullable<Float>,
         result -> Nullable<Text>,
     }
 }
@@ -110,10 +110,10 @@ diesel::table! {
         group_id -> Text,
         round -> Integer,
         team -> Nullable<Text>,
-        rank -> Nullable<Integer>,
-        points_team -> Nullable<Integer>,
-        points_player -> Nullable<Integer>,
-        tie -> Nullable<Integer>,
+        rank -> Nullable<Float>,
+        points_team -> Nullable<Float>,
+        points_player -> Nullable<Float>,
+        tie -> Nullable<Float>,
     }
 }
 

@@ -106,7 +106,7 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
     }
 
     group_replacement = new Map(
-      groups.map((group) => [group.id, group.replacement || group.id])
+      groups.map((group) => [group.id, group.replacement || group.id]),
     );
 
     const resp_group = await getGroup({
@@ -127,7 +127,7 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
       for (const event_org of resp_event_orgs.data) {
         const new_teams = event_org.teams
           .filter(
-            (team) => group_replacement.get(team.group_id || "") == group_id
+            (team) => group_replacement.get(team.group_id || "") == group_id,
           )
           .map((team) => ({
             team: team,
@@ -140,7 +140,7 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
       team_list.sort(
         (a, b) =>
           a.team.name.localeCompare(b.team.name) ||
-          a.team.name.localeCompare(b.team.name)
+          a.team.name.localeCompare(b.team.name),
       );
       teams = team_list;
     } else {
@@ -150,7 +150,7 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
 
   function team_for_name(
     name: string | undefined,
-    slug: string | undefined
+    slug: string | undefined,
   ): PairingTeam | null | undefined {
     if (!name || !slug) {
       return null;
@@ -201,15 +201,15 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
       if (header) {
         if (in_pairing) {
           let data = new Map(
-            columns.map((val, index) => [header![index], val])
+            columns.map((val, index) => [header![index], val]),
           );
           const team_home = team_for_name(
             data.get("Mannschaft_home"),
-            data.get("Land_home")
+            data.get("Land_home"),
           );
           const team_guest = team_for_name(
             data.get("Mannschaft_guest"),
-            data.get("Land_guest")
+            data.get("Land_guest"),
           );
           const table = +(data.get("PaarNr") || "");
 
@@ -229,14 +229,14 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
 
         if (in_results) {
           let data = new Map(
-            columns.map((val, index) => [header![index], val])
+            columns.map((val, index) => [header![index], val]),
           );
           console.log(data);
           const team = team_for_name(data.get("Mannschaft"), data.get("Land"));
           const rank = +(data.get("Rang") || "");
-          const points_team = Math.floor(+(data.get("Man.Pkt._won") || ""));
-          const points_player = Math.floor(+(data.get("Brt.Pkt._won") || ""));
-          const tie = Math.floor(+(data.get("Buchh") || "")); // FIXME
+          const points_team = +(data.get("Man.Pkt._won") || "");
+          const points_player = +(data.get("Brt.Pkt._won") || "");
+          const tie = +(data.get("Buchh") || "");
 
           result_list.push({
             team: team ?? undefined,

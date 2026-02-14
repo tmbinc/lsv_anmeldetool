@@ -434,8 +434,8 @@ pub struct Pairing {
     pub table_num: i32,
     pub team_home: Option<String>,
     pub team_guest: Option<String>,
-    pub points_home: Option<i32>,
-    pub points_guest: Option<i32>,
+    pub points_home: Option<f32>,
+    pub points_guest: Option<f32>,
     pub result: Option<String>,
 }
 
@@ -488,10 +488,10 @@ pub struct TeamResult {
     pub group_id: String,
     pub round: i32,
     pub team: Option<String>,
-    pub rank: Option<i32>,
-    pub points_team: Option<i32>,
-    pub points_player: Option<i32>,
-    pub tie: Option<i32>,
+    pub rank: Option<f32>,
+    pub points_team: Option<f32>,
+    pub points_player: Option<f32>,
+    pub tie: Option<f32>,
 }
 
 #[derive(

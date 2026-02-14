@@ -17,6 +17,7 @@
     type EventOrgState,
     updateOrg,
     authOrgLogin,
+    getTeamCountForEvent,
   } from "../../../../../api/api";
   import { page } from "$app/state";
   import {
@@ -67,6 +68,7 @@
   let finalized = $state(false);
   let questionnaire_changes = $state(false);
   let data_missing_modal = $state(false);
+  let team_count = $state(0);
 
   const state_description = {
     NotEnlisted: "Not Enlisted",
@@ -155,6 +157,11 @@
       },
     );
 
+    getTeamCountForEvent({ event: event_id }).resp.subscribe((resp) => {
+      if (resp?.ok) {
+        team_count = resp.data;
+      }
+    });
     loading = !all_good;
   });
 
@@ -407,6 +414,12 @@
         vorgenommen werden.
       </Alert>
     {/if}
+    <p>
+      Es sind aktuell {team_count} Mannschaften gemeldet.
+      {#if reg_event?.public_reg_until}Meldeschluss ist {new Date(
+          reg_event?.public_reg_until || 0,
+        ).toLocaleString()}.{/if}
+    </p>
 
     <Card class="p-4 sm:p-6 md:p-8">
       <h5

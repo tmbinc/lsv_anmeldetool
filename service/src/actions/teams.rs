@@ -20,6 +20,20 @@ pub fn list_teams_by_org_event(
     Ok(user)
 }
 
+pub fn count_teams_by_event(
+    conn: &mut SqliteConnection,
+    event_uid: &Uuid,
+) -> Result<usize, DbError> {
+    use crate::schema::teams::dsl::*;
+
+    let count = teams
+        .filter(event.eq(event_uid.to_string()))
+        .count()
+        .get_result::<i64>(conn)?;
+
+    Ok(count as usize)
+}
+
 pub fn update_team(conn: &mut SqliteConnection, team: Team) -> Result<(), DbError> {
     diesel::insert_into(schema::teams::table)
         .values(&team)

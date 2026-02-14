@@ -185,6 +185,10 @@ async fn main() -> std::io::Result<()> {
                             .route(get().to(api::results::get_results)),
                     )
                     .service(
+                        resource("event/{event}/team_count")
+                            .route(get().to(api::events::get_event_team_count)),
+                    )
+                    .service(
                         resource("event/{event}/questionnaire")
                             .route(get().to(api::questionnaire::get_questionnaire_for_event))
                             .route(post().to(api::questionnaire::create_questionnaire_for_event)),

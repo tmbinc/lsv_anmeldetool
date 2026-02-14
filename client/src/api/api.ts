@@ -38,6 +38,7 @@ export const setEventOrgState = apity.path('/api/v1/event/{event}/org/{org}').me
 export const getOrgEvents = apity.path('/api/v1/org/{org}/events').method('get').create();
 
 export const getTeamsForOrgEvent = apity.path('/api/v1/org/{org}/{event}/teams').method('get').create();
+export const getTeamCountForEvent = apity.path('/api/v1/event/{event}/team_count').method('get').create();
 export const createTeam = apity.path('/api/v1/team').method('post').create();
 export const updateTeam = apity.path('/api/v1/team').method('put').create();
 export const deleteTeam = apity.path('/api/v1/team/{team}').method('delete').create();

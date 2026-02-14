@@ -219,3 +219,27 @@ pub async fn set_event_org_state(
 
     Ok(Json("ok".to_string()))
 }
+
+/// Get event team count (all groups)
+#[api_operation(summary = "get event team count", skip_args = "user")]
+pub async fn get_event_team_count(
+    pool: web::Data<DbPool>,
+    user: LoggedUser,
+    event_uid: Path<Uuid>,
+) -> Result<Json<usize>, ErrorResponse> {
+    match user.role {
+        Role::Admin | Role::None | Role::Org(_) => {}
+    };
+
+    let event_uid = event_uid.into_inner();
+
+    let count = web::block(move || {
+        let mut conn = pool.get()?;
+
+        actions::teams::count_teams_by_event(&mut conn, &event_uid)
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    Ok(Json(count))
+}

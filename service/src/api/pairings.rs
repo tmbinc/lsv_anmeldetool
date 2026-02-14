@@ -62,10 +62,10 @@ pub async fn set_pairings(
 pub struct PairingEntry {
     team_home: Option<String>,
     team_home_org: Option<String>,
-    points_home: Option<i32>,
+    points_home: Option<f32>,
     team_guest: Option<String>,
     team_guest_org: Option<String>,
-    points_guest: Option<i32>,
+    points_guest: Option<f32>,
     table: i32,
     group: String,
     round: i32,
