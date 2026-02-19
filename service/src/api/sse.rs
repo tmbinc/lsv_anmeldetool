@@ -141,6 +141,18 @@ impl SseState {
             .await;
     }
 
+    pub async fn results_updated(&self, event: &Uuid, group: &Uuid, round: i32) {
+        let msg = ChangedMessage {
+            kind: "results",
+            event: event.clone(),
+            group: Some(group.clone()),
+            round: Some(round),
+        };
+        self.broadcaster
+            .broadcast(&serde_json::to_string(&msg).unwrap_or("invalid".into()))
+            .await;
+    }
+
     pub async fn team_changed(&self, team: &Uuid, state: &str) {
         let msg = TeamChangedMessage {
             kind: "team_changed",

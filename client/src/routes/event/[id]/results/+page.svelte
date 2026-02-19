@@ -63,7 +63,7 @@
       console.log(event);
       var dataobj = JSON.parse(event.data);
       console.log(dataobj);
-      if (dataobj.kind == "result") {
+      if (dataobj.kind == "results") {
         results_request.reload();
       }
     };
@@ -80,15 +80,15 @@
   };
 
   function roundForGroup(group: Group) {
-    return results.find((p) => p.group == group.id)?.round || "?";
+    return results.find((p) => p.group == group.id)?.round || null;
   }
 </script>
 
-<main class="h-screen w-screen overflow-hidden bg-black text-white">
-  <div class="float:bottom columns-1 text-white">
+<main class="h-screen w-screen overflow-hidden bg-white text-black">
+  <div class="float:bottom columns-1">
     {#each groups_results.filter((f) => !f.replacement) as group, group_index (group.id)}
       <div
-        class={"mb-10 overflow-clip bg-" + group.color + "-500"}
+        class={"mb-10 overflow-clip text-" + group.color + "-500"}
         role="button"
         tabindex="0"
         ondblclick={() => {
@@ -97,18 +97,24 @@
         hidden={!enabled_groups?.includes(group.id)}
       >
         <p class="text-3xl">
-          {group.name} - Ergebnisse (Stand: Runde {roundForGroup(group)})
+          {group.name} -
+          {#if roundForGroup(group)}
+            Ergebnisse (Stand: Runde {roundForGroup(group)})
+          {:else}
+            Noch keine Ergebnisse
+          {/if}
         </p>
         <table
           class="table-fixed border-separate border-spacing-0 border border-gray-400 dark:border-gray-500"
         >
           <thead>
             <tr>
-              <th class="w-1">Platz</th>
-              <th class="w-40">Name</th>
-              <th class="w-40">MPkt.</th>
-              <th class="w-40">Brettpunkte</th>
-              <th class="w-40">Zweitwertung</th>
+              <th class="w-1">Rang</th>
+              <th class="w-60">Mannschaft</th>
+              <th class="w-20">S R V</th>
+              <th class="w-10">Man.Pkt.</th>
+              <th class="w-10">Brt.Pkt.</th>
+              <th class="w-10">Buchh</th>
             </tr>
           </thead>
           <tbody>
@@ -116,8 +122,8 @@
               <tr
                 class={"break-inside-avoid " +
                   (result_index % 2
-                    ? "bg-" + group.color + "-800"
-                    : "bg-" + group.color + "-400")}
+                    ? "text-" + group.color + "-800"
+                    : "text-" + group.color + "-400")}
               >
                 <td class="py-0 px-1 border-b-2 border-b-black">
                   {result.rank}</td
@@ -127,13 +133,19 @@
                     <sub>{result.team_org}</sub>
                   </div></td
                 >
-                <td>
-                  {result.points_team}
+                <td class="py-0 w-20 px-2 border-b-2 border-b-black">
+                  {result.points_win}
+                  {result.points_draw}
+                  {result.points_lost}
                 </td>
-                <td>
-                  {result.points_player}
+
+                <td class="py-0 px-1 border-b-2 border-b-black">
+                  {result.points_team} - {result.points_team_lost}
                 </td>
-                <td>
+                <td class="py-0 px-1 border-b-2 border-b-black">
+                  {result.points_player} - {result.points_player_lost}
+                </td>
+                <td class="py-0 px-1 border-b-2 border-b-black">
                   {result.tie}
                 </td>
               </tr>

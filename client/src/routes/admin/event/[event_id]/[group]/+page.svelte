@@ -52,7 +52,12 @@
     team: PairingTeam | undefined;
     rank: number | null;
     points_team: number | null;
+    points_team_lost: number | null;
     points_player: number | null;
+    points_player_lost: number | null;
+    points_win: number | null;
+    points_draw: number | null;
+    points_lost: number | null;
     tie: number | null;
   };
 
@@ -235,14 +240,24 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
           const team = team_for_name(data.get("Mannschaft"), data.get("Land"));
           const rank = +(data.get("Rang") || "");
           const points_team = +(data.get("Man.Pkt._won") || "");
+          const points_team_lost = +(data.get("Man.Pkt._lost") || "");
           const points_player = +(data.get("Brt.Pkt._won") || "");
+          const points_player_lost = +(data.get("Brt.Pkt._lost") || "");
+          const points_win = +(data.get("S") || "");
+          const points_draw = +(data.get("R") || "");
+          const points_lost = +(data.get("V") || "");
           const tie = +(data.get("Buchh") || "");
 
           result_list.push({
             team: team ?? undefined,
             rank: rank,
             points_team: points_team,
+            points_team_lost: points_team_lost,
             points_player: points_player,
+            points_player_lost: points_player_lost,
+            points_win: points_win,
+            points_draw: points_draw,
+            points_lost: points_lost,
             tie: tie,
           });
         }
@@ -259,10 +274,13 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
           header[header.findIndex((n) => n == "Punkte")] += "_guest";
         }
         if (in_results) {
+          // This is quite frustrating...
           header[header.findIndex((n) => n == "Man.Pkt.")] += "_won";
-          header[header.findIndex((n) => n == "Man.Pkt.")] += "_lost";
+          header[header.findIndex((n) => n == "Man.Pkt.")] += "xxx";
+          header[header.findIndex((n) => n == "")] = "Man.Pkt._lost";
           header[header.findIndex((n) => n == "Brt.Pkt.")] += "_won";
-          header[header.findIndex((n) => n == "Brt.Pkt.")] += "_lost";
+          header[header.findIndex((n) => n == "Brt.Pkt.")] += "xxx";
+          header[header.findIndex((n) => n == "")] = "Brt.Pkt._lost";
         }
       }
     }
@@ -304,7 +322,12 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
       team: result.team?.team.id,
       rank: result.rank,
       points_team: result.points_team,
+      points_team_lost: result.points_team_lost,
       points_player: result.points_player,
+      points_player_lost: result.points_player_lost,
+      points_win: result.points_win,
+      points_draw: result.points_draw,
+      points_lost: result.points_lost,
       tie: result.tie,
     }));
 
@@ -387,6 +410,7 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
       <TableHeadCell>Rank</TableHeadCell>
       <TableHeadCell>Points (Team)</TableHeadCell>
       <TableHeadCell>Points (Player)</TableHeadCell>
+      <TableHeadCell>S R V</TableHeadCell>
       <TableHeadCell>Tie</TableHeadCell>
     </TableHead>
     <TableBody>
@@ -402,8 +426,17 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
             {/if}
           </TableBodyCell>
           <TableBodyCell>{result.rank}</TableBodyCell>
-          <TableBodyCell>{result.points_team}</TableBodyCell>
-          <TableBodyCell>{result.points_player}</TableBodyCell>
+          <TableBodyCell
+            >{result.points_team} - {result.points_team_lost}</TableBodyCell
+          >
+          <TableBodyCell
+            >{result.points_player} - {result.points_player_lost}</TableBodyCell
+          >
+          <TableBodyCell
+            >{result.points_win}
+            {result.points_draw}
+            {result.points_lost}</TableBodyCell
+          >
           <TableBodyCell>{result.tie}</TableBodyCell>
         </TableBodyRow>
       {/each}

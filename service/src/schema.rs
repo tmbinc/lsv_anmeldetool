@@ -112,7 +112,12 @@ diesel::table! {
         team -> Nullable<Text>,
         rank -> Nullable<Float>,
         points_team -> Nullable<Float>,
+        points_team_lost -> Nullable<Float>,
         points_player -> Nullable<Float>,
+        points_player_lost -> Nullable<Float>,
+        points_win -> Nullable<Float>,
+        points_draw -> Nullable<Float>,
+        points_lost -> Nullable<Float>,
         tie -> Nullable<Float>,
     }
 }

@@ -26,6 +26,7 @@
         >Ergebnisse melden</NavLi
       >
       <NavLi href="/event/{event_id}/paarvis/">B:paarvis</NavLi>
+      <NavLi href="/event/{event_id}/results/">B:results</NavLi>
       <NavLi href="/event/{event_id}/timetable_pairing/"
         >B:timetable_pairing</NavLi
       >

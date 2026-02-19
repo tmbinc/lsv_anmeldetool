@@ -1,5 +1,6 @@
 use crate::actions::DbError;
 use crate::api::auth::LoggedUser;
+use crate::api::sse::SseState;
 use crate::errors::ErrorResponse;
 use crate::models::{Group, Role, TeamResult};
 use crate::{actions, DbPool};
@@ -19,6 +20,7 @@ pub struct SetResultsPayload {
 #[api_operation(summary = "set results for a given event + group", skip_args = "user")]
 pub async fn set_results(
     pool: web::Data<DbPool>,
+    sse: web::Data<SseState>,
     user: LoggedUser,
     path: Path<(Uuid, Uuid, i32)>,
     data: Json<SetResultsPayload>,
@@ -49,6 +51,8 @@ pub async fn set_results(
     // map diesel query errors to a 500 error response
     .map_err(error::ErrorInternalServerError)?;
 
+    sse.results_updated(&event_uid, &group_uid, round).await;
+
     Ok(Json(data))
 }
 
@@ -59,7 +63,12 @@ pub struct ResultEntry {
     team_genus: Option<String>,
     rank: Option<f32>,
     points_team: Option<f32>,
+    points_team_lost: Option<f32>,
     points_player: Option<f32>,
+    points_player_lost: Option<f32>,
+    points_win: Option<f32>,
+    points_draw: Option<f32>,
+    points_lost: Option<f32>,
     tie: Option<f32>,
     group: String,
     round: i32,
@@ -132,7 +141,12 @@ pub async fn get_results(
                 team_genus: team.and_then(|(org, _)| org.genus.clone()),
                 rank: p.rank,
                 points_team: p.points_team,
+                points_team_lost: p.points_team_lost,
                 points_player: p.points_player,
+                points_player_lost: p.points_player_lost,
+                points_win: p.points_win,
+                points_draw: p.points_draw,
+                points_lost: p.points_lost,
                 tie: p.tie,
                 group: p.group_id,
                 round: p.round,

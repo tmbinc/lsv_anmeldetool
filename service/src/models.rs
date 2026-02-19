@@ -490,7 +490,12 @@ pub struct TeamResult {
     pub team: Option<String>,
     pub rank: Option<f32>,
     pub points_team: Option<f32>,
+    pub points_team_lost: Option<f32>,
     pub points_player: Option<f32>,
+    pub points_player_lost: Option<f32>,
+    pub points_win: Option<f32>,
+    pub points_draw: Option<f32>,
+    pub points_lost: Option<f32>,
     pub tie: Option<f32>,
 }
 

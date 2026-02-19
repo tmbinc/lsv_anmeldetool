@@ -389,9 +389,19 @@ export interface components {
     ResultEntry: {
       group: string;
       /** Format: float */
+      points_draw?: number | null;
+      /** Format: float */
+      points_lost?: number | null;
+      /** Format: float */
       points_player?: number | null;
       /** Format: float */
+      points_player_lost?: number | null;
+      /** Format: float */
       points_team?: number | null;
+      /** Format: float */
+      points_team_lost?: number | null;
+      /** Format: float */
+      points_win?: number | null;
       /** Format: float */
       rank?: number | null;
       /** Format: int32 */
@@ -469,9 +479,19 @@ export interface components {
       event: string;
       group_id: string;
       /** Format: float */
+      points_draw?: number | null;
+      /** Format: float */
+      points_lost?: number | null;
+      /** Format: float */
       points_player?: number | null;
       /** Format: float */
+      points_player_lost?: number | null;
+      /** Format: float */
       points_team?: number | null;
+      /** Format: float */
+      points_team_lost?: number | null;
+      /** Format: float */
+      points_win?: number | null;
       /** Format: float */
       rank?: number | null;
       /** Format: int32 */
