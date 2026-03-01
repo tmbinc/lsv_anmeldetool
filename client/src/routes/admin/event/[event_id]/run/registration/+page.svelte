@@ -19,7 +19,7 @@
   import FetchErrors from "../../../../../FetchErrors.svelte";
   import { ArrowRightOutline } from "flowbite-svelte-icons";
 
-  let event_id = page.params.event_id;
+  let event_id = page.params.event_id || "";
   let fetch_errors: FetchErrors;
 
   let groups = $state(new Map<string, GroupTeamStats>());
@@ -35,7 +35,7 @@
 
   onMount(async () => {
     const resp_groups = await getGroupsForEvent({
-      event: page.params.event_id,
+      event: page.params.event_id || "",
     }).result;
 
     let new_groups = new Map<string, GroupTeamStats>();
@@ -48,7 +48,7 @@
             total: 0,
             ready: 0,
           },
-        ])
+        ]),
       );
     }
 

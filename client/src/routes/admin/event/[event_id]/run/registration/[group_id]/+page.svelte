@@ -36,8 +36,8 @@
     QuestionCircleSolid,
   } from "flowbite-svelte-icons";
 
-  let event_id = page.params.event_id;
-  let group_id = page.params.group_id;
+  let event_id = page.params.event_id || "";
+  let group_id = page.params.group_id || "";
   let fetch_errors: FetchErrors;
   let filter_ready = $state(false);
 
@@ -96,7 +96,7 @@
     group_names = new Map(groups.map((group) => [group.id, group.name]));
     group_slugs = new Map(groups.map((group) => [group.id, group.slug]));
     group_replacement = new Map(
-      groups.map((group) => [group.id, group.replacement || group.id])
+      groups.map((group) => [group.id, group.replacement || group.id]),
     );
 
     const resp_event_orgs = await getEventOrgs({ event: event_id }).result;
@@ -111,7 +111,7 @@
           .filter(
             (team) =>
               group_id == "all" ||
-              group_replacement.get(team.group_id || "") == group_id
+              group_replacement.get(team.group_id || "") == group_id,
           )
           .map((team) => ({
             org: event_org.org,
@@ -137,7 +137,7 @@
       team_list.sort(
         (a, b) =>
           a.org.name.localeCompare(b.org.name) ||
-          a.team.name.localeCompare(b.team.name)
+          a.team.name.localeCompare(b.team.name),
       );
       teams = team_list;
     } else {
@@ -178,7 +178,7 @@
 
   async function set_team_presence_state_verify(
     team: OrgTeam,
-    new_state: string
+    new_state: string,
   ) {
     verify_team = team;
     verify_change = true;
@@ -325,7 +325,7 @@
                   on:change={() => {
                     set_team_presence_state(
                       team,
-                      team.team.presence_state == "present" ? "" : "present"
+                      team.team.presence_state == "present" ? "" : "present",
                     );
                   }}
                 ></Checkbox>

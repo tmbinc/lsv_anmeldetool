@@ -15,7 +15,7 @@
   let loading = $state(true);
   let failed_load = $state(false);
   let event_name = $state("");
-  let event_id = page.params.event_id;
+  let event_id = page.params.event_id || "";
 
   let start_times: string[] = $state([]);
   let timetable = $state(new Map<string, TimetableRow[]>());

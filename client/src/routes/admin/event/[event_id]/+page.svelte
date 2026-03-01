@@ -53,7 +53,7 @@
     { name: "Verified", value: "Verified" },
   ];
 
-  const event_id = page.params.event_id;
+  const event_id = page.params.event_id || "";
 
   onMount(async () => {
     const request = getEvent({ event: event_id });
@@ -76,15 +76,15 @@
       other_orgs = resp_nonevent_orgs.data;
 
       other_orgs.sort((eventa, eventb) =>
-        eventa.name.localeCompare(eventb.name)
+        eventa.name.localeCompare(eventb.name),
       );
 
       // Ooops O(n^2)
       other_orgs = other_orgs.filter(
         (other_org) =>
           event_orgs.findIndex(
-            (event_orgs) => event_orgs.org.id == other_org.id
-          ) == -1
+            (event_orgs) => event_orgs.org.id == other_org.id,
+          ) == -1,
       );
     } else {
       fetch_errors.check(resp_nonevent_orgs);
@@ -94,7 +94,7 @@
 
   function sort() {
     event_orgs = event_orgs.sort((eventa, eventb) =>
-      eventa.org.name.localeCompare(eventb.org.name)
+      eventa.org.name.localeCompare(eventb.org.name),
     );
   }
 

@@ -16,8 +16,8 @@
   } from "flowbite-svelte";
   import { CheckCircleOutline } from "flowbite-svelte-icons";
 
-  const event_id = page.params.event_id;
-  const group_id = page.params.group;
+  const event_id = page.params.event_id || "";
+  const group_id = page.params.group || "";
 
   let uploaded = $state(false);
 

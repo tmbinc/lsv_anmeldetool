@@ -15,7 +15,7 @@
   import TimePicker from "date-picker-svelte/TimePicker.svelte";
   import { BellActiveAltSolid } from "flowbite-svelte-icons";
 
-  let event_id = page.params.event_id;
+  let event_id = page.params.event_id || "";
   let fetch_errors: FetchErrors;
   type TimetableColumn = {
     group: Group;

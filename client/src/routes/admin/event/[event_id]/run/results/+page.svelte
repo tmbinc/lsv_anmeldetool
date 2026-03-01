@@ -9,7 +9,7 @@
 
   let groups: Group[] = $state([]);
   let fetch_errors: FetchErrors;
-  const event_id = page.params.event_id;
+  const event_id = page.params.event_id || "";
 
   onMount(async () => {
     const resp_groups = await getGroupsForEvent({ event: event_id }).result;

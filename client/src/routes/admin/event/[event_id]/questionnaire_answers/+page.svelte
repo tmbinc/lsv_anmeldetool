@@ -14,7 +14,7 @@
     TableHead,
     TableHeadCell,
   } from "flowbite-svelte";
-  const event_id = page.params.event_id;
+  const event_id = page.params.event_id || "";
 
   let fetch_errors: FetchErrors;
   let data: EventQuestionnaireAnswers | undefined = $state(undefined);
@@ -28,8 +28,8 @@
       data.questions.sort((a, b) => a.sort - b.sort);
       email_addresses = new Set(
         data.orgs.map(
-          (org) => org.org.contact_name + " <" + org.org.contact_email + ">"
-        )
+          (org) => org.org.contact_name + " <" + org.org.contact_email + ">",
+        ),
       );
     } else {
       fetch_errors.check(resp);

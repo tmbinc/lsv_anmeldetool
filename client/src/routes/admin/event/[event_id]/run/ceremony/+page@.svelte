@@ -17,7 +17,7 @@
   import "reveal.js/dist/reveal.css";
   import "reveal.js/dist/theme/night.css";
 
-  let event_id = page.params.event_id;
+  let event_id = page.params.event_id || "";
   let fetch_errors: FetchErrors;
   let loading = $state(true);
   const event_orgs: EventOrg[] = $state([]);
@@ -34,7 +34,7 @@
 
   onMount(async () => {
     const resp_results = await getResults({
-      event: page.params.event_id,
+      event: page.params.event_id || "",
     }).result;
 
     console.log(resp_results);
@@ -47,7 +47,7 @@
       results = resp_results.data.results
         .sort(
           (a, b) =>
-            a.group.localeCompare(b.group) || (b.rank || 0) - (a.rank || 0)
+            a.group.localeCompare(b.group) || (b.rank || 0) - (a.rank || 0),
         )
         .map((entry) => ({
           ...entry,
@@ -58,7 +58,7 @@
       function findRank(
         results: ResultEntryCeremony[],
         result: ResultEntryCeremony,
-        delta: number
+        delta: number,
       ): ResultEntryCeremony | undefined {
         let index = results.findIndex((r) => r == result);
         return results[index + delta];

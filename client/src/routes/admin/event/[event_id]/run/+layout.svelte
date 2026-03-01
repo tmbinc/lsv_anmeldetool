@@ -8,7 +8,7 @@
   } from "flowbite-svelte";
   import { page } from "$app/state";
 
-  const event_id = page.params.event_id;
+  const event_id = page.params.event_id || "";
 </script>
 
 <nav>
