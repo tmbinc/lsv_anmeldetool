@@ -22,7 +22,7 @@
 
   let org: Org | null = $state(null);
   let org_events: OrgEvent[] = $state([]);
-  let org_id = page.params.id;
+  let org_id = page.params.id || "";
   let fetch_error: FetchErrors;
 
   onMount(async () => {

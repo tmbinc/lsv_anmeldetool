@@ -17,7 +17,7 @@
   let loading = $state(true);
   let failed_load = $state(false);
   let event_name = $state("");
-  const event_id = page.params.id;
+  const event_id = page.params.id || "";
   let start_times: string[] = $state([]);
   let timetable = $state(new Map<string, TimetableRow[]>());
   let groupnames = $state(new Map<string, string>());
@@ -40,7 +40,7 @@
           let new_timetable = new Map<string, TimetableRow[]>();
 
           resp.data.rows.sort((a, b) =>
-            a.expected_time.localeCompare(b.expected_time)
+            a.expected_time.localeCompare(b.expected_time),
           );
 
           let seen_active = new Set<string>();

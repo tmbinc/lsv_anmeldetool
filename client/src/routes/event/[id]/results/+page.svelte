@@ -19,7 +19,7 @@
   let loading = $state(true);
   let failed_load = $state(false);
   let event_name = $state("");
-  const event_id = page.params.id;
+  const event_id = page.params.id || "";
   let start_times: string[] = $state([]);
   let timetable = $state(new Map<string, TimetableRow[]>());
   let groupnames = $state(new Map<string, string>());

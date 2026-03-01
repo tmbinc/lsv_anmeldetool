@@ -36,14 +36,14 @@
   let groups: Group[] = $state([]);
   let groups_select: SelectOptionType<string>[] = $state([]);
   let group_selected = $state(
-    (browser && localStorage.getItem("group_selected")) ?? "*"
+    (browser && localStorage.getItem("group_selected")) ?? "*",
   );
   let rooms: Room[] = $state([]);
   let round: number | undefined = $state(undefined);
   let orgs: Set<string> = new Set();
   let orgs_select: SelectOptionType<string>[] = $state([]);
   let org_selected = $state(
-    (browser && localStorage.getItem("org_selected")) ?? "*"
+    (browser && localStorage.getItem("org_selected")) ?? "*",
   );
   let hide_config = $state(org_selected != "*" || group_selected != "*");
   let transitionParams = {
@@ -52,7 +52,7 @@
     easing: sineIn,
   };
 
-  const event_id = page.params.id;
+  const event_id = page.params.id || "";
   let evtSource: EventSource | null = null;
 
   onMount(async () => {

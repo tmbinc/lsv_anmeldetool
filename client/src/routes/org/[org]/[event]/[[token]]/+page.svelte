@@ -52,9 +52,9 @@
   let org: Org | null = $state(null);
   let reg_event: Event | null = $state(null);
   let teams: Team[] = $state([]);
-  let org_id = page.params.org;
-  let event_id = page.params.event;
-  let login_token = page.params.token;
+  let org_id = page.params.org || "";
+  let event_id = page.params.event || "";
+  let login_token = page.params.token || "";
   let groups: SelectOptionType<string>[] = $state([]);
   let teams_changed: string[] = $state([]);
   let team_to_delete: string | null = $state(null);

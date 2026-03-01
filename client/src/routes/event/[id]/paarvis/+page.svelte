@@ -23,7 +23,7 @@
   import img_sponsor from "$lib/images/logo_mhs.svg";
   import img_schachverein from "$lib/images/Logo_Final_Schachverein.png";
 
-  let event_id = page.params.id;
+  let event_id = page.params.id || "";
   let fetch_errors: FetchErrors;
   let loading = $state(true);
   let failed_load = $state(false);
@@ -52,7 +52,7 @@
           let new_timetable = new Map<string, TimetableRow[]>();
 
           resp.data.rows.sort((a, b) =>
-            a.expected_time.localeCompare(b.expected_time)
+            a.expected_time.localeCompare(b.expected_time),
           );
 
           let seen_active = new Set<string>();

@@ -28,13 +28,13 @@
   let verify_failed: string | null = $state(null);
   let verify_failed_open = $state(false);
 
-  const event_id = page.params.id;
+  const event_id = page.params.id || "";
 
   const is_valid_email = (email: string) => {
     return String(email)
       .toLowerCase()
       .match(
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       );
   };
 
@@ -152,13 +152,13 @@
           Wir versenden dann einen Link an die angegebene E-Mail-Adresse. Unter
           diesem Link können dann die teilnehmenden Mannschaften {#if event?.public_reg_until}bis
             zum {new Date(
-              event?.public_reg_until || 0
+              event?.public_reg_until || 0,
             ).toLocaleDateString()}{/if}
           gemeldet werden.
         </li>
         <li>
           Am Turniertag {#if event?.begin}({new Date(
-              event?.begin || 0
+              event?.begin || 0,
             ).toLocaleDateString()}){/if} werden die Anmeldungen vor Ort bestätigt.
         </li>
       </ol>
@@ -222,13 +222,13 @@
         <li>
           Unter diesem Link können dann die teilnehmenden Mannschaften {#if event?.public_reg_until}bis
             zum {new Date(
-              event?.public_reg_until || 0
+              event?.public_reg_until || 0,
             ).toLocaleDateString()}{/if}
           gemeldet werden.
         </li>
         <li>
           Am Turniertag {#if event?.begin}({new Date(
-              event?.begin || 0
+              event?.begin || 0,
             ).toLocaleDateString()}){/if} werden die Anmeldungen vor Ort bestätigt.
         </li>
       </ol>
