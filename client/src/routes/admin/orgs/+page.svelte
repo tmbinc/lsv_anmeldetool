@@ -90,7 +90,8 @@ Die	Test-Schule	 Test-Schule.Luebeck@schule.landsh.de	 Test-Straße 1a,  1234
     for (const line of lines) {
       const columns = line.split("\t");
       if (header) {
-        let data = new Map(columns.map((val, index) => [header[index], val]));
+        const h = header;
+        let data = new Map(columns.map((val, index) => [h[index], val]));
         let org_name = data.get("Name der Schule") || "";
         let org_email = data.get("E-Mail-Adresse") || "";
         let org_address = data.get("postalische Adresse") || "";

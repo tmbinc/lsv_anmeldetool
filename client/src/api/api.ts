@@ -88,6 +88,9 @@ export const setTimetable = apity.path('/api/v1/event/{event}/timetable').method
 
 export const readSse = apity.path('/api/v1/event/{event}/sse').method('get').create();
 
+export const getTemplate = apity.path('/api/v1/event/{event}/templates/{template_type}/{template_variant}').method('get').create();
+export const setTemplate = apity.path('/api/v1/event/{event}/templates/{template_type}/{template_variant}').method('put').create();
+
 export type Invite = components["schemas"]["Invite"];
 export type Org = components["schemas"]["Org"];
 export type Event = components["schemas"]["Event"];

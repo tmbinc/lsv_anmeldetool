@@ -198,6 +198,11 @@ async fn main() -> std::io::Result<()> {
                             .route(get().to(api::groups::get_groups))
                             .route(post().to(api::groups::add_group)),
                     )
+                    .service(
+                        resource("event/{event}/templates/{template_type}/{template_variant}")
+                            .route(put().to(api::templates::set_template))
+                            .route(get().to(api::templates::get_template)),
+                    )
                     .service(resource("group").route(put().to(api::groups::update_group)))
                     .service(
                         resource("group/{group}")

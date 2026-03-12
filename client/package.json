@@ -31,6 +31,7 @@
 		"@pdfme/common": "^5.5.8",
 		"@pdfme/generator": "^5.5.8",
 		"@pdfme/schemas": "^5.5.8",
+		"@pdfme/ui": "^5.5.8",
 		"@popperjs/core": "^2.11.8",
 		"@skeletonlabs/skeleton": "^2.11.0",
 		"@skeletonlabs/tw-plugin": "^0.4.1",

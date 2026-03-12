@@ -9,4 +9,5 @@ pub mod results;
 pub mod rooms;
 pub mod sse;
 pub mod teams;
+pub mod templates;
 pub mod timetable;

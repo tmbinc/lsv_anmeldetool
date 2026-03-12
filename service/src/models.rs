@@ -1,6 +1,6 @@
 use crate::schema::{
     events, groups, invite_queue, org_event, org_secrets, orgs, pairings, questionnaire,
-    questionnaire_answers, results, rooms, teams, timetable, users,
+    questionnaire_answers, results, rooms, teams, templates, timetable, users,
 };
 use apistos::ApiComponent;
 use chrono::NaiveDateTime;
@@ -527,4 +527,29 @@ pub struct TimetableEntry {
     pub last_update: NaiveDateTime,
     pub state: String,
     pub flags: String,
+}
+
+#[derive(
+    Queryable,
+    Selectable,
+    Identifiable,
+    Debug,
+    PartialEq,
+    Insertable,
+    Serialize,
+    Deserialize,
+    Clone,
+    AsChangeset,
+    ApiComponent,
+    JsonSchema,
+)]
+#[diesel(table_name = templates)]
+#[diesel(belongs_to(Event))]
+#[diesel(primary_key(event, template_type))]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct TemplateEntry {
+    pub event: String,
+    pub template_type: String,
+    pub template_variant: String,
+    pub content: String,
 }

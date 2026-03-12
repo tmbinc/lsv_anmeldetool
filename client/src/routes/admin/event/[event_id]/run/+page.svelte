@@ -1,24 +1,228 @@
 <script lang="ts">
-  let props = $props();
-  import { page } from "$app/state";
-
   import { onMount } from "svelte";
-  import { getGroupsForEvent, type Group } from "../../../../../api/api";
+  import { page } from "$app/state";
+  import {
+    getEvent,
+    getGroupsForEvent,
+    getTeamCountForEvent,
+    type Group,
+  } from "../../../../../api/api";
   import FetchErrors from "../../../../FetchErrors.svelte";
-  import { Button } from "flowbite-svelte";
+  import {
+    ClipboardListOutline,
+    CalendarMonthOutline,
+    ClipboardCheckOutline,
+    AwardOutline,
+    FilePdfOutline,
+    CogOutline,
+    DesktopPcOutline,
+    ChartMixedOutline,
+    CalendarWeekOutline,
+    StarOutline,
+    UsersGroupOutline,
+    GridOutline,
+  } from "flowbite-svelte-icons";
 
-  let groups: Group[] = $state([]);
-  let fetch_errors: FetchErrors;
   const event_id = page.params.event_id || "";
 
+  let event_name = $state("");
+  let event_date = $state<string | null>(null);
+  let groups: Group[] = $state([]);
+  let team_count = $state<number | null>(null);
+  let fetch_errors: FetchErrors;
+
   onMount(async () => {
+    getEvent({ event: event_id }).resp.subscribe((resp) => {
+      if (resp?.ok) {
+        event_name = resp.data.name;
+        event_date = resp.data.begin ?? null;
+      }
+    });
+
     const resp_groups = await getGroupsForEvent({ event: event_id }).result;
     if (resp_groups.ok) {
       groups = resp_groups.data;
     } else {
       fetch_errors.check(resp_groups);
     }
+
+    const resp_teams = await getTeamCountForEvent({ event: event_id }).result;
+    if (resp_teams.ok) {
+      team_count = resp_teams.data;
+    }
   });
+
+  const adminCards = [
+    {
+      href: `/admin/event/${event_id}/run/registration/`,
+      label: "Registrierung",
+      description: "Anwesenheit und Einchecken der Teams verwalten",
+      icon: ClipboardListOutline,
+      color: "blue",
+    },
+    {
+      href: `/admin/event/${event_id}/run/timetable/`,
+      label: "Zeitplanung",
+      description: "Rundenzeiten und Spielplan festlegen",
+      icon: CalendarMonthOutline,
+      color: "blue",
+    },
+    {
+      href: `/admin/event/${event_id}/run/results/`,
+      label: "Ergebnisse melden",
+      description: "Spielergebnisse der einzelnen Runden eintragen",
+      icon: ClipboardCheckOutline,
+      color: "blue",
+    },
+    {
+      href: `/admin/event/${event_id}/run/urkunde/`,
+      label: "Urkunden",
+      description: "Urkunden für alle Teilnehmer generieren",
+      icon: AwardOutline,
+      color: "blue",
+    },
+    {
+      href: `/admin/event/${event_id}/pdftemplate/`,
+      label: "PDF-Vorlage",
+      description: "Urkundenvorlage bearbeiten und speichern",
+      icon: FilePdfOutline,
+      color: "blue",
+    },
+    {
+      href: `/admin/event/${event_id}/`,
+      label: "Turnier-Administration",
+      description: "Zurück zur allgemeinen Turnierverwaltung",
+      icon: CogOutline,
+      color: "gray",
+    },
+  ];
+
+  const beamerCards = [
+    {
+      href: `/event/${event_id}/paarvis/`,
+      label: "Paarungsansicht",
+      description: "Aktuelle Paarungen auf dem Beamer anzeigen",
+      icon: DesktopPcOutline,
+      color: "purple",
+    },
+    {
+      href: `/event/${event_id}/results/`,
+      label: "Ergebnisse",
+      description: "Rangliste und Ergebnisse für das Publikum",
+      icon: ChartMixedOutline,
+      color: "purple",
+    },
+    {
+      href: `/event/${event_id}/timetable_pairing/`,
+      label: "Zeitplan & Paarungen",
+      description: "Kombinierte Ansicht für den Aushang",
+      icon: CalendarWeekOutline,
+      color: "purple",
+    },
+    {
+      href: `/admin/event/${event_id}/run/ceremony/`,
+      label: "Siegerehrung",
+      description: "Animierte Siegerehrung für die Abschlussveranstaltung",
+      icon: StarOutline,
+      color: "purple",
+    },
+  ];
+
+  const colorClasses = {
+    blue: {
+      card: "border-blue-100 hover:border-blue-300 hover:bg-blue-50",
+      icon: "bg-blue-100 text-blue-600",
+    },
+    purple: {
+      card: "border-purple-100 hover:border-purple-300 hover:bg-purple-50",
+      icon: "bg-purple-100 text-purple-600",
+    },
+    gray: {
+      card: "border-gray-200 hover:border-gray-400 hover:bg-gray-50",
+      icon: "bg-gray-100 text-gray-500",
+    },
+  };
 </script>
 
 <FetchErrors bind:this={fetch_errors} />
+
+<main class="mx-auto max-w-5xl px-6 py-10">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">{event_name || "…"}</h1>
+    {#if event_date}
+      <p class="mt-1 text-sm text-gray-500">{event_date}</p>
+    {/if}
+  </div>
+
+  <!-- Stats -->
+  <div class="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
+    <div class="rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="rounded-lg bg-blue-100 p-2 text-blue-600">
+          <GridOutline class="h-5 w-5" />
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-gray-900">{groups.filter(g => !g.replacement).length}</div>
+          <div class="text-xs text-gray-500">Gruppen</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="rounded-lg bg-blue-100 p-2 text-blue-600">
+          <UsersGroupOutline class="h-5 w-5" />
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-gray-900">{team_count ?? "…"}</div>
+          <div class="text-xs text-gray-500">Teams</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin tools -->
+  <section class="mb-10">
+    <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400">Administration</h2>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {#each adminCards as card}
+        {@const colors = colorClasses[card.color as keyof typeof colorClasses]}
+        <a
+          href={card.href}
+          class="group flex items-start gap-4 rounded-xl border bg-white p-4 shadow-sm transition-all {colors.card}"
+        >
+          <div class="mt-0.5 shrink-0 rounded-lg p-2 {colors.icon}">
+            <card.icon class="h-5 w-5" />
+          </div>
+          <div>
+            <div class="font-medium text-gray-900 group-hover:text-gray-900">{card.label}</div>
+            <div class="mt-0.5 text-sm text-gray-500">{card.description}</div>
+          </div>
+        </a>
+      {/each}
+    </div>
+  </section>
+
+  <!-- Beamer pages -->
+  <section>
+    <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400">Beamer / Anzeige</h2>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {#each beamerCards as card}
+        {@const colors = colorClasses[card.color as keyof typeof colorClasses]}
+        <a
+          href={card.href}
+          class="group flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm transition-all {colors.card}"
+        >
+          <div class="shrink-0 self-start rounded-lg p-2 {colors.icon}">
+            <card.icon class="h-5 w-5" />
+          </div>
+          <div>
+            <div class="font-medium text-gray-900">{card.label}</div>
+            <div class="mt-0.5 text-sm text-gray-500">{card.description}</div>
+          </div>
+        </a>
+      {/each}
+    </div>
+  </section>
+</main>

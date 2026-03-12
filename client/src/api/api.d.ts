@@ -122,6 +122,12 @@ export interface paths {
     /** add a group */
     post: operations["post_api-v1-event-6e29cbdb5e0ae2f26ebeb4172e8bf7d5"];
   };
+  "/api/v1/event/{event}/templates/{template_type}/{template_variant}": {
+    /** get template for a given event and type */
+    get: operations["get_api-v1-event-28446f60f4799a072044b92e3eb26a04"];
+    /** set template for given type for event */
+    put: operations["put_api-v1-event-28446f60f4799a072044b92e3eb26a04"];
+  };
   "/api/v1/group": {
     /** update group */
     put: operations["put_api-v1-group-44e4a130606b544f6ab5a1532e35bc29"];
@@ -445,7 +451,7 @@ export interface components {
     };
     /** SetTimetablePayload */
     SetTimetablePayload: {
-      timetable: components["schemas"]["TimetableEntry"][];
+      content?: string | null;
     };
     /** SlimUser */
     SlimUser: {
@@ -1496,6 +1502,75 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Group"];
         };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** get template for a given event and type */
+  "get_api-v1-event-28446f60f4799a072044b92e3eb26a04": {
+    parameters: {
+      path: {
+        event: string;
+        template_type: string;
+        template_variant: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
+        content: never;
+      };
+      /** @description Invalid input */
+      405: {
+        content: never;
+      };
+      /** @description Conflict */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** set template for given type for event */
+  "put_api-v1-event-28446f60f4799a072044b92e3eb26a04": {
+    parameters: {
+      path: {
+        event: string;
+        template_type: string;
+        template_variant: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTimetablePayload"];
+      };
+    };
+    responses: {
+      200: {
+        content: never;
       };
       /** @description Forbidden */
       403: {

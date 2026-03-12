@@ -149,6 +149,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    templates (event, template_type) {
+        event -> Text,
+        template_type -> Text,
+        template_variant -> Text,
+        content -> Text,
+    }
+}
+
+diesel::table! {
     timetable (event, group_id, row_index) {
         event -> Text,
         group_id -> Text,
@@ -200,6 +209,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     results,
     rooms,
     teams,
+    templates,
     timetable,
     users,
 );
