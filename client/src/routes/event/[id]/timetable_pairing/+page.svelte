@@ -3,16 +3,12 @@
   import {
     getPairings,
     getTimetable,
-    readSse,
     type EventOrg,
     type Group,
     type PairingEntry,
     type TimetableRow,
   } from "../../../../api/api";
   import { page } from "$app/state";
-  import Loading from "../../../Loading.svelte";
-  import LoadError from "../../../LoadError.svelte";
-  import { Checkbox } from "flowbite-svelte";
 
   let loading = $state(true);
   let failed_load = $state(false);
@@ -46,7 +42,6 @@
           let seen_active = new Set<string>();
           let new_start_times = new Set<string>();
 
-          // Ignore anything before the first "active" for each group.
           for (const row of resp.data.rows) {
             if (seen_active.has(row.group) || row.state == "active") {
               seen_active.add(row.group);
@@ -72,17 +67,13 @@
           }
 
           timetable = new_timetable;
-
-          let groups = resp.data.groups;
-
-          groupnames = new Map(groups.map((group) => [group.id, group.name]));
+          groupnames = new Map(resp.data.groups.map((g) => [g.id, g.name]));
 
           if (enabled_groups) {
-            enabled_groups = groups.map((group) => group.id);
+            enabled_groups = resp.data.groups.map((g) => g.id);
           }
 
           start_times = [...new_start_times].sort((a, b) => a.localeCompare(b));
-
           loading = false;
         } else {
           failed_load = true;
@@ -98,162 +89,153 @@
         groups_pairings = resp.data.groups;
         event_name = resp.data.event_name;
         pairings.sort((a, b) => a.table - b.table);
-        let rounds = new Set<number>();
-
-        for (let pairing of pairings) {
-          if (pairing.team_home_org) {
-            orgs.add(pairing.team_home_org);
-          }
-          if (pairing.team_guest_org) {
-            orgs.add(pairing.team_guest_org);
-          }
-          rounds.add(pairing.round);
+        for (let p of pairings) {
+          if (p.team_home_org) orgs.add(p.team_home_org);
+          if (p.team_guest_org) orgs.add(p.team_guest_org);
         }
       }
     });
 
     evtSource = new EventSource("/api/v1/event/" + event_id + "/sse");
-    evtSource.onmessage = function (event) {
-      console.log(event);
-      var dataobj = JSON.parse(event.data);
-      console.log(dataobj);
-      if (dataobj.kind == "pairing") {
-        pairing_request.reload();
-      }
-      if (dataobj.kind == "timetable") {
-        timetable_request.reload();
-      }
+    evtSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.kind == "pairing") pairing_request.reload();
+      if (data.kind == "timetable") timetable_request.reload();
     };
   });
 
-  onDestroy(() => {
-    evtSource?.close();
-  });
+  onDestroy(() => evtSource?.close());
 
-  type EntryWithName = {
-    name: string;
-    flags: string;
-    groups: string[];
-  };
+  type EntryWithName = { name: string; flags: string; groups: string[] };
 
   function timetableFor(key: string): EntryWithName[] {
     const items = timetable.get(key) || [];
-
-    let unique_names = [...new Set(items.map((item) => item.name))].sort();
-
+    const unique_names = [...new Set(items.map((item) => item.name))].sort();
     return unique_names.map((name) => ({
-      name: name,
+      name,
       flags: items.find((f) => f.name == name)?.flags || "",
-      groups: items
-        .filter((f) => f.name == name)
-        .map((r) => groupnames.get(r.group) || ""),
+      groups: items.filter((f) => f.name == name).map((r) => groupnames.get(r.group) || ""),
     }));
   }
+
   function roundForGroup(group: Group) {
     return pairings.find((p) => p.group == group.id)?.round || "?";
   }
+
+  function timeLabel(key: string): string {
+    const t = new Date(parseInt(key)).toTimeString().split(" ")[0].slice(0, 5);
+    if (key.endsWith("_next")) return t;
+    return "ca.\u00a0" + t;
+  }
+
+  const visibleGroups = $derived(
+    groups_pairings.filter((g) => !g.replacement && enabled_groups.includes(g.id))
+  );
 </script>
 
-<!-- {#if loading}
-    <Loading text="Lade Zeitplan..." />
-  {:else if failed_load}
-    <LoadError text="Laden fehlgeschlagen!" />
-  {:else} -->
+<main class="h-screen w-screen flex flex-col overflow-hidden bg-gray-950 text-white">
 
-<main class="h-screen w-screen overflow-hidden bg-black">
-  <div class="float:top; height: 80% overflow-hidden text-white">
-    <table class="w-screen">
-      <tbody>
-        {#each start_times as key}
-          {#if key.includes("_flag:!_") || key.endsWith("_active") || key.endsWith("_next")}
-            <tr
-              class={"" +
-                (key.endsWith("_active")
-                  ? "text-red-600 text-2xl"
-                  : key.endsWith("_next")
-                    ? "text-yellow-300 text-l"
-                    : "text-slate-300")}
-            >
-              <td class="py-px">
-                {#if key.endsWith("_next")}
-                  Danach: {new Date(parseInt(key))
-                    .toTimeString()
-                    .split(" ")[0]
-                    .slice(0, 5)}
-                {:else if key.endsWith("_active")}
-                  Jetzt
-                {:else}
-                  ca. {new Date(parseInt(key))
-                    .toTimeString()
-                    .split(" ")[0]
-                    .slice(0, 5)}
-                {/if}
-              </td>
-              <td class="py-px">
-                {#each timetableFor(key) as row}
-                  <div>
-                    {row.name}
-                    {#if groupnames.size != row.groups.length}
-                      ({row.groups.sort().join(", ")})
-                    {/if}
-                  </div>
-                {/each}
-              </td>
-            </tr>
+  <!-- ── Timetable bar ──────────────────────────────────────────── -->
+  <header class="shrink-0 flex items-center gap-3 border-b border-white/10 px-5 py-2 min-w-0">
+
+    <!-- Event name -->
+    <span class="shrink-0 text-xs font-semibold uppercase tracking-widest text-white/30">
+      {event_name}
+    </span>
+
+    <span class="shrink-0 text-white/10">|</span>
+
+    <!-- Timeline items -->
+    <div class="flex min-w-0 items-center gap-1 overflow-hidden text-sm">
+      {#each start_times as key, i}
+        {#if key.includes("_flag:!_") || key.endsWith("_active") || key.endsWith("_next")}
+          {@const isActive = key.endsWith("_active")}
+          {@const isNext = key.endsWith("_next")}
+          {@const entries = timetableFor(key)}
+
+          {#if i > 0}
+            <span class="shrink-0 text-white/20 px-0.5">›</span>
           {/if}
-        {/each}
-      </tbody>
-    </table>
-  </div>
 
-  <div class="float:bottom columns-4 text-white">
-    {#each groups_pairings.filter((f) => !f.replacement) as group, group_index (group.id)}
+          <div class="flex shrink-0 items-baseline gap-1.5 {isActive ? 'text-white' : isNext ? 'text-white/60' : 'text-white/35'}">
+            <!-- Time / state pill -->
+            {#if isActive}
+              <span class="rounded bg-amber-400 px-1.5 py-0.5 text-xs font-bold leading-none text-gray-900">
+                Jetzt
+              </span>
+            {:else}
+              <span class="tabular-nums text-xs {isNext ? 'text-amber-400/80' : 'text-white/30'}">
+                {timeLabel(key)}
+              </span>
+            {/if}
+
+            <!-- Entry names -->
+            {#each entries as row}
+              <span class="font-medium {isActive ? 'text-white' : ''}">
+                {row.name}{#if groupnames.size !== row.groups.length}<span class="ml-1 text-xs opacity-50">({row.groups.sort().join(", ")})</span>{/if}
+              </span>
+            {/each}
+          </div>
+        {/if}
+      {/each}
+    </div>
+  </header>
+
+  <!-- ── Pairing columns ───────────────────────────────────────── -->
+  <div
+    class="flex-1 overflow-hidden grid gap-3 p-3"
+    style="grid-template-columns: repeat({visibleGroups.length || 1}, minmax(0, 1fr));"
+  >
+    {#each groups_pairings.filter((f) => !f.replacement) as group (group.id)}
       <div
-        class={"mb-10 overflow-clip bg-" + group.color + "-500"}
+        class="flex flex-col overflow-hidden rounded-lg"
+        hidden={!enabled_groups.includes(group.id)}
         role="button"
         tabindex="0"
-        ondblclick={() => {
-          enabled_groups = enabled_groups?.filter((f) => f != group.id);
-        }}
-        hidden={!enabled_groups?.includes(group.id)}
+        ondblclick={() => { enabled_groups = enabled_groups.filter((f) => f != group.id); }}
       >
-        <p class="text-3xl">{group.name} - Runde {roundForGroup(group)}</p>
-        <table
-          class="table-fixed border-separate border-spacing-0 border border-gray-400 dark:border-gray-500"
+        <!-- Group header -->
+        <div
+          class="shrink-0 flex items-baseline justify-between px-3 py-2 text-gray-900"
+          style="background-color: {group.color};"
         >
-          <thead>
-            <tr>
-              <th class="w-1">Tisch</th>
-              <th class="w-40">Mannschaft 1 (Brett 1 schwarz)</th><th
-                >Mannschaft 2 (Brett 1 weiß)</th
-              >
-            </tr>
-          </thead>
-          <tbody>
-            {#each pairings.filter((p) => p.group == group.id) as pairing, pairing_index}
-              <tr
-                class={"break-inside-avoid " +
-                  (pairing_index % 2
-                    ? "bg-" + group.color + "-800"
-                    : "bg-" + group.color + "-400")}
-              >
-                <td class="py-0 px-1 border-b-2 border-b-black"
-                  >{pairing.table}</td
-                ><td class="py-0 px-1 overflow-clip border-b-2 border-b-black">
-                  <div>{pairing.team_home}</div>
-                  <div>
-                    <sub>{pairing.team_home_org}</sub>
-                  </div></td
-                >
-                <td class="py-0 px-1 overflow-clip border-b-2 border-b-black">
-                  <div>{pairing.team_guest ?? "spielfrei"}</div>
-                  <div><sub>{pairing.team_guest_org}</sub></div>
-                </td></tr
-              >
-            {/each}
-          </tbody>
-        </table>
+          <span class="font-bold leading-tight">{group.name}</span>
+          <span class="text-sm font-medium opacity-70">Runde {roundForGroup(group)}</span>
+        </div>
+
+        <!-- Pairing table -->
+        <div class="flex-1 overflow-auto">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-white/10 text-left text-xs font-semibold uppercase tracking-wide text-white/40">
+                <th class="px-2 py-1.5 w-8 text-center">#</th>
+                <th class="px-2 py-1.5">Brett 1 schwarz</th>
+                <th class="px-2 py-1.5">Brett 1 weiß</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each pairings.filter((p) => p.group == group.id) as pairing, i}
+                <tr class="border-b border-white/5 {i % 2 === 0 ? 'bg-white/5' : ''}">
+                  <td class="px-2 py-1 text-center text-white/40 tabular-nums">{pairing.table}</td>
+                  <td class="px-2 py-1">
+                    <div class="font-medium leading-tight">{pairing.team_home ?? "–"}</div>
+                    {#if pairing.team_home_org}
+                      <div class="text-xs text-white/40 leading-tight">{pairing.team_home_org}</div>
+                    {/if}
+                  </td>
+                  <td class="px-2 py-1">
+                    <div class="font-medium leading-tight">{pairing.team_guest ?? "spielfrei"}</div>
+                    {#if pairing.team_guest_org}
+                      <div class="text-xs text-white/40 leading-tight">{pairing.team_guest_org}</div>
+                    {/if}
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
       </div>
     {/each}
   </div>
+
 </main>

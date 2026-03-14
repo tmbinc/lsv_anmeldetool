@@ -26,6 +26,28 @@
   let other_orgs: Org[] = $state([]);
   let fetch_errors: FetchErrors;
 
+  let sortField = $state<"name" | "status">("name");
+  let sortDir = $state<"asc" | "desc">("asc");
+
+  const stateOrder: Record<string, number> = {
+    NotEnlisted: 0, Registered: 1, Invited: 2,
+    Updated: 3, Submitted: 4, Verified: 5,
+  };
+
+  const sortedEventOrgs = $derived(
+    [...event_orgs].sort((a, b) => {
+      const cmp = sortField === "name"
+        ? a.org.name.localeCompare(b.org.name)
+        : (stateOrder[a.state] ?? 0) - (stateOrder[b.state] ?? 0);
+      return sortDir === "asc" ? cmp : -cmp;
+    })
+  );
+
+  function toggleSort(field: "name" | "status") {
+    if (sortField === field) sortDir = sortDir === "asc" ? "desc" : "asc";
+    else { sortField = field; sortDir = "asc"; }
+  }
+
   const states: SelectOptionType<string>[] = [
     { name: "Not enlisted",    value: "NotEnlisted",  disabled: true },
     { name: "Self-registered", value: "Registered" },
@@ -282,14 +304,32 @@
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-gray-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">
-              <th class="px-5 py-3">Schule</th>
-              <th class="px-3 py-3">Status</th>
+              <th class="px-5 py-3">
+                <button onclick={() => toggleSort("name")} class="flex items-center gap-1 hover:text-gray-600">
+                  Schule
+                  {#if sortField === "name"}
+                    <span>{sortDir === "asc" ? "↑" : "↓"}</span>
+                  {:else}
+                    <span class="opacity-30">↕</span>
+                  {/if}
+                </button>
+              </th>
+              <th class="px-3 py-3">
+                <button onclick={() => toggleSort("status")} class="flex items-center gap-1 hover:text-gray-600">
+                  Status
+                  {#if sortField === "status"}
+                    <span>{sortDir === "asc" ? "↑" : "↓"}</span>
+                  {:else}
+                    <span class="opacity-30">↕</span>
+                  {/if}
+                </button>
+              </th>
               <th class="px-3 py-3">Status setzen</th>
               <th class="px-3 py-3"></th>
             </tr>
           </thead>
           <tbody>
-            {#each event_orgs as event_org}
+            {#each sortedEventOrgs as event_org}
               <tr class="border-b border-gray-100 {stateRow[event_org.state] ?? 'bg-gray-50'}">
                 <td class="px-5 py-2.5">
                   <a href="/admin/org/{event_org.org.id}" class="font-medium text-gray-900 hover:text-blue-600">

@@ -6,8 +6,10 @@
     getGroupsForEvent,
     getTeamCountForEvent,
     getResults,
+    getPairings,
     type Group,
     type ResultEntry,
+    type PairingEntry,
   } from "../../../../../api/api";
   import FetchErrors from "../../../../FetchErrors.svelte";
   import {
@@ -24,6 +26,7 @@
     UsersGroupOutline,
     GridOutline,
     PlusOutline,
+    TableColumnOutline,
   } from "flowbite-svelte-icons";
 
   const event_id = page.params.event_id || "";
@@ -33,14 +36,25 @@
   let groups: Group[] = $state([]);
   let team_count = $state<number | null>(null);
   let results: ResultEntry[] = $state([]);
+  let pairings: PairingEntry[] = $state([]);
   let fetch_errors: FetchErrors;
 
-  // Latest round per group id
-  const latestRoundByGroup = $derived(() => {
+  // Latest result round per group id
+  const latestResultRound = $derived(() => {
     const map = new Map<string, number>();
     for (const r of results) {
       const cur = map.get(r.group) ?? 0;
       if (r.round > cur) map.set(r.group, r.round);
+    }
+    return map;
+  });
+
+  // Latest pairing round per group id
+  const latestPairingRound = $derived(() => {
+    const map = new Map<string, number>();
+    for (const p of pairings) {
+      const cur = map.get(p.group) ?? 0;
+      if (p.round > cur) map.set(p.group, p.round);
     }
     return map;
   });
@@ -68,6 +82,11 @@
     const resp_results = await getResults({ event: event_id }).result;
     if (resp_results.ok) {
       results = resp_results.data.results;
+    }
+
+    const resp_pairings = await getPairings({ event: event_id }).result;
+    if (resp_pairings.ok) {
+      pairings = resp_pairings.data.pairings;
     }
   });
 
@@ -207,19 +226,30 @@
     <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400">Gruppen & Ergebnisse</h2>
     <div class="flex flex-col gap-2">
       {#each groups.filter(g => !g.replacement) as group}
-        {@const latest = latestRoundByGroup().get(group.id) ?? 0}
+        {@const resultRound = latestResultRound().get(group.id) ?? 0}
+        {@const pairingRound = latestPairingRound().get(group.id) ?? 0}
         <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
           <div class="h-3 w-3 shrink-0 rounded-full" style="background-color: {group.color};"></div>
           <span class="flex-1 font-medium text-gray-900">{group.name}</span>
-          {#if latest > 0}
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-              Runde {latest}
-            </span>
+
+          <!-- Pairing round -->
+          {#if pairingRound > 0}
+            <a href="/event/{event_id}/pairings" class="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors">
+              Paarung Runde {pairingRound}
+            </a>
           {:else}
-            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-400">
-              Keine Ergebnisse
-            </span>
+            <span class="rounded-full bg-gray-50 px-2.5 py-0.5 text-xs text-gray-300">Keine Paarungen</span>
           {/if}
+
+          <!-- Result round -->
+          {#if resultRound > 0}
+            <a href="/event/{event_id}/results" class="rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700 hover:bg-green-100 transition-colors">
+              Ergebnisse Runde {resultRound}
+            </a>
+          {:else}
+            <span class="rounded-full bg-gray-50 px-2.5 py-0.5 text-xs text-gray-300">Keine Ergebnisse</span>
+          {/if}
+
           <a
             href="/admin/event/{event_id}/{group.id}/"
             class="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
@@ -252,6 +282,52 @@
           </div>
         </a>
       {/each}
+    </div>
+  </section>
+
+  <!-- Public links -->
+  <section class="mb-10">
+    <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400">Öffentliche Seiten</h2>
+    <div class="grid gap-3 sm:grid-cols-3">
+      <a
+        href="/event/{event_id}/timetable"
+        target="_blank"
+        class="group flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50"
+      >
+        <div class="shrink-0 rounded-lg bg-gray-100 p-2 text-gray-500">
+          <CalendarWeekOutline class="h-5 w-5" />
+        </div>
+        <div>
+          <div class="font-medium text-gray-900">Zeitplan</div>
+          <div class="mt-0.5 text-xs text-gray-400">/event/…/timetable</div>
+        </div>
+      </a>
+      <a
+        href="/event/{event_id}/pairings"
+        target="_blank"
+        class="group flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50"
+      >
+        <div class="shrink-0 rounded-lg bg-gray-100 p-2 text-gray-500">
+          <TableColumnOutline class="h-5 w-5" />
+        </div>
+        <div>
+          <div class="font-medium text-gray-900">Paarungen</div>
+          <div class="mt-0.5 text-xs text-gray-400">/event/…/pairings</div>
+        </div>
+      </a>
+      <a
+        href="/event/{event_id}/results"
+        target="_blank"
+        class="group flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50"
+      >
+        <div class="shrink-0 rounded-lg bg-gray-100 p-2 text-gray-500">
+          <ChartMixedOutline class="h-5 w-5" />
+        </div>
+        <div>
+          <div class="font-medium text-gray-900">Ergebnisse</div>
+          <div class="mt-0.5 text-xs text-gray-400">/event/…/results</div>
+        </div>
+      </a>
     </div>
   </section>
 

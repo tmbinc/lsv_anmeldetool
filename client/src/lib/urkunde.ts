@@ -103,7 +103,7 @@ export function buildInput(
       if (field.type === "multiVariableText") {
         const vars: Record<string, string> = {};
         for (const v of (field as { variables?: string[] }).variables ?? []) {
-          vars[v] = data[v] ?? "";
+          vars[v] = data[v] || " ";
         }
         result[field.name] = JSON.stringify(vars);
       } else if (field.name in data) {
