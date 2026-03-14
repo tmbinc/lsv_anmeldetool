@@ -1,14 +1,5 @@
 <script lang="ts">
-  import {
-    Footer,
-    FooterLink,
-    FooterLinkGroup,
-    Navbar,
-    NavBrand,
-    NavHamburger,
-    NavLi,
-    NavUl,
-  } from "flowbite-svelte";
+  import { Navbar, NavBrand } from "flowbite-svelte";
   import "../app.css";
   import { page } from "$app/stores";
   import img_verein from "$lib/images/Logo_Final_Schachverein.png";
@@ -16,6 +7,10 @@
 
 <svelte:head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+    rel="icon"
+    href="https://lsv1873.de/wp-content/uploads/2025/12/cropped-cropped-Icon-2-1-32x32.png"
+  />
 </svelte:head>
 
 {#if !$page.url.pathname.includes("/run/ceremony") && !$page.url.pathname.includes("/timetable_pairing") && !$page.url.pathname.includes("/paarvis")}
@@ -34,16 +29,27 @@
 
   <slot />
 
-  <div></div>
-  <Footer class="mx-10">
-    <FooterLinkGroup
-      ulClass="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0"
+  <footer class="mt-16 border-t border-gray-200 bg-white">
+    <div
+      class="mx-auto max-w-5xl px-6 py-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between"
     >
-      <FooterLink href="/">Über</FooterLink>
-      <FooterLink href="/privacy">Datenschutz</FooterLink>
-      <FooterLink href="mailto:anmeldung@lsv1873.de">Kontakt</FooterLink>
-    </FooterLinkGroup>
-  </Footer>
+      <span class="text-sm text-gray-400"
+        ><a href="https://www.lsv1873.de/">Lübecker Schachverein von 1873</a
+        ></span
+      >
+      <div class="flex gap-5 text-sm">
+        <a
+          href="/privacy"
+          class="text-gray-400 hover:text-gray-700 transition-colors"
+          >Datenschutz</a
+        >
+        <a
+          href="mailto:anmeldung@lsv1873.de"
+          class="text-gray-400 hover:text-gray-700 transition-colors">Kontakt</a
+        >
+      </div>
+    </div>
+  </footer>
 
   <style lang="postcss">
     :global(html) {

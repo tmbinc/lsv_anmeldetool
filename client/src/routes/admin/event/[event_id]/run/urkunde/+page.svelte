@@ -9,19 +9,9 @@
   import { page } from "$app/state";
   import { generate } from "@pdfme/generator";
   import { Viewer } from "@pdfme/ui";
-  import { BLANK_A4_PDF, getDefaultFont } from "@pdfme/common";
-  import type { Font, Template } from "@pdfme/common";
-  import {
-    text,
-    multiVariableText,
-    image,
-    svg,
-    table,
-    barcodes,
-    line,
-    rectangle,
-    ellipse,
-  } from "@pdfme/schemas";
+  import { BLANK_A4_PDF } from "@pdfme/common";
+  import type { Template } from "@pdfme/common";
+  import { getFontsData, plugins, placeholders, buildDataMap, buildInput } from "$lib/urkunde";
   import { Button } from "flowbite-svelte";
   import { ArrowLeftOutline, FilePdfOutline } from "flowbite-svelte-icons";
 
@@ -33,98 +23,29 @@
   let selected_group = $state("");
   let selected_team_index = $state(0);
   let generating = $state(false);
+
+  const blankableFields: { key: string; label: string }[] = [
+    { key: "rank",          label: "Platz" },
+    { key: "points_team",   label: "Mannschaftspunkte" },
+    { key: "points_player", label: "Brettpunkte" },
+    { key: "tie",           label: "Buchholz" },
+  ];
+  let blanked = $state(new Set<string>());
+
+  function applyBlanking(data: Record<string, string>): Record<string, string> {
+    if (blanked.size === 0) return data;
+    const out = { ...data };
+    for (const key of blanked) out[key] = "     ";
+    return out;
+  }
   let evtSource: EventSource | null = null;
 
   let viewerContainer: HTMLDivElement;
   let viewer: Viewer | null = $state(null);
 
-  const getFontsData = (): Font => ({
-    ...getDefaultFont(),
-    "PinyonScript-Regular": {
-      fallback: false,
-      data: "https://fonts.gstatic.com/s/pinyonscript/v22/6xKpdSJbL9-e9LuoeQiDRQR8aOLQO4bhiDY.ttf",
-    },
-    NotoSerifJP: {
-      fallback: false,
-      data: "https://fonts.gstatic.com/s/notoserifjp/v30/xn71YHs72GKoTvER4Gn3b5eMRtWGkp6o7MjQ2bwxOubAILO5wBCU.ttf",
-    },
-    NotoSansJP: {
-      fallback: false,
-      data: "https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEj75vY0rw-oME.ttf",
-    },
-  });
-
-  const plugins = {
-    Text: text,
-    MultiVariableText: multiVariableText,
-    Image: image,
-    SVG: svg,
-    Table: table,
-    Line: line,
-    Rectangle: rectangle,
-    Ellipse: ellipse,
-    QRCode: barcodes.qrcode,
-  };
-
-  const fallbackTemplate: Template = {
-    basePdf: BLANK_A4_PDF,
-    schemas: [[]],
-  };
+  const fallbackTemplate: Template = { basePdf: BLANK_A4_PDF, schemas: [[]] };
 
   let currentTemplate: Template = fallbackTemplate;
-
-  // Available placeholder field names (for both text field names and multiVariableText variables)
-  const placeholders = [
-    { key: "team",          label: "Team-Name" },
-    { key: "team_name",     label: "Team-Name (Alias)" },
-    { key: "org",           label: "Schule / Organisation" },
-    { key: "team_genus",    label: "Genus des Teams (der/die/das)" },
-    { key: "rank",          label: "Platz (1, 2, 3 …)" },
-    { key: "points_team",   label: "Mannschaftspunkte" },
-    { key: "points_player", label: "Einzelpunkte" },
-    { key: "tie",           label: "Feinwertung" },
-    { key: "group",         label: "Gruppe" },
-    { key: "event",         label: "Veranstaltungsname" },
-  ];
-
-  // Flat map of all known variable values for a given entry
-  function dataMap(entry: ResultEntry, group_name: string): Record<string, string> {
-    const team = entry.team ?? "";
-    return {
-      team,
-      team_name:     team,
-      org:           entry.team_org      ?? "",
-      team_genus:    ({ f: "die", m: "der", n: "das" })[entry.team_genus ?? ""] ?? entry.team_genus ?? "",
-      rank:          entry.rank          != null ? String(entry.rank)          : "",
-      points_team:   entry.points_team   != null ? String(entry.points_team)   : "",
-      points_player: entry.points_player != null ? String(entry.points_player) : "",
-      tie:           entry.tie           != null ? String(entry.tie)           : "",
-      group:         group_name,
-      event:         event_name,
-    };
-  }
-
-  // Build a pdfme input record for one entry, driven by the actual template schema.
-  // - multiVariableText fields: input value is a JSON string of {variable: value} pairs
-  // - text (and other) fields: input value is the data value matching the field name
-  function buildInput(template: Template, entry: ResultEntry, group_name: string): Record<string, string> {
-    const data = dataMap(entry, group_name);
-    const result: Record<string, string> = {};
-    for (const page of template.schemas) {
-      for (const field of page) {
-        if (field.type === "multiVariableText") {
-          const vars: Record<string, string> = {};
-          for (const v of (field as { variables?: string[] }).variables ?? []) {
-            vars[v] = data[v] ?? "";
-          }
-          result[field.name] = JSON.stringify(vars);
-        } else if (field.name in data) {
-          result[field.name] = data[field.name];
-        }
-      }
-    }
-    return result;
-  }
 
   // Teams for selected group, sorted by rank
   const groupTeams = $derived(
@@ -147,7 +68,7 @@
   $effect(() => {
     if (!viewer) return;
     const entry = groupTeams[selected_team_index] ?? groupTeams[0];
-    const inputs = entry ? [buildInput(currentTemplate, entry, selectedGroupName)] : [{}];
+    const inputs = entry ? [buildInput(currentTemplate, applyBlanking(buildDataMap(entry, selectedGroupName, event_name)))] : [{}];
     viewer.updateTemplate(currentTemplate);
     viewer.setInputs(inputs);
   });
@@ -206,7 +127,7 @@
     const entry = groupTeams[selected_team_index] ?? groupTeams[0];
     if (!entry) return;
     try {
-      const inputs = [buildInput(currentTemplate, entry, selectedGroupName)];
+      const inputs = [buildInput(currentTemplate, applyBlanking(buildDataMap(entry, selectedGroupName, event_name)))];
       const pdf = await generate({ template: currentTemplate, inputs, plugins });
       const blob = new Blob([pdf.buffer], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
@@ -221,7 +142,7 @@
     if (!groupTeams.length) return;
     generating = true;
     try {
-      const inputs = groupTeams.map((entry) => buildInput(currentTemplate, entry, selectedGroupName));
+      const inputs = groupTeams.map((entry) => buildInput(currentTemplate, applyBlanking(buildDataMap(entry, selectedGroupName, event_name))));
       const pdf = await generate({ template: currentTemplate, inputs, plugins });
       const blob = new Blob([pdf.buffer], { type: "application/pdf" });
       window.open(URL.createObjectURL(blob));
@@ -307,6 +228,28 @@
               <code class="shrink-0 rounded bg-gray-200 px-1 text-xs text-blue-700">{"{" + p.key + "}"}</code>
               <span class="text-xs text-gray-500">{p.label}</span>
             </div>
+          {/each}
+        </div>
+      </div>
+
+      <!-- Vorausdruck -->
+      <div class="border-t border-gray-200 px-4 py-3">
+        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Vorausdruck</p>
+        <div class="space-y-1">
+          {#each blankableFields as f}
+            <label class="flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                class="h-3.5 w-3.5 rounded border-gray-300 text-blue-600"
+                checked={blanked.has(f.key)}
+                onchange={() => {
+                  if (blanked.has(f.key)) blanked.delete(f.key);
+                  else blanked.add(f.key);
+                  blanked = new Set(blanked);
+                }}
+              />
+              <span class="text-xs text-gray-600">{f.label} ausblenden</span>
+            </label>
           {/each}
         </div>
       </div>

@@ -414,6 +414,7 @@ export interface components {
       round: number;
       team?: string | null;
       team_genus?: string | null;
+      team_id?: string | null;
       team_org?: string | null;
       /** Format: float */
       tie?: number | null;

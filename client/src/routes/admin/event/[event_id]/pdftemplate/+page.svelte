@@ -5,48 +5,10 @@
   import { getTemplate, setTemplate } from "../../../../../api/api";
   import { Button } from "flowbite-svelte";
   import { CheckOutline, ArrowLeftOutline } from "flowbite-svelte-icons";
-  import type { Font, Template } from "@pdfme/common";
+  import type { Template } from "@pdfme/common";
   import { Designer } from "@pdfme/ui";
-  import { BLANK_A4_PDF, getDefaultFont } from "@pdfme/common";
-  import {
-    text,
-    multiVariableText,
-    image,
-    svg,
-    table,
-    barcodes,
-    line,
-    rectangle,
-    ellipse,
-  } from "@pdfme/schemas";
-
-  const getFontsData = (): Font => ({
-    ...getDefaultFont(),
-    "PinyonScript-Regular": {
-      fallback: false,
-      data: "https://fonts.gstatic.com/s/pinyonscript/v22/6xKpdSJbL9-e9LuoeQiDRQR8aOLQO4bhiDY.ttf",
-    },
-    NotoSerifJP: {
-      fallback: false,
-      data: "https://fonts.gstatic.com/s/notoserifjp/v30/xn71YHs72GKoTvER4Gn3b5eMRtWGkp6o7MjQ2bwxOubAILO5wBCU.ttf",
-    },
-    NotoSansJP: {
-      fallback: false,
-      data: "https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEj75vY0rw-oME.ttf",
-    },
-  });
-
-  const plugins = {
-    Text: text,
-    MultiVariableText: multiVariableText,
-    Image: image,
-    SVG: svg,
-    Table: table,
-    Line: line,
-    Rectangle: rectangle,
-    Ellipse: ellipse,
-    QRCode: barcodes.qrcode,
-  };
+  import { BLANK_A4_PDF } from "@pdfme/common";
+  import { getFontsData, plugins, placeholders } from "$lib/urkunde";
 
   const fallbackTemplate: Template = {
     basePdf: BLANK_A4_PDF,
@@ -142,18 +104,7 @@
     <!-- Placeholder reference -->
     <div class="flex w-56 shrink-0 flex-col gap-1 border-l border-gray-200 bg-gray-50 px-4 py-4">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Platzhalter</p>
-      {#each [
-        { key: "team",          label: "Team-Name" },
-        { key: "team_name",     label: "Team-Name (Alias)" },
-        { key: "org",           label: "Schule / Organisation" },
-        { key: "team_genus",    label: "Genus (der/die/das)" },
-        { key: "rank",          label: "Platz (1, 2, 3 …)" },
-        { key: "points_team",   label: "Mannschaftspunkte" },
-        { key: "points_player", label: "Einzelpunkte" },
-        { key: "tie",           label: "Feinwertung" },
-        { key: "group",         label: "Gruppe" },
-        { key: "event",         label: "Veranstaltungsname" },
-      ] as p}
+      {#each placeholders as p}
         <div class="flex flex-col gap-0.5">
           <code class="rounded bg-gray-200 px-1 text-xs text-blue-700">{"{" + p.key + "}"}</code>
           <span class="text-xs text-gray-400">{p.label}</span>

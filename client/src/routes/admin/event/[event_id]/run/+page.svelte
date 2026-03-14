@@ -5,7 +5,9 @@
     getEvent,
     getGroupsForEvent,
     getTeamCountForEvent,
+    getResults,
     type Group,
+    type ResultEntry,
   } from "../../../../../api/api";
   import FetchErrors from "../../../../FetchErrors.svelte";
   import {
@@ -21,6 +23,7 @@
     StarOutline,
     UsersGroupOutline,
     GridOutline,
+    PlusOutline,
   } from "flowbite-svelte-icons";
 
   const event_id = page.params.event_id || "";
@@ -29,7 +32,18 @@
   let event_date = $state<string | null>(null);
   let groups: Group[] = $state([]);
   let team_count = $state<number | null>(null);
+  let results: ResultEntry[] = $state([]);
   let fetch_errors: FetchErrors;
+
+  // Latest round per group id
+  const latestRoundByGroup = $derived(() => {
+    const map = new Map<string, number>();
+    for (const r of results) {
+      const cur = map.get(r.group) ?? 0;
+      if (r.round > cur) map.set(r.group, r.round);
+    }
+    return map;
+  });
 
   onMount(async () => {
     getEvent({ event: event_id }).resp.subscribe((resp) => {
@@ -49,6 +63,11 @@
     const resp_teams = await getTeamCountForEvent({ event: event_id }).result;
     if (resp_teams.ok) {
       team_count = resp_teams.data;
+    }
+
+    const resp_results = await getResults({ event: event_id }).result;
+    if (resp_results.ok) {
+      results = resp_results.data.results;
     }
   });
 
@@ -181,6 +200,38 @@
       </div>
     </div>
   </div>
+
+  <!-- Groups / results status -->
+  {#if groups.filter(g => !g.replacement).length > 0}
+  <section class="mb-10">
+    <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400">Gruppen & Ergebnisse</h2>
+    <div class="flex flex-col gap-2">
+      {#each groups.filter(g => !g.replacement) as group}
+        {@const latest = latestRoundByGroup().get(group.id) ?? 0}
+        <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
+          <div class="h-3 w-3 shrink-0 rounded-full" style="background-color: {group.color};"></div>
+          <span class="flex-1 font-medium text-gray-900">{group.name}</span>
+          {#if latest > 0}
+            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+              Runde {latest}
+            </span>
+          {:else}
+            <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-400">
+              Keine Ergebnisse
+            </span>
+          {/if}
+          <a
+            href="/admin/event/{event_id}/{group.id}/"
+            class="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <PlusOutline class="h-3.5 w-3.5" />
+            Eintragen
+          </a>
+        </div>
+      {/each}
+    </div>
+  </section>
+  {/if}
 
   <!-- Admin tools -->
   <section class="mb-10">

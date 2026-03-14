@@ -270,7 +270,7 @@
     <Loading />
   {:else}
     <h1 class="text-3xl font-bold underline">
-      Wilkommen, {org?.name}!
+      Willkommen, {org?.name}!
     </h1>
 
     <p class="my-4 text-xl text-gray-500">

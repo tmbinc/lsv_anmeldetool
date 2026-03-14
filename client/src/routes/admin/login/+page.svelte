@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { Alert, Button } from "flowbite-svelte";
   import { authLogin, authLogout, whoAmI } from "../../../api/api";
   import { onMount } from "svelte";
-  import type { ApiResponse } from "@cocreators-ee/apity";
 
   let email = $state("");
   let password = $state("");
@@ -11,19 +9,14 @@
   let user_email: string | null = $state(null);
 
   onMount(async () => {
-    const request = whoAmI({}).resp.subscribe((resp) => {
-      if (resp?.ok) {
-        user_email = resp.data.email;
-      } else {
-        user_email = "";
-      }
+    whoAmI({}).resp.subscribe((resp) => {
+      user_email = resp?.ok ? resp.data.email : "";
     });
   });
 
   async function login() {
-    const resp = await authLogin({ email: email, password: password }).result;
+    const resp = await authLogin({ email, password }).result;
     if (resp.ok) {
-      console.log(resp);
       login_ok = true;
       login_failed = false;
     } else {
@@ -32,59 +25,94 @@
   }
 
   async function logout() {
-    const resp = await authLogout({});
+    await authLogout({});
     login_ok = false;
     user_email = "";
   }
+
+  function onkeydown(e: KeyboardEvent) {
+    if (e.key === "Enter") login();
+  }
 </script>
 
-<div class="m-10 shadow bg-white rounded-xl">
-  {#if login_ok}
-    <div class="flex-row text-center m-10">
-      <div class="mt-5">Logged in. Please navigate back.</div>
-    </div>
-  {:else}
-    {#if login_failed}
-      <Alert>Login failed.</Alert>
-    {/if}
+<div class="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+  <div class="w-full max-w-sm">
 
-    {#if user_email != null}
-      {#if user_email}
-        <div class="flex-row text-center">
-          <div class="m-5">Logged in as {user_email}</div>
-          <Button class="m-5" on:click={() => logout()}>Logout</Button>
+    <div class="mb-8 text-center">
+      <h1 class="text-2xl font-bold text-gray-900">Administration</h1>
+      <p class="mt-1 text-sm text-gray-500">Lübecker Schachverein von 1873</p>
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+
+      {#if login_ok}
+        <div class="text-center">
+          <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 text-2xl">✓</div>
+          <p class="font-medium text-gray-900">Erfolgreich eingeloggt.</p>
+          <p class="mt-1 text-sm text-gray-500">Sie können zurücknavigieren.</p>
         </div>
-      {:else}
-        <div class="flex-row">
-          <div class="m-5 text-center">Aktuell nicht eingeloggt.</div>
-          <div class="m-5 font-bold">
-            Für den Administrationsbereich bitte einloggen.
-          </div>
-          <div class="m-5">
-            (Für die Verwaltung von Mannschaften ist ein einloggen nicht
-            erforderlich; bitte folgen Sie dem Link aus der Email.)
-          </div>
-          <div
-            class="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0"
+
+      {:else if user_email === null}
+        <!-- loading -->
+
+      {:else if user_email}
+        <div class="text-center">
+          <p class="text-sm text-gray-500">Eingeloggt als</p>
+          <p class="mt-1 font-medium text-gray-900">{user_email}</p>
+          <button
+            onclick={logout}
+            class="mt-6 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            <input
-              class="m-3"
-              type="email"
-              name="email"
-              bind:value={email}
-              placeholder="username"
-            />
-            <input
-              class="m-3"
-              type="password"
-              name="password"
-              placeholder="password"
-              bind:value={password}
-            />
-            <Button class="m-3" on:click={() => login()}>Login</Button>
+            Ausloggen
+          </button>
+        </div>
+
+      {:else}
+        <div class="mb-6">
+          <p class="text-sm text-gray-600">
+            Für den Administrationsbereich bitte einloggen. Für die Verwaltung
+            von Mannschaften folgen Sie dem Link aus der E-Mail.
+          </p>
+        </div>
+
+        {#if login_failed}
+          <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            E-Mail oder Passwort falsch.
           </div>
+        {/if}
+
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700" for="email">E-Mail</label>
+            <input
+              id="email"
+              type="email"
+              bind:value={email}
+              {onkeydown}
+              placeholder="admin@example.com"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700" for="password">Passwort</label>
+            <input
+              id="password"
+              type="password"
+              bind:value={password}
+              {onkeydown}
+              placeholder="••••••••"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <button
+            onclick={login}
+            class="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+          >
+            Einloggen
+          </button>
         </div>
       {/if}
-    {/if}
-  {/if}
+
+    </div>
+  </div>
 </div>

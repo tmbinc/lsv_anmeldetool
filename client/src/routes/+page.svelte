@@ -1,25 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { listEvents, type Event } from "../api/api";
-  import {
-    Button,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
-  import Loading from "./Loading.svelte";
   import FetchErrors from "./FetchErrors.svelte";
 
-  let loading = $state(false);
   let events: Event[] = $state([]);
   let fetch_errors: FetchErrors;
 
   onMount(async () => {
-    const request = listEvents({});
-    const resp = await request.result;
+    const resp = await listEvents({}).result;
     if (resp.ok) {
       events = resp.data;
     } else {
@@ -28,63 +16,49 @@
   });
 </script>
 
-<main
-  class="mx-auto items-center gap-x-4 rounded-xl bg-white p-6
-shadow-lg outline outline-black/5 dark:bg-slate-800 dark:shadow-none
-dark:-outline-offset-1 dark:outline-white/10"
->
-  <div>
-    <FetchErrors admin={false} bind:this={fetch_errors} />
-    {#if loading}
-      <Loading />
-    {:else}
-      <div class="text-xl font-medium text-black dark:text-white">
-        Turnierkalender
+<FetchErrors admin={false} bind:this={fetch_errors} />
+
+<div class="mx-auto max-w-2xl px-6 py-12">
+  <h1 class="mb-8 text-2xl font-bold text-gray-900">Turnierkalender</h1>
+
+  <div class="flex flex-col gap-3">
+    {#each events as event}
+      <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div class="font-semibold text-gray-900">{event.name}</div>
+            {#if event.begin}
+              <div class="mt-0.5 text-sm text-gray-400">
+                {new Date(event.begin).toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" })}
+              </div>
+            {/if}
+          </div>
+
+          {#if !event.registration_active}
+            <div class="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-400">
+              {#if event.registration_start_date}
+                Anmeldung ab {new Date(event.registration_start_date).toLocaleDateString("de-DE", { day: "numeric", month: "long" })}
+              {:else}
+                Anmeldung noch nicht aktiv
+              {/if}
+            </div>
+          {:else if event.allow_set_present}
+            <a
+              href="/event/{event.id}/timetable"
+              class="shrink-0 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            >
+              Zeitplan →
+            </a>
+          {:else}
+            <a
+              href="/event/{event.id}"
+              class="shrink-0 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            >
+              Zur Anmeldung →
+            </a>
+          {/if}
+        </div>
       </div>
-      <div class="flex items-center sm:justify-center ml-4 sm:ml-0">
-        <Table>
-          <TableBody>
-            {#each events as event}
-              <TableBodyRow class="flex flex-col md:flex-row items-center mb-4">
-                <TableBodyCell>
-                  {event.name}
-                </TableBodyCell>
-                <TableBodyCell>
-                  {#if event.begin}
-                    Datum: {new Date(event.begin).toLocaleDateString()}
-                  {/if}
-                </TableBodyCell>
-                {#if !event.registration_active}
-                  <TableBodyCell>
-                    <Button disabled={true}>
-                      {#if event.registration_start_date}
-                        <i
-                          >Anmeldung ab dem {new Date(
-                            event.registration_start_date
-                          ).toLocaleDateString()}
-                        </i>
-                      {:else}
-                        <i>noch keine Registrierung möglich</i>
-                      {/if}
-                    </Button>
-                  </TableBodyCell>
-                {:else if event.allow_set_present}
-                  <TableBodyCell
-                    ><Button href="/event/{event.id}/timetable"
-                      >Zeitplan...</Button
-                    ></TableBodyCell
-                  >
-                {:else}
-                  <TableBodyCell
-                    ><Button href="/event/{event.id}">Zur Anmeldung...</Button
-                    ></TableBodyCell
-                  >
-                {/if}
-              </TableBodyRow>
-            {/each}
-          </TableBody>
-        </Table>
-      </div>
-    {/if}
+    {/each}
   </div>
-</main>
+</div>
