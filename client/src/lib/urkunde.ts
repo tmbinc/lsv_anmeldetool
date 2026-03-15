@@ -17,15 +17,71 @@ import type { ResultEntry } from "../api/api";
 export function getFontsData(): Font {
   return {
     ...getDefaultFont(),
-    "PinyonScript-Regular": {
+    // ── Script / calligraphy ──────────────────────────────────────────────────
+    "PinyonScript-Regular": {      // OFL – elegant script
       fallback: false,
       data: "https://fonts.gstatic.com/s/pinyonscript/v22/6xKpdSJbL9-e9LuoeQiDRQR8aOLQO4bhiDY.ttf",
     },
-    NotoSerifJP: {
+    "GreatVibes-Regular": {        // OFL – flowing script, great for certificates
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/greatvibes/v21/RWmMoKWR9v4ksMfaWd_JN-XC.ttf",
+    },
+    // ── Formal serif ─────────────────────────────────────────────────────────
+    "Cinzel-Regular": {            // OFL – classical Roman caps, ideal for formal docs
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/cinzel/v26/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnTYo.ttf",
+    },
+    "Cinzel-Bold": {               // OFL
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/cinzel/v26/8vIU7ww63mVu7gtR-kwKxNvkNOjw-jHgTYo.ttf",
+    },
+    "PlayfairDisplay-Regular": {   // OFL – elegant serif for headlines
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.ttf",
+    },
+    "PlayfairDisplay-Bold": {      // OFL
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiukDQ.ttf",
+    },
+    "Merriweather-Regular": {      // OFL – highly legible serif body text
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/merriweather/v33/u-4D0qyriQwlOrhSvowK_l5UcA6zuSYEqOzpPe3HOZJ5eX1WtLaQwmYiScCmDxhtNOKl8yDr3icqEw.ttf",
+    },
+    "Merriweather-Bold": {         // OFL
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/merriweather/v33/u-4D0qyriQwlOrhSvowK_l5UcA6zuSYEqOzpPe3HOZJ5eX1WtLaQwmYiScCmDxhtNOKl8yDrOSAqEw.ttf",
+    },
+    // ── Sans-serif ────────────────────────────────────────────────────────────
+    "Roboto-Regular": {            // Apache 2.0 – Google's flagship sans-serif
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/roboto/v51/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWubEbWmT.ttf",
+    },
+    "Roboto-Bold": {               // Apache 2.0
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/roboto/v51/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWuYjammT.ttf",
+    },
+    "OpenSans-Regular": {          // Apache 2.0 – clean, neutral sans-serif
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0C4n.ttf",
+    },
+    "OpenSans-Bold": {             // Apache 2.0
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1y4n.ttf",
+    },
+    "Lato-Regular": {              // OFL – friendly, rounded sans-serif
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/lato/v25/S6uyw4BMUTPHvxk.ttf",
+    },
+    "Lato-Bold": {                 // OFL
+      fallback: false,
+      data: "https://fonts.gstatic.com/s/lato/v25/S6u9w4BMUTPHh6UVew8.ttf",
+    },
+    // ── Japanese (CJK) ───────────────────────────────────────────────────────
+    NotoSerifJP: {                 // OFL
       fallback: false,
       data: "https://fonts.gstatic.com/s/notoserifjp/v30/xn71YHs72GKoTvER4Gn3b5eMRtWGkp6o7MjQ2bwxOubAILO5wBCU.ttf",
     },
-    NotoSansJP: {
+    NotoSansJP: {                  // OFL
       fallback: false,
       data: "https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEj75vY0rw-oME.ttf",
     },

@@ -144,9 +144,9 @@
       color: "purple",
     },
     {
-      href: `/event/${event_id}/results/`,
+      href: `/event/${event_id}/timetable_results/`,
       label: "Ergebnisse",
-      description: "Rangliste und Ergebnisse für das Publikum",
+      description: "Rangliste und Ergebnisse für den Beamer",
       icon: ChartMixedOutline,
       color: "purple",
     },
@@ -228,9 +228,12 @@
       {#each groups.filter(g => !g.replacement) as group}
         {@const resultRound = latestResultRound().get(group.id) ?? 0}
         {@const pairingRound = latestPairingRound().get(group.id) ?? 0}
+        {@const mergedGroups = groups.filter(g => g.replacement === group.id)}
         <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
           <div class="h-3 w-3 shrink-0 rounded-full" style="background-color: {group.color};"></div>
-          <span class="flex-1 font-medium text-gray-900">{group.name}</span>
+          <span class="flex-1 font-medium text-gray-900">
+            {group.name}{#if mergedGroups.length > 0}<span class="ml-1 font-normal text-gray-400">({mergedGroups.map(g => g.name).join(", ")})</span>{/if}
+          </span>
 
           <!-- Pairing round -->
           {#if pairingRound > 0}
@@ -324,7 +327,7 @@
           <ChartMixedOutline class="h-5 w-5" />
         </div>
         <div>
-          <div class="font-medium text-gray-900">Ergebnisse</div>
+          <div class="font-medium text-gray-900">Ergebnisse (mobil)</div>
           <div class="mt-0.5 text-xs text-gray-400">/event/…/results</div>
         </div>
       </a>

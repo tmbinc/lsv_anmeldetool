@@ -274,13 +274,23 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
           header[header.findIndex((n) => n == "Punkte")] += "_guest";
         }
         if (in_results) {
-          // This is quite frustrating...
-          header[header.findIndex((n) => n == "Man.Pkt.")] += "_won";
-          header[header.findIndex((n) => n == "Man.Pkt.")] += "xxx";
-          header[header.findIndex((n) => n == "")] = "Man.Pkt._lost";
-          header[header.findIndex((n) => n == "Brt.Pkt.")] += "_won";
-          header[header.findIndex((n) => n == "Brt.Pkt.")] += "xxx";
-          header[header.findIndex((n) => n == "")] = "Brt.Pkt._lost";
+          // Each scored column appears twice in the header: once for the won
+          // value and once as a "-" separator column, followed by an unnamed
+          // column that holds the lost value.  We must NOT use findIndex("") to
+          // locate the lost column because that would match the unrelated empty
+          // column after "Mannschaft".  Instead we rename the separator and
+          // then address the lost column by its position directly after it.
+          const man_sep = header.findIndex((n) => n == "Man.Pkt.");
+          header[man_sep] = "Man.Pkt._won";
+          const man_dash = header.findIndex((n) => n == "Man.Pkt.");
+          header[man_dash] = "_skip";
+          header[man_dash + 1] = "Man.Pkt._lost";
+
+          const brt_sep = header.findIndex((n) => n == "Brt.Pkt.");
+          header[brt_sep] = "Brt.Pkt._won";
+          const brt_dash = header.findIndex((n) => n == "Brt.Pkt.");
+          header[brt_dash] = "_skip";
+          header[brt_dash + 1] = "Brt.Pkt._lost";
         }
       }
     }

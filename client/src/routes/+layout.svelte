@@ -13,7 +13,7 @@
   />
 </svelte:head>
 
-{#if !$page.url.pathname.includes("/run/ceremony") && !$page.url.pathname.includes("/timetable_pairing") && !$page.url.pathname.includes("/paarvis")}
+{#if !$page.url.pathname.includes("/run/ceremony") && !$page.url.pathname.includes("/timetable_pairing") && !$page.url.pathname.includes("/timetable_results") && !$page.url.pathname.includes("/paarvis")}
   <nav>
     <Navbar let:hidden let:toggle>
       <NavBrand href="/">

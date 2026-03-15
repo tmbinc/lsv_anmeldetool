@@ -69,7 +69,7 @@
           timetable = new_timetable;
           groupnames = new Map(resp.data.groups.map((g) => [g.id, g.name]));
 
-          if (enabled_groups) {
+          if (enabled_groups.length === 0) {
             enabled_groups = resp.data.groups.map((g) => g.id);
           }
 
@@ -182,59 +182,63 @@
   </header>
 
   <!-- ── Pairing columns ───────────────────────────────────────── -->
+  <!--
+    CSS multi-column layout: content flows top-to-bottom within each column
+    then spills into the next, so large groups can span column boundaries and
+    small groups share a column with their neighbor.  column-fill: auto fills
+    each column to the container height before starting a new one.
+  -->
   <div
-    class="flex-1 overflow-hidden grid gap-3 p-3"
-    style="grid-template-columns: repeat({visibleGroups.length || 1}, minmax(0, 1fr));"
+    class="flex-1 min-h-0 overflow-hidden p-3"
+    style="columns: 4; column-gap: 0.75rem; column-fill: auto;"
   >
-    {#each groups_pairings.filter((f) => !f.replacement) as group (group.id)}
+    {#each visibleGroups as group (group.id)}
+      <!-- Header: break-after-avoid keeps it attached to the first pairing row -->
       <div
-        class="flex flex-col overflow-hidden rounded-lg"
-        hidden={!enabled_groups.includes(group.id)}
+        class="break-after-avoid break-inside-avoid flex items-baseline justify-between rounded-t-sm px-3 py-1.5 text-gray-900 mt-1 first:mt-0"
+        style="background-color: {group.color};"
         role="button"
         tabindex="0"
         ondblclick={() => { enabled_groups = enabled_groups.filter((f) => f != group.id); }}
       >
-        <!-- Group header -->
-        <div
-          class="shrink-0 flex items-baseline justify-between px-3 py-2 text-gray-900"
-          style="background-color: {group.color};"
-        >
-          <span class="font-bold leading-tight">{group.name}</span>
-          <span class="text-sm font-medium opacity-70">Runde {roundForGroup(group)}</span>
-        </div>
-
-        <!-- Pairing table -->
-        <div class="flex-1 overflow-auto">
-          <table class="w-full text-sm border-collapse">
-            <thead>
-              <tr class="border-b border-white/10 text-left text-xs font-semibold uppercase tracking-wide text-white/40">
-                <th class="px-2 py-1.5 w-8 text-center">#</th>
-                <th class="px-2 py-1.5">Brett 1 schwarz</th>
-                <th class="px-2 py-1.5">Brett 1 weiß</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each pairings.filter((p) => p.group == group.id) as pairing, i}
-                <tr class="border-b border-white/5 {i % 2 === 0 ? 'bg-white/5' : ''}">
-                  <td class="px-2 py-1 text-center text-white/40 tabular-nums">{pairing.table}</td>
-                  <td class="px-2 py-1">
-                    <div class="font-medium leading-tight">{pairing.team_home ?? "–"}</div>
-                    {#if pairing.team_home_org}
-                      <div class="text-xs text-white/40 leading-tight">{pairing.team_home_org}</div>
-                    {/if}
-                  </td>
-                  <td class="px-2 py-1">
-                    <div class="font-medium leading-tight">{pairing.team_guest ?? "spielfrei"}</div>
-                    {#if pairing.team_guest_org}
-                      <div class="text-xs text-white/40 leading-tight">{pairing.team_guest_org}</div>
-                    {/if}
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
+        <span class="font-bold text-sm">{group.name}</span>
+        <span class="text-xs font-medium opacity-70">Runde {roundForGroup(group)}</span>
       </div>
+
+      {#each pairings.filter((p) => p.group === group.id) as pairing}
+        <!--
+          items-stretch: all cells fill the full row height so the table number
+          naturally spans from top to bottom regardless of team/org line count.
+          The group color is used as the table-number cell background so every
+          row carries a visible color marker even when the group header is in a
+          previous column.
+        -->
+        <div class="flex items-stretch border-b border-white/25 text-sm break-inside-avoid" style="border-left: 3px solid {group.color};">
+          <!-- Table number: group-colored background, dark text, vertically centred -->
+          <div class="flex w-10 shrink-0 items-center justify-center text-2xl font-black text-gray-900 tabular-nums" style="background-color: {group.color};">
+            {pairing.table}
+          </div>
+          <!-- Home team -->
+          <div class="flex min-w-0 flex-1 flex-col justify-center px-2 py-1.5">
+            <div class="truncate font-bold leading-tight text-white">{pairing.team_home ?? "–"}</div>
+            {#if pairing.team_home_org}
+              <div class="truncate text-xs leading-tight text-white/55">{pairing.team_home_org}</div>
+            {/if}
+          </div>
+          <!-- Column separator -->
+          <div class="flex w-5 shrink-0 items-center justify-center border-x border-white/15 text-xs font-bold text-white/25">:</div>
+          <!-- Guest team -->
+          <div class="flex min-w-0 flex-1 flex-col justify-center px-2 py-1.5">
+            <div class="truncate font-bold leading-tight text-white">{pairing.team_guest ?? "spielfrei"}</div>
+            {#if pairing.team_guest_org}
+              <div class="truncate text-xs leading-tight text-white/55">{pairing.team_guest_org}</div>
+            {/if}
+          </div>
+        </div>
+      {/each}
+
+      <!-- Small gap between groups -->
+      <div class="h-2"></div>
     {/each}
   </div>
 
