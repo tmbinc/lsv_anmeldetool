@@ -122,6 +122,11 @@
     return pairings.find((p) => p.group == group.id)?.round || "?";
   }
 
+  function fmt(v: number | null | undefined): string {
+    if (v == null) return "";
+    return Number.isInteger(v) ? String(v) : v.toFixed(1);
+  }
+
   function timeLabel(key: string): string {
     const t = new Date(parseInt(key)).toTimeString().split(" ")[0].slice(0, 5);
     if (key.endsWith("_next")) return t;
@@ -220,16 +225,26 @@
           </div>
           <!-- Home team -->
           <div class="flex min-w-0 flex-1 flex-col justify-center px-2 py-1.5">
-            <div class="truncate font-bold leading-tight text-white">{pairing.team_home ?? "–"}</div>
+            <div class="flex min-w-0 items-baseline gap-1">
+              <div class="truncate font-bold leading-tight text-white" style="direction: rtl;">{pairing.team_home ?? "–"}</div>
+              {#if pairing.points_home != null}
+                <span class="shrink-0 tabular-nums text-xs text-white/50">({fmt(pairing.points_home)})</span>
+              {/if}
+            </div>
             {#if pairing.team_home_org}
               <div class="truncate text-xs leading-tight text-white/55">{pairing.team_home_org}</div>
             {/if}
           </div>
-          <!-- Column separator -->
+          <!-- Separator -->
           <div class="flex w-5 shrink-0 items-center justify-center border-x border-white/15 text-xs font-bold text-white/25">:</div>
           <!-- Guest team -->
           <div class="flex min-w-0 flex-1 flex-col justify-center px-2 py-1.5">
-            <div class="truncate font-bold leading-tight text-white">{pairing.team_guest ?? "spielfrei"}</div>
+            <div class="flex min-w-0 items-baseline gap-1">
+              <div class="truncate font-bold leading-tight text-white" style="direction: rtl;">{pairing.team_guest ?? "spielfrei"}</div>
+              {#if pairing.points_guest != null}
+                <span class="shrink-0 tabular-nums text-xs text-white/50">({fmt(pairing.points_guest)})</span>
+              {/if}
+            </div>
             {#if pairing.team_guest_org}
               <div class="truncate text-xs leading-tight text-white/55">{pairing.team_guest_org}</div>
             {/if}

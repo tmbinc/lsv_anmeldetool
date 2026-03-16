@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import { getResults, type Group, type ResultEntry } from "../../../../api/api";
+  import PairingAlert from "../PairingAlert.svelte";
   import { page } from "$app/state";
   import { browser } from "$app/environment";
 
@@ -11,8 +12,9 @@
   let groups: Group[] = $state([]);
   let results: ResultEntry[] = $state([]);
   let evtSource: EventSource | null = null;
+  let pairingSignal = $state(0);
 
-  let org_selected = $state((browser && localStorage.getItem("org_selected")) ?? "*");
+  let org_selected = $state(browser ? (localStorage.getItem("org_selected") ?? "*") : "*");
   let orgs: string[] = $state([]);
 
   function saveOrg() {
@@ -177,6 +179,7 @@
     evtSource.onmessage = (ev) => {
       const data = JSON.parse(ev.data);
       if (data.kind == "results") results_request.reload();
+      if (data.kind == "pairing") pairingSignal++;
     };
   });
 
@@ -194,6 +197,8 @@
   const visibleGroups = $derived(groups.filter((g) => !g.replacement));
 </script>
 
+<PairingAlert {event_id} signal={pairingSignal} />
+
 <!-- ── Matrix rain canvas (below everything) ──────────────────────────── -->
 {#if matrix}
   <canvas
@@ -209,8 +214,21 @@
 
   <!-- Sticky header -->
   <header class="sticky top-0 z-30 border-b shadow-sm {t.header}">
+    <!-- Nav row -->
+    <div class="flex items-center gap-3 px-4 pt-2 pb-1 text-xs {matrix ? 'text-green-700 font-mono' : 'text-gray-400'}">
+      <a href="/event/{event_id}/timetable"
+         class="transition-colors {matrix ? 'hover:text-green-400' : 'hover:text-gray-600'}">
+        {matrix ? "< ZEITPLAN" : "← Zeitplan"}
+      </a>
+      <span class="opacity-40">|</span>
+      <a href="/event/{event_id}/pairings"
+         class="transition-colors {matrix ? 'hover:text-green-400' : 'hover:text-gray-600'}">
+        {matrix ? "PAARUNGEN >" : "Paarungen →"}
+      </a>
+    </div>
+
     <!-- Title -->
-    <div class="px-4 pt-3 pb-2">
+    <div class="px-4 pt-1 pb-2">
       <h1 class="text-lg font-bold {t.title}">
         {matrix ? "> " : ""}{event_name || "Ergebnisse"}{matrix ? "_" : ""}
       </h1>
@@ -303,25 +321,23 @@
 
             <!-- Column labels -->
             <div
-              class="grid border-b px-2 py-1.5 text-xs font-semibold uppercase tracking-wide {t.colLabel}"
-              style="grid-template-columns: 2.25rem 1fr 3.5rem 3.5rem 3.5rem;"
+              class="pts-grid grid border-b px-2 py-1.5 text-xs font-semibold uppercase {t.colLabel}"
             >
               <div class="text-center">#</div>
               <div class="px-1">{matrix ? "TEAM_ID" : "Mannschaft"}</div>
-              <div class="text-right">{matrix ? "MAN" : "Man."}</div>
-              <div class="text-right">{matrix ? "BRT" : "Brt."}</div>
-              <div class="text-right">{matrix ? "BUC" : "Buchh"}</div>
+              <div class="text-right">{matrix ? "M" : "M"}</div>
+              <div class="text-right">{matrix ? "B" : "B"}</div>
+              <div class="text-right">{matrix ? "Bh" : "Bh"}</div>
             </div>
 
             {#each groupResults as result, i}
               {@const hl  = org_selected !== "*" && result.team_org === org_selected}
               {@const dim = org_selected !== "*" && result.team_org !== org_selected}
               <div
-                class="grid items-center border-b px-2 py-2 last:border-0
+                class="pts-grid grid items-center border-b px-2 py-2 last:border-0
                   {hl ? t.rowHL : dim ? t.rowNormal : i % 2 === 1 ? t.rowAlt : t.rowNormal}
                   {dim ? t.rowDim : ''}"
-                style="grid-template-columns: 2.25rem 1fr 3.5rem 3.5rem 3.5rem;
-                       border-left: 3px solid {matrix ? (hl ? '#00ff41' : '#003300') : group.color};
+                style="border-left: 3px solid {matrix ? (hl ? '#00ff41' : '#003300') : group.color};
                        border-bottom-color: {matrix ? '#0a2a0a' : ''};"
               >
                 <!-- Rank -->
@@ -373,6 +389,21 @@
 >π</button>
 
 <style>
+  /* Responsive points grid: rank | name | M | B | Bh */
+  .pts-grid {
+    grid-template-columns: 1.75rem 1fr 2rem 2rem 2rem;
+  }
+  @media (min-width: 360px) {
+    .pts-grid {
+      grid-template-columns: 2rem 1fr 2.5rem 2.5rem 2.5rem;
+    }
+  }
+  @media (min-width: 480px) {
+    .pts-grid {
+      grid-template-columns: 2.25rem 1fr 3rem 3rem 3rem;
+    }
+  }
+
   /* Scanline CRT effect */
   .scanlines {
     background: repeating-linear-gradient(

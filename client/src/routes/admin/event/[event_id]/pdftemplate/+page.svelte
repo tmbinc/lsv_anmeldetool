@@ -34,6 +34,27 @@
   let fetch_errors: FetchErrors;
   let saved = $state(false);
   let saveTimer: ReturnType<typeof setTimeout>;
+  let copyFeedback = $state(false);
+  let pasteFeedback = $state(false);
+
+  async function copyTemplate() {
+    if (!designer) return;
+    await navigator.clipboard.writeText(JSON.stringify(designer.getTemplate()));
+    copyFeedback = true;
+    setTimeout(() => (copyFeedback = false), 2000);
+  }
+
+  async function pasteTemplate() {
+    const text = await navigator.clipboard.readText();
+    try {
+      const tmpl = JSON.parse(text);
+      designer?.updateTemplate(tmpl);
+      pasteFeedback = true;
+      setTimeout(() => (pasteFeedback = false), 2000);
+    } catch {
+      alert("Ungültige Vorlage in der Zwischenablage.");
+    }
+  }
 
   onMount(() => {
     designer = new Designer({
@@ -88,11 +109,19 @@
     <div class="mx-1 h-4 w-px bg-gray-300"></div>
     <span class="text-sm font-semibold text-gray-700">PDF-Vorlage: Urkunde</span>
     <div class="ml-auto flex items-center gap-2">
+      {#if copyFeedback}
+        <span class="text-sm text-green-600">Kopiert ✓</span>
+      {/if}
+      {#if pasteFeedback}
+        <span class="text-sm text-green-600">Eingefügt ✓</span>
+      {/if}
       {#if saved}
         <span class="flex items-center gap-1 text-sm text-green-600">
           <CheckOutline class="h-4 w-4" /> Gespeichert
         </span>
       {/if}
+      <Button size="sm" color="alternative" onclick={copyTemplate}>Kopieren</Button>
+      <Button size="sm" color="alternative" onclick={pasteTemplate}>Einfügen</Button>
       <Button size="sm" onclick={save}>Speichern</Button>
     </div>
   </div>

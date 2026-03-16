@@ -158,7 +158,8 @@
       }
     }
 
-    const upload_res = await setTimetable({ event: event_id, timetable: res })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const upload_res = await setTimetable({ event: event_id, timetable: res } as any)
       .result;
     if (!upload_res.ok) {
       alert("upload of timetable failed");

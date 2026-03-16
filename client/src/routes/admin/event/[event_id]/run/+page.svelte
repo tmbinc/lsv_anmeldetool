@@ -14,6 +14,7 @@
   import FetchErrors from "../../../../FetchErrors.svelte";
   import {
     ClipboardListOutline,
+    EnvelopeOutline,
     CalendarMonthOutline,
     ClipboardCheckOutline,
     AwardOutline,
@@ -124,6 +125,13 @@
       label: "PDF-Vorlage",
       description: "Urkundenvorlage bearbeiten und speichern",
       icon: FilePdfOutline,
+      color: "blue",
+    },
+    {
+      href: `/admin/event/${event_id}/teamlist/`,
+      label: "Team-Übersicht",
+      description: "Zusammenfassung aller Teams pro Schule zum Versand",
+      icon: EnvelopeOutline,
       color: "blue",
     },
     {

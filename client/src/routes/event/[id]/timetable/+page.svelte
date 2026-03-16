@@ -3,6 +3,7 @@
   import { getTimetable, type TimetableRow } from "../../../../api/api";
   import { page } from "$app/state";
   import Loading from "../../../Loading.svelte";
+  import PairingAlert from "../PairingAlert.svelte";
   import LoadError from "../../../LoadError.svelte";
 
   let loading = $state(true);
@@ -13,6 +14,7 @@
   let timetable = $state(new Map<string, TimetableRow[]>());
   let groupnames = $state(new Map<string, string>());
   let evtSource: EventSource | null = null;
+  let pairingSignal = $state(0);
 
   onMount(async () => {
     let timetable_request = getTimetable({ event: event_id });
@@ -59,6 +61,7 @@
     evtSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.kind == "timetable") timetable_request.reload();
+      if (data.kind == "pairing") pairingSignal++;
     };
   });
 
@@ -80,6 +83,8 @@
     return new Date(parseInt(key)).toTimeString().split(" ")[0].slice(0, 5);
   }
 </script>
+
+<PairingAlert {event_id} signal={pairingSignal} />
 
 {#if loading}
   <Loading text="Lade Zeitplan..." />

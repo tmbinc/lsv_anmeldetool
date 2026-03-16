@@ -3,110 +3,142 @@
   import { getRooms, setRooms, type Room } from "../../../../../../api/api";
   import { page } from "$app/state";
   import FetchErrors from "../../../../../FetchErrors.svelte";
-  import {
-    Button,
-    Input,
-    Modal,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
-  import { CheckCircleOutline } from "flowbite-svelte-icons";
 
   const event_id = page.params.event_id || "";
   const group_id = page.params.group || "";
 
-  let uploaded = $state(false);
-
   let fetch_errors: FetchErrors;
-
   let rooms: Room[] = $state([]);
+  let saved = $state(false);
+  let saving = $state(false);
 
   onMount(async () => {
-    const request = getRooms({ event: event_id });
-    const resp = await request.result;
+    const resp = await getRooms({ event: event_id }).result;
     if (resp.ok) {
-      rooms = resp.data.filter((room) => room.group_id == group_id);
+      rooms = resp.data.filter((r) => r.group_id == group_id);
     } else {
       fetch_errors.check(resp);
     }
   });
 
-  async function new_room() {
+  function new_room() {
     rooms.push({
       event: event_id,
       group_id: group_id,
-      room: "New Room",
+      room: "",
       table_num_low: 0,
       table_num_high: 0,
     });
+    saved = false;
   }
-  async function save_rooms() {
-    let result = await setRooms({
-      event: event_id,
-      group: group_id,
-      rooms: rooms,
-    }).result;
 
+  function remove_room(i: number) {
+    rooms.splice(i, 1);
+    saved = false;
+  }
+
+  async function save_rooms() {
+    saving = true;
+    saved = false;
+    const result = await setRooms({ event: event_id, group: group_id, rooms }).result;
+    saving = false;
     if (result.ok) {
-      uploaded = true;
+      saved = true;
     } else {
-      alert("warning - failed to save: " + result.data);
+      alert("Speichern fehlgeschlagen: " + result.data);
     }
   }
 </script>
 
-<main>
-  <FetchErrors bind:this={fetch_errors} />
+<FetchErrors bind:this={fetch_errors} />
 
-  <Table>
-    <TableHead>
-      <TableHeadCell>Table #low..#high</TableHeadCell>
-      <TableHeadCell>Room Name</TableHeadCell>
-    </TableHead>
-    <TableBody>
-      {#each rooms as room}
-        <TableBodyRow>
-          <TableBodyCell
-            ><div class="inline-block">
-              <Input
-                type="number"
-                class="inline-block w-16"
-                bind:value={room.table_num_low}
-              />
-              to
-              <Input
-                type="number"
-                class="inline-block w-16"
-                bind:value={room.table_num_high}
-              />
-            </div>
-          </TableBodyCell>
-          <TableBodyCell><Input bind:value={room.room} /></TableBodyCell>
-        </TableBodyRow>
-      {/each}
-      <TableBodyRow>
-        <TableBodyCell></TableBodyCell>
-        <TableBodyCell>
-          <Button on:click={new_room}>New Room Mapping...</Button>
-          <Button on:click={save_rooms}>Upload</Button>
-        </TableBodyCell>
-      </TableBodyRow>
-    </TableBody>
-  </Table>
+<main class="px-4 py-8 sm:px-8">
 
-  <Modal bind:open={uploaded} size="xs" autoclose>
-    <div class="text-center">
-      <CheckCircleOutline
-        class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
-      />
-      <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-        Room setup saved!
-      </h3>
-      <Button color="alternative">Close</Button>
+  <div class="mb-6 flex items-center justify-between gap-4">
+    <h1 class="text-xl font-bold text-gray-900">Raumzuordnung</h1>
+    <div class="flex items-center gap-3">
+      {#if saved}
+        <span class="text-sm font-medium text-green-600">Gespeichert ✓</span>
+      {/if}
+      <button
+        onclick={save_rooms}
+        disabled={saving}
+        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:opacity-50"
+      >{saving ? "Speichern…" : "Speichern"}</button>
     </div>
-  </Modal>
+  </div>
+
+  <!-- Room list -->
+  {#if rooms.length === 0}
+    <p class="rounded-xl border border-dashed border-gray-300 py-10 text-center text-sm text-gray-400">
+      Noch keine Raumzuordnungen. Klicke auf „Raum hinzufügen".
+    </p>
+  {:else}
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+
+      <!-- Header row -->
+      <div class="grid items-center gap-4 border-b border-gray-100 bg-gray-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400"
+           style="grid-template-columns: 1fr 3fr auto;">
+        <div>Tische (von – bis)</div>
+        <div>Raumname</div>
+        <div class="w-7"></div>
+      </div>
+
+      {#each rooms as room, i}
+        <div
+          class="grid items-center gap-4 border-b border-gray-100 px-4 py-2.5 last:border-0 hover:bg-gray-50/50"
+          style="grid-template-columns: 1fr 3fr auto;"
+        >
+          <!-- Table range -->
+          <div class="flex items-center gap-1.5">
+            <input
+              type="number"
+              bind:value={room.table_num_low}
+              oninput={() => (saved = false)}
+              class="w-16 rounded-md border border-gray-200 px-2 py-1.5 text-center text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span class="text-gray-400">–</span>
+            <input
+              type="number"
+              bind:value={room.table_num_high}
+              oninput={() => (saved = false)}
+              class="w-16 rounded-md border border-gray-200 px-2 py-1.5 text-center text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+
+          <!-- Room name -->
+          <input
+            type="text"
+            bind:value={room.room}
+            oninput={() => (saved = false)}
+            placeholder="z.B. Aula"
+            class="w-full rounded-md border border-gray-200 px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+
+          <!-- Delete -->
+          <button
+            onclick={() => remove_room(i)}
+            class="flex h-7 w-7 items-center justify-center rounded-md text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
+            title="Entfernen"
+          >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      {/each}
+    </div>
+  {/if}
+
+  <!-- Add button -->
+  <button
+    onclick={new_room}
+    class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
+  >
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+    Raum hinzufügen
+  </button>
+
 </main>

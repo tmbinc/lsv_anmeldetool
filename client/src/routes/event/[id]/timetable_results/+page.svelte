@@ -185,7 +185,7 @@
 
           <!-- Team name + org -->
           <div class="flex min-w-0 flex-1 flex-col justify-center px-2 py-1.5">
-            <div class="truncate font-bold leading-tight text-white">{result.team ?? "–"}</div>
+            <div class="truncate font-bold leading-tight text-white" style="direction: rtl;">{result.team ?? "–"}</div>
             {#if result.team_org}
               <div class="truncate text-xs leading-tight text-white/55">{result.team_org}</div>
             {/if}

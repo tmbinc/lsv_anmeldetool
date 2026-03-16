@@ -53,6 +53,7 @@
   let verify_team_new_state: string | null = $state(null);
   let verify_team: OrgTeam | null = $state(null);
   let also_clear_changes_modal = $state(false);
+  let csv_include_contact = $state(false);
   let evtSource: EventSource | null = null;
 
   type OrgTeam = {
@@ -235,6 +236,48 @@
       });
     }
   }
+
+  function download_csv() {
+    const esc = (v: string | null | undefined): string => {
+      const s = v ?? "";
+      if (s.includes('"') || s.includes(",") || s.includes("\n"))
+        return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+
+    const statusLabel = (t: OrgTeam): string => {
+      if (t.org_state !== "Verified") return "nicht verifiziert";
+      if (t.team.presence_state === "present") return "anwesend";
+      if (t.team.presence_state === "absent") return "abgemeldet";
+      return "registriert";
+    };
+
+    const cols = ["Schule", "Mannschaft", "Status", "Gruppe"];
+    if (csv_include_contact) cols.push("Kontakt", "Telefon");
+
+    const rows = [cols.join(",")];
+    for (const t of teams) {
+      const row = [
+        esc(t.org.name),
+        esc(t.team.name),
+        esc(statusLabel(t)),
+        esc(group_names.get(t.team.group_id ?? "") ?? ""),
+      ];
+      if (csv_include_contact) {
+        row.push(esc(t.team.contact_name), esc(t.team.contact_phone));
+      }
+      rows.push(row.join(","));
+    }
+
+    const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = (group?.name || "WK") + ".csv";
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 </script>
 
 <div class="m-6 md:mx-10">
@@ -368,6 +411,10 @@
       also_clear_changes_modal = true;
     }}>Download SwissChess Mannschaftsliste...</Button
   >
+  <div class="mx-10 mb-6 flex flex-wrap items-center gap-3">
+    <Button on:click={download_csv}>Download CSV</Button>
+    <Checkbox bind:checked={csv_include_contact}>Kontaktdaten einschließen</Checkbox>
+  </div>
   <Label>Urkundendruck - Schulename:</Label>
   <Textarea value={slug_org_decode}></Textarea>
   <Label>Urkundendruck - Altersgruppe (Achtung, Attributfeld!):</Label>

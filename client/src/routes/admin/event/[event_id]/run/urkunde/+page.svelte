@@ -38,6 +38,13 @@
       .sort((a, b) => a.team.name.localeCompare(b.team.name))
   );
 
+  // Teams for selected group, sorted by rank
+  const groupTeams = $derived(
+    results
+      .filter((r) => r.group === selected_group)
+      .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999))
+  );
+
   // Unified data rows for the current mode: {data, rank?}
   // rank is only set in results mode, used for subset filtering
   type Row = { data: Record<string, string>; rank?: number };
@@ -110,13 +117,6 @@
   let viewer: Viewer | null = $state(null);
 
   let currentTemplate: Template = { basePdf: BLANK_A4_PDF, schemas: [[]] };
-
-  // Teams for selected group, sorted by rank
-  const groupTeams = $derived(
-    results
-      .filter((r) => r.group === selected_group)
-      .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999))
-  );
 
   const selectedGroupName = $derived(
     groups_results.find((g) => g.id === selected_group)?.name ?? ""
