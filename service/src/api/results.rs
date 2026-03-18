@@ -49,7 +49,8 @@ pub async fn set_results(
     })
     .await?
     // map diesel query errors to a 500 error response
-    .map_err(error::ErrorInternalServerError)?;
+    .unwrap();
+    // .map_err(error::ErrorInternalServerError)?;
 
     sse.results_updated(&event_uid, &group_uid, round).await;
 
@@ -61,6 +62,7 @@ pub struct ResultEntry {
     team: Option<String>,
     team_id: Option<String>,
     team_org: Option<String>,
+    team_org_genitive: Option<String>,
     team_genus: Option<String>,
     rank: Option<f32>,
     points_team: Option<f32>,
@@ -140,6 +142,7 @@ pub async fn get_results(
                 team: team.map(|(_, team)| team.name.clone()),
                 team_id: team.map(|(_, team)| team.id.clone()),
                 team_org: team.map(|(org, _)| org.name.clone()),
+                team_org_genitive: team.and_then(|(org, _)| org.name_genitive.clone()),
                 team_genus: team.and_then(|(org, _)| org.genus.clone()),
                 rank: p.rank,
                 points_team: p.points_team,

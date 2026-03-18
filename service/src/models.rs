@@ -36,6 +36,8 @@ pub struct Org {
     pub contact_phone: Option<String>,
     pub last_update: NaiveDateTime,
     pub slug: String,
+    #[diesel(treat_none_as_null = true)]
+    pub name_genitive: Option<String>,
 }
 
 /// New org details.
@@ -545,7 +547,7 @@ pub struct TimetableEntry {
 )]
 #[diesel(table_name = templates)]
 #[diesel(belongs_to(Event))]
-#[diesel(primary_key(event, template_type))]
+#[diesel(primary_key(event, template_type, template_variant))]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct TemplateEntry {
     pub event: String,

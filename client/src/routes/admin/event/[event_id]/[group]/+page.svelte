@@ -132,7 +132,9 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
       for (const event_org of resp_event_orgs.data) {
         const new_teams = event_org.teams
           .filter(
-            (team) => group_replacement.get(team.group_id || "") == group_id,
+            (team) =>
+              group_replacement.get(team.group_id || "") == group_id ||
+              team.group_id == group_id,
           )
           .map((team) => ({
             team: team,
@@ -370,8 +372,9 @@ PaarNr	MNr	Mannschaft		TWZ	T	Attr.	Verein	Land	Punkte	-	MNr	Mannschaft		TWZ	T	At
   <Button color="blue" disabled={pairings.length == 0} on:click={uploadPairings}
     >Upload PAIRINGS for round {round}...</Button
   >
-  <Button color="blue" disabled={results.length == 0} on:click={uploadResults}
-    >Upload Results of round {round}...</Button
+  <Button color="blue" on:click={uploadResults}
+    >{#if results.length == 0}Clear Results{:else}
+      Upload results of round {round}...{/if}</Button
   >
   <div class="text-5xl">Preview</div>
   <Table shadow>

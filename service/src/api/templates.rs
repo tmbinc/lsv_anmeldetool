@@ -57,17 +57,10 @@ pub async fn set_template(
 )]
 pub async fn get_template(
     pool: web::Data<DbPool>,
-    user: LoggedUser,
+    _user: LoggedUser,
     path: Path<(Uuid, String, String)>,
 ) -> Result<Json<String>, ErrorResponse> {
     let (event_uid, template_type, template_variant) = path.into_inner();
-
-    match user.role {
-        Role::Admin => {}
-        _ => {
-            return Err(ErrorResponse::Unauthorized("".to_string()));
-        }
-    };
 
     let data = web::block(move || -> Result<Option<String>, DbError> {
         let mut conn = pool.get()?;

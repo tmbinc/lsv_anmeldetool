@@ -59,7 +59,11 @@ Die	Test-Schule	 Test-Schule.Luebeck@schule.landsh.de	 Test-Straße 1a,  1234
   function update(id: String) {
     let org_to_update = orgs.find((org) => org.id == id);
     if (org_to_update) {
-      updateOrg({ ...org_to_update, org: org_to_update.id });
+      updateOrg({
+        ...org_to_update,
+        org: org_to_update.id,
+        name_genitive: org_to_update.name_genitive || null,
+      });
       changed = changed.filter((item) => item != id);
     }
   }
@@ -154,6 +158,7 @@ Die	Test-Schule	 Test-Schule.Luebeck@schule.landsh.de	 Test-Straße 1a,  1234
     <Table>
       <TableHead>
         <TableHeadCell>Name</TableHeadCell>
+        <TableHeadCell>Genitiv</TableHeadCell>
         <TableHeadCell>Contact Name</TableHeadCell>
         <TableHeadCell>Contact Email</TableHeadCell>
         <TableHeadCell>Contact Phone</TableHeadCell>
@@ -172,6 +177,14 @@ Die	Test-Schule	 Test-Schule.Luebeck@schule.landsh.de	 Test-Straße 1a,  1234
                 disabled={!edit_mode}
                 oninput={() => change(org.id)}
                 bind:value={org.name}
+              /></TableBodyCell
+            >
+            <TableBodyCell
+              ><Input
+                disabled={!edit_mode}
+                oninput={() => change(org.id)}
+                bind:value={org.name_genitive}
+                placeholder="(wie Name)"
               /></TableBodyCell
             >
             <TableBodyCell

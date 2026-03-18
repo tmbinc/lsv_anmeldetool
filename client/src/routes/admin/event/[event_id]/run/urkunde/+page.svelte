@@ -15,12 +15,19 @@
   import { Viewer } from "@pdfme/ui";
   import { BLANK_A4_PDF } from "@pdfme/common";
   import type { Template } from "@pdfme/common";
-  import { getFontsData, plugins, placeholders, buildDataMap, buildInput } from "$lib/urkunde";
+  import { getFontsData, plugins, placeholders, buildDataMap, buildInput, GENUS_MAP } from "$lib/urkunde";
   import { Button } from "flowbite-svelte";
   import { ArrowLeftOutline, FilePdfOutline } from "flowbite-svelte-icons";
+  import FetchErrors from "../../../../../FetchErrors.svelte";
 
   const event_id = page.params.event_id || "";
 
+  const VARIANTS: { value: string; label: string }[] = [
+    { value: "main",          label: "Standard" },
+    { value: "no_background", label: "Ohne Hintergrund" },
+  ];
+
+  let template_variant = $state("main");
   let event_name = $state("");
   let groups_results: Group[] = $state([]);
   let results: ResultEntry[] = $state([]);
@@ -30,10 +37,15 @@
   let generating = $state(false);
   let source_mode = $state<"results" | "teams">("results");
 
-  // Teams mode: flat list of {team, org_name} for selected group, sorted alphabetically
+  // Teams mode: flat list of {team, org_name, org_name_genitive} for selected group, sorted alphabetically
   const groupTeamList = $derived(
     event_orgs
-      .flatMap((eo) => eo.teams.map((t) => ({ team: t, org_name: eo.org.name })))
+      .flatMap((eo) => eo.teams.map((t) => ({
+        team: t,
+        org_name: eo.org.name,
+        org_name_genitive: eo.org.name_genitive ?? eo.org.name,
+        org_genus: GENUS_MAP[eo.org.genus ?? ""] ?? "",
+      })))
       .filter(({ team }) => team.group_id === selected_group)
       .sort((a, b) => a.team.name.localeCompare(b.team.name))
   );
@@ -55,13 +67,14 @@
           data: buildDataMap(e, selectedGroupName, event_name),
           rank: e.rank ?? undefined,
         }))
-      : groupTeamList.map(({ team, org_name }) => ({
+      : groupTeamList.map(({ team, org_name, org_name_genitive, org_genus }) => ({
           data: {
             team:          team.name,
             team_name:     team.name,
             team_id:       team.id,
             org:           org_name,
-            team_genus:    "",
+            org_genitive:  org_name_genitive,
+            team_genus:    org_genus,
             rank:          "",
             points_team:   "",
             points_player: "",
@@ -113,6 +126,7 @@
   }
   let evtSource: EventSource | null = null;
 
+  let fetch_errors: FetchErrors;
   let viewerContainer: HTMLDivElement;
   let viewer: Viewer | null = $state(null);
 
@@ -142,7 +156,7 @@
     const resp = await getTemplate({
       event: event_id,
       template_type: "urkunde",
-      template_variant: "main",
+      template_variant,
     }).result;
     if (resp.ok && resp.data) {
       try {
@@ -150,11 +164,24 @@
       } catch {
         console.error("Failed to parse template");
       }
+    } else {
+      currentTemplate = { basePdf: BLANK_A4_PDF, schemas: [[]] };
     }
+    viewer?.updateTemplate(currentTemplate);
   }
+
+  let mounted = false;
+  $effect(() => {
+    // Re-load template whenever variant changes, but only after initial mount
+    // (initial load is handled inside onMount to preserve ordering with viewer init)
+    if (mounted) loadTemplate();
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    template_variant; // track dependency
+  });
 
   onMount(async () => {
     await loadTemplate();
+    mounted = true;
 
     viewer = new Viewer({
       domContainer: viewerContainer,
@@ -166,19 +193,24 @@
 
     const resp_event = await getEvent({ event: event_id }).result;
     if (resp_event.ok) event_name = resp_event.data.name;
+    else fetch_errors.check(resp_event);
 
     // Load groups directly so the selector works even without any results uploaded
     const resp_groups = await getGroupsForEvent({ event: event_id }).result;
     if (resp_groups.ok) {
-      groups_results = resp_groups.data.filter((g) => !g.replacement);
+      groups_results = resp_groups.data;
       if (!selected_group && groups_results.length > 0) {
         selected_group = groups_results[0].id;
       }
+    } else {
+      fetch_errors.check(resp_groups);
     }
 
     const resp_orgs = await getEventOrgs({ event: event_id }).result;
     if (resp_orgs.ok) {
       event_orgs = resp_orgs.data;
+    } else {
+      fetch_errors.check(resp_orgs);
     }
 
     const results_request = getResults({ event: event_id });
@@ -233,6 +265,7 @@
   }
 </script>
 
+<FetchErrors bind:this={fetch_errors} />
 <div class="flex h-screen flex-col bg-white text-black">
   <!-- Top bar -->
   <div class="flex shrink-0 items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-2">
@@ -242,6 +275,14 @@
     </a>
     <div class="mx-1 h-4 w-px bg-gray-300"></div>
     <span class="text-sm font-semibold text-gray-700">{event_name || "Urkunden"}</span>
+    <select
+      bind:value={template_variant}
+      class="rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+    >
+      {#each VARIANTS as v}
+        <option value={v.value}>{v.label}</option>
+      {/each}
+    </select>
     <a href="/admin/event/{event_id}/pdftemplate/" class="ml-auto text-sm text-gray-400 hover:text-gray-700">
       Vorlage bearbeiten →
     </a>

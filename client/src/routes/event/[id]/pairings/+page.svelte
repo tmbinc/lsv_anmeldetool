@@ -159,10 +159,11 @@
 
     {:else}
       {#each visibleGroups as group (group.id)}
-        {@const groupPairings = pairings.filter((p) =>
-          p.group === group.id &&
-          (org_selected === "*" || org_selected === p.team_home_org || org_selected === p.team_guest_org)
+        {@const allGroupPairings = pairings.filter((p) => p.group === group.id)}
+        {@const groupPairings = allGroupPairings.filter((p) =>
+          org_selected === "*" || org_selected === p.team_home_org || org_selected === p.team_guest_org
         )}
+        {@const hiddenCount = allGroupPairings.length - groupPairings.length}
         {@const round = roundForGroup(group)}
 
         <div id="group-{group.id}" class="scroll-mt-44 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -175,7 +176,7 @@
             {/if}
           </div>
 
-          {#if groupPairings.length === 0}
+          {#if groupPairings.length === 0 && hiddenCount === 0}
             <p class="px-4 py-4 text-sm text-gray-400">Keine Paarungen.</p>
           {:else}
             <div class="flex flex-col gap-1.5 p-2">
@@ -269,6 +270,9 @@
                 </div>
               </div>
             {/each}
+            {#if hiddenCount > 0}
+              <p class="px-2 py-1 text-xs text-gray-400">… und {hiddenCount} weitere Paarung{hiddenCount === 1 ? "" : "en"} (versteckt).</p>
+            {/if}
             </div>
           {/if}
 

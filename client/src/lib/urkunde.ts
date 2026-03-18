@@ -10,7 +10,95 @@ import {
   rectangle,
   ellipse,
 } from "@pdfme/schemas";
+import type { Plugin } from "@pdfme/common";
 import type { ResultEntry } from "../api/api";
+
+// ── URL Image plugin ──────────────────────────────────────────────────────────
+// Stores an image URL as content instead of a base64 data URI.
+// The image is fetched at PDF-generation time, so the template stays small.
+
+const MM_TO_PT = 72 / 25.4;
+
+async function urlToDataUrl(url: string): Promise<string> {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const urlImage: Plugin<any> = {
+  pdf: async (arg) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { value, schema, pdfDoc, page, _cache } = arg as any;
+    const url: string = value || schema.content || "";
+    if (!url) return;
+
+    let embedded = _cache.get(url);
+    if (!embedded) {
+      const dataUrl = await urlToDataUrl(url);
+      const isPng = dataUrl.startsWith("data:image/png;");
+      embedded = await (isPng ? pdfDoc.embedPng(dataUrl) : pdfDoc.embedJpg(dataUrl));
+      _cache.set(url, embedded);
+    }
+
+    const x      = schema.position.x * MM_TO_PT;
+    const width  = schema.width       * MM_TO_PT;
+    const height = schema.height      * MM_TO_PT;
+    const y      = page.getHeight() - schema.position.y * MM_TO_PT - height;
+    page.drawImage(embedded, { x, y, width, height, opacity: schema.opacity ?? 1 });
+  },
+
+  ui: (arg) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { value, schema, rootElement, mode, onChange } = arg as any;
+    const url: string = value || schema.content || "";
+    const editable = mode === "designer";
+
+    rootElement.style.cssText = "width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-sizing:border-box;";
+
+    if (url) {
+      const img = document.createElement("img");
+      img.src = url;
+      img.style.cssText = "max-width:100%;max-height:calc(100% - 28px);object-fit:contain;";
+      rootElement.appendChild(img);
+    }
+
+    if (editable) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "https://…";
+      input.value = url;
+      input.style.cssText = "width:100%;font-size:11px;padding:2px 4px;border:1px solid #ccc;border-radius:3px;box-sizing:border-box;";
+      input.addEventListener("change", () => {
+        if (onChange) onChange({ key: "content", value: input.value });
+      });
+      rootElement.appendChild(input);
+    } else if (!url) {
+      const hint = document.createElement("span");
+      hint.textContent = "Kein Bild";
+      hint.style.cssText = "font-size:11px;color:#999;";
+      rootElement.appendChild(hint);
+    }
+  },
+
+  propPanel: {
+    schema: {},
+    defaultSchema: {
+      name: "",
+      type: "urlImage",
+      content: "",
+      position: { x: 0, y: 0 },
+      width:  40,
+      height: 40,
+      opacity: 1,
+    },
+  },
+};
 
 // ── Fonts ────────────────────────────────────────────────────────────────────
 
@@ -94,6 +182,7 @@ export const plugins = {
   Text: text,
   MultiVariableText: multiVariableText,
   Image: image,
+  UrlImage: urlImage,
   SVG: svg,
   Table: table,
   Line: line,
@@ -108,6 +197,7 @@ export const placeholders: { key: string; label: string }[] = [
   { key: "team_name",     label: "Team-Name" },
   { key: "team_id",       label: "Team-ID" },
   { key: "org",           label: "Schule / Organisation" },
+  { key: "org_genitive",  label: "Schule (Genitiv, z.B. \"des Gymnasiums\")" },
   { key: "team_genus",    label: "Genus (der/die/das)" },
   { key: "rank",          label: "Platz (1, 2, 3, ...)" },
   { key: "points_team",   label: "Mannschaftspunkte" },
@@ -120,7 +210,7 @@ export const placeholders: { key: string; label: string }[] = [
 // ── Data helpers ─────────────────────────────────────────────────────────────
 
 // (Genitiv!)
-const GENUS_MAP: Record<string, string> = { f: "der", m: "des", n: "des" };
+export const GENUS_MAP: Record<string, string> = { f: "der", m: "des", n: "des" };
 
 /** Build the flat variable map for a result entry. */
 export function buildDataMap(
@@ -134,6 +224,7 @@ export function buildDataMap(
     team_name:     team,
     team_id:       entry.team_id ?? "",
     org:           entry.team_org      ?? "",
+    org_genitive:  entry.team_org_genitive ?? entry.team_org ?? "",
     team_genus:    GENUS_MAP[entry.team_genus ?? ""] ?? entry.team_genus ?? "",
     rank:          entry.rank          != null ? String(entry.rank)          : "",
     points_team:   entry.points_team   != null ? String(entry.points_team)   : "",

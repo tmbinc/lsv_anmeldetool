@@ -47,6 +47,7 @@ pub fn insert_new_org(conn: &mut SqliteConnection, nm: &str) -> Result<Org, DbEr
         contact_email_pending: None,
         last_update: Utc::now().naive_utc(),
         slug: nm.to_owned(),
+        name_genitive: None,
     };
 
     diesel::insert_into(orgs).values(&new_org).execute(conn)?;

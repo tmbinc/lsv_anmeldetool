@@ -66,6 +66,7 @@ diesel::table! {
         contact_phone -> Nullable<Text>,
         last_update -> Timestamp,
         slug -> Text,
+        name_genitive -> Nullable<Text>,
     }
 }
 
@@ -149,7 +150,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    templates (event, template_type) {
+    templates (event, template_type, template_variant) {
         event -> Text,
         template_type -> Text,
         template_variant -> Text,

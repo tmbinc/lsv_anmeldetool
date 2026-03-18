@@ -244,7 +244,20 @@ pub async fn get_team(
             if authorized {
                 Ok(Json(team))
             } else {
-                Err(ErrorResponse::Unauthorized("".to_string()))
+                // Return a redacted version of the team data.
+                Ok(Json(Team {
+                    id: team.id,
+                    event: team.event,
+                    org: "".into(),
+                    name: team.name,
+                    group_id: team.group_id,
+                    contact_name: None,
+                    contact_phone: None,
+                    presence_state: "".into(),
+                    comment: None,
+                    changed_since: None,
+                    changed_since_export: false,
+                }))
             }
         }
 

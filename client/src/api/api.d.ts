@@ -321,6 +321,7 @@ export interface components {
       last_update: string;
       name: string;
       name_additional?: string | null;
+      name_genitive?: string | null;
       public: boolean;
       slug: string;
     };
@@ -416,6 +417,7 @@ export interface components {
       team_genus?: string | null;
       team_id?: string | null;
       team_org?: string | null;
+      team_org_genitive?: string | null;
       /** Format: float */
       tie?: number | null;
     };

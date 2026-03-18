@@ -11,7 +11,7 @@
   onMount(async () => {
     const resp = await getGroupsForEvent({ event: event_id }).result;
     if (resp.ok) {
-      groups = resp.data.filter((g) => !g.replacement);
+      groups = resp.data;
     } else {
       fetch_errors.check(resp);
     }
