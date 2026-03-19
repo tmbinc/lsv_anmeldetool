@@ -44,6 +44,9 @@ importers:
       flowbite-svelte-icons:
         specifier: ^2.3.0
         version: 2.3.0(svelte@5.53.6)
+      qrcode:
+        specifier: ^1.5.4
+        version: 1.5.4
       reveal.js:
         specifier: ^5.2.1
         version: 5.2.1
@@ -53,19 +56,22 @@ importers:
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.3.1
-        version: 3.3.1(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21))
+        version: 3.3.1(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0)))
       '@sveltejs/adapter-node':
         specifier: ^5.5.4
-        version: 5.5.4(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21))
+        version: 5.5.4(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0)))
       '@sveltejs/adapter-static':
         specifier: ^3.0.10
-        version: 3.0.10(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21))
+        version: 3.0.10(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0)))
       '@sveltejs/kit':
         specifier: ^2.53.4
-        version: 2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21)
+        version: 2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0))
       '@sveltejs/vite-plugin-svelte':
         specifier: ^4.0.4
-        version: 4.0.4(svelte@5.53.6)(vite@5.4.21)
+        version: 4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0))
+      '@types/qrcode':
+        specifier: ^1.5.6
+        version: 1.5.6
       '@types/reveal.js':
         specifier: ^5.2.2
         version: 5.2.2
@@ -92,7 +98,7 @@ importers:
         version: 5.9.3
       vite:
         specifier: ^5.4.21
-        version: 5.4.21
+        version: 5.4.21(@types/node@25.5.0)
 
 packages:
 
@@ -742,6 +748,12 @@ packages:
   '@types/js-cookie@3.0.6':
     resolution: {integrity: sha512-wkw9yd1kEXOPnvEeEV1Go1MmxtBJL0RR79aOTAApecWFVu7w0NNXNqhcWgvw2YgZDYadliXkl14pa3WXw5jlCQ==}
 
+  '@types/node@25.5.0':
+    resolution: {integrity: sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw==}
+
+  '@types/qrcode@1.5.6':
+    resolution: {integrity: sha512-te7NQcV2BOvdj2b1hCAHzAoMNuj65kNBMz0KBaxM6c3VGBOhU0dURQKOtH8CFNI/dsKkwlv32p26qYQTWoB5bw==}
+
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
 
@@ -784,6 +796,10 @@ packages:
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
+    engines: {node: '>=8'}
+
+  ansi-styles@4.3.0:
+    resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==}
     engines: {node: '>=8'}
 
   antd@5.29.3:
@@ -878,6 +894,10 @@ packages:
     resolution: {integrity: sha512-QOSvevhslijgYwRx6Rv7zKdMF8lbRmx+uQGx2+vDc+KI/eBnsy9kit5aj23AgGu3pa4t9AgwbnXWqS+iOY+2aA==}
     engines: {node: '>= 6'}
 
+  camelcase@5.3.1:
+    resolution: {integrity: sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==}
+    engines: {node: '>=6'}
+
   caniuse-lite@1.0.30001775:
     resolution: {integrity: sha512-s3Qv7Lht9zbVKE9XoTyRG6wVDCKdtOFIjBGg3+Yhn6JaytuNKPIjBMTMIY1AnOH3seL5mvF+x33oGAyK3hVt3A==}
 
@@ -899,6 +919,9 @@ packages:
 
   classnames@2.5.1:
     resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
+
+  cliui@6.0.0:
+    resolution: {integrity: sha512-t6wbgtoCXvAzst7QgXxJYqPt0usEfbgQdftEPbLL/cvv6HPE5VgvqCuAIDR0NgU52ds6rFwqrgakNLrHEjCbrQ==}
 
   clone@2.1.2:
     resolution: {integrity: sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==}
@@ -1008,6 +1031,10 @@ packages:
       supports-color:
         optional: true
 
+  decamelize@1.2.0:
+    resolution: {integrity: sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==}
+    engines: {node: '>=0.10.0'}
+
   decompress-response@4.2.1:
     resolution: {integrity: sha512-jOSne2qbyE+/r8G1VU+G/82LBs2Fs4LAsTiLSHOCOMZQl2OKZ6i8i4IyHemTe+/yIXOtTcRQMzPcgyhoFlqPkw==}
     engines: {node: '>=8'}
@@ -1031,6 +1058,9 @@ packages:
 
   didyoumean@1.2.2:
     resolution: {integrity: sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==}
+
+  dijkstrajs@1.0.3:
+    resolution: {integrity: sha512-qiSlmBq9+BCdCA/L46dw8Uy93mloxsPSbwnm5yrKn2vMPiy8KyAskTF6zuV/j5BMsmOGZDPs7KjU+mjb670kfA==}
 
   dlv@1.1.3:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
@@ -1091,6 +1121,10 @@ packages:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
 
+  find-up@4.1.0:
+    resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
+    engines: {node: '>=8'}
+
   flowbite-datepicker@1.3.2:
     resolution: {integrity: sha512-6Nfm0MCVX3mpaR7YSCjmEO2GO8CDt6CX8ZpQnGdeu03WUCWtEPQ/uy0PUiNtIJjJZWnX0Cm3H55MOhbD1g+E/g==}
 
@@ -1145,6 +1179,10 @@ packages:
 
   gesto@1.19.4:
     resolution: {integrity: sha512-hfr/0dWwh0Bnbb88s3QVJd1ZRJeOWcgHPPwmiH6NnafDYvhTsxg+SLYu+q/oPNh9JS3V+nlr6fNs8kvPAtcRDQ==}
+
+  get-caller-file@2.0.5:
+    resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
+    engines: {node: 6.* || 8.* || >= 10.*}
 
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -1268,6 +1306,10 @@ packages:
 
   locate-character@3.0.0:
     resolution: {integrity: sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA==}
+
+  locate-path@5.0.0:
+    resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
+    engines: {node: '>=8'}
 
   lodash-es@4.17.23:
     resolution: {integrity: sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==}
@@ -1398,6 +1440,18 @@ packages:
   overlap-area@1.1.0:
     resolution: {integrity: sha512-3dlJgJCaVeXH0/eZjYVJvQiLVVrPO4U1ZGqlATtx6QGO3b5eNM6+JgUKa7oStBTdYuGTk7gVoABCW6Tp+dhRdw==}
 
+  p-limit@2.3.0:
+    resolution: {integrity: sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w==}
+    engines: {node: '>=6'}
+
+  p-locate@4.1.0:
+    resolution: {integrity: sha512-R79ZZ/0wAxKGu3oYMlz8jy/kbhsNrS7SKZ7PxEHBgJ5+F2mtFW2fK2cOtBh1cHYkQsbzFV7I+EoRKe6Yt0oK7A==}
+    engines: {node: '>=8'}
+
+  p-try@2.2.0:
+    resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
+    engines: {node: '>=6'}
+
   pako@0.2.9:
     resolution: {integrity: sha512-NUcwaKxUxWrZLpDG+z/xZaCgQITkA/Dv4V/T6bw7VON6l1Xz/VnrBqrYjZQ12TamKHzITTfOEIYUj48y2KXImA==}
 
@@ -1406,6 +1460,10 @@ packages:
 
   pako@2.1.0:
     resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
+
+  path-exists@4.0.0:
+    resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
+    engines: {node: '>=8'}
 
   path-is-absolute@1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
@@ -1443,6 +1501,10 @@ packages:
   pirates@4.0.7:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
+
+  pngjs@5.0.0:
+    resolution: {integrity: sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw==}
+    engines: {node: '>=10.13.0'}
 
   postcss-import@15.1.0:
     resolution: {integrity: sha512-hpr+J05B2FVYUAXHeK1YyI267J/dDDhMU6B6civm8hSY1jYJnBXxzKDKDswzJmtLHryrjhnDjqqp/49t8FALew==}
@@ -1493,6 +1555,11 @@ packages:
 
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
+
+  qrcode@1.5.4:
+    resolution: {integrity: sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -1801,6 +1868,13 @@ packages:
   regenerator-runtime@0.11.1:
     resolution: {integrity: sha512-MguG95oij0fC3QV3URf4V2SDYGJhJnJGqvIIgdECeODCT98wSWDAJ94SSuVpYQUoTcGUIL6L4yNB7j1DFFHSBg==}
 
+  require-directory@2.1.1:
+    resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
+    engines: {node: '>=0.10.0'}
+
+  require-main-filename@2.0.0:
+    resolution: {integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==}
+
   resize-observer-polyfill@1.5.1:
     resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
 
@@ -2026,6 +2100,9 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  undici-types@7.18.2:
+    resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
+
   undici@5.29.0:
     resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
     engines: {node: '>=14.0'}
@@ -2102,11 +2179,21 @@ packages:
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
 
+  which-module@2.0.1:
+    resolution: {integrity: sha512-iBdZ57RDvnOR9AGBhML2vFZf7h8vmBjhoaZqODJBFWHVtKkDmKuHai3cx5PgVMrX5YDNp27AofYbAwctSS+vhQ==}
+
   wide-align@1.1.5:
     resolution: {integrity: sha512-eDMORYaPNZ4sQIuuYPDHdQvf4gyCF9rEEV/yPxGfwPkRodwEgiMUUXTx/dex+Me0wxx53S+NgUHaP7y3MGlDmg==}
 
+  wrap-ansi@6.2.0:
+    resolution: {integrity: sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==}
+    engines: {node: '>=8'}
+
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+
+  y18n@4.0.3:
+    resolution: {integrity: sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==}
 
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
@@ -2116,9 +2203,17 @@ packages:
     engines: {node: '>= 14'}
     hasBin: true
 
+  yargs-parser@18.1.3:
+    resolution: {integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==}
+    engines: {node: '>=6'}
+
   yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
+
+  yargs@15.4.1:
+    resolution: {integrity: sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A==}
+    engines: {node: '>=8'}
 
   zimmerframe@1.1.4:
     resolution: {integrity: sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ==}
@@ -2707,28 +2802,28 @@ snapshots:
     dependencies:
       acorn: 8.16.0
 
-  '@sveltejs/adapter-auto@3.3.1(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21))':
+  '@sveltejs/adapter-auto@3.3.1(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0)))':
     dependencies:
-      '@sveltejs/kit': 2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21)
+      '@sveltejs/kit': 2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0))
       import-meta-resolve: 4.2.0
 
-  '@sveltejs/adapter-node@5.5.4(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21))':
+  '@sveltejs/adapter-node@5.5.4(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0)))':
     dependencies:
       '@rollup/plugin-commonjs': 29.0.0(rollup@4.59.0)
       '@rollup/plugin-json': 6.1.0(rollup@4.59.0)
       '@rollup/plugin-node-resolve': 16.0.3(rollup@4.59.0)
-      '@sveltejs/kit': 2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21)
+      '@sveltejs/kit': 2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0))
       rollup: 4.59.0
 
-  '@sveltejs/adapter-static@3.0.10(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21))':
+  '@sveltejs/adapter-static@3.0.10(@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0)))':
     dependencies:
-      '@sveltejs/kit': 2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21)
+      '@sveltejs/kit': 2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0))
 
-  '@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21)':
+  '@sveltejs/kit@2.53.4(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(typescript@5.9.3)(vite@5.4.21(@types/node@25.5.0))':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@sveltejs/acorn-typescript': 1.0.9(acorn@8.16.0)
-      '@sveltejs/vite-plugin-svelte': 4.0.4(svelte@5.53.6)(vite@5.4.21)
+      '@sveltejs/vite-plugin-svelte': 4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0))
       '@types/cookie': 0.6.0
       acorn: 8.16.0
       cookie: 0.6.0
@@ -2740,29 +2835,29 @@ snapshots:
       set-cookie-parser: 3.0.1
       sirv: 3.0.2
       svelte: 5.53.6
-      vite: 5.4.21
+      vite: 5.4.21(@types/node@25.5.0)
     optionalDependencies:
       typescript: 5.9.3
 
-  '@sveltejs/vite-plugin-svelte-inspector@3.0.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(vite@5.4.21)':
+  '@sveltejs/vite-plugin-svelte-inspector@3.0.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 4.0.4(svelte@5.53.6)(vite@5.4.21)
+      '@sveltejs/vite-plugin-svelte': 4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0))
       debug: 4.4.3
       svelte: 5.53.6
-      vite: 5.4.21
+      vite: 5.4.21(@types/node@25.5.0)
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21)':
+  '@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 3.0.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21))(svelte@5.53.6)(vite@5.4.21)
+      '@sveltejs/vite-plugin-svelte-inspector': 3.0.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0)))(svelte@5.53.6)(vite@5.4.21(@types/node@25.5.0))
       debug: 4.4.3
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.21
       svelte: 5.53.6
-      vite: 5.4.21
-      vitefu: 1.1.2(vite@5.4.21)
+      vite: 5.4.21(@types/node@25.5.0)
+      vitefu: 1.1.2(vite@5.4.21(@types/node@25.5.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -2775,6 +2870,14 @@ snapshots:
   '@types/estree@1.0.8': {}
 
   '@types/js-cookie@3.0.6': {}
+
+  '@types/node@25.5.0':
+    dependencies:
+      undici-types: 7.18.2
+
+  '@types/qrcode@1.5.6':
+    dependencies:
+      '@types/node': 25.5.0
 
   '@types/resolve@1.20.2': {}
 
@@ -2819,8 +2922,11 @@ snapshots:
 
   ansi-colors@4.1.3: {}
 
-  ansi-regex@5.0.1:
-    optional: true
+  ansi-regex@5.0.1: {}
+
+  ansi-styles@4.3.0:
+    dependencies:
+      color-convert: 2.0.1
 
   antd@5.29.3(date-fns@4.1.0)(react-dom@16.14.0(react@16.14.0))(react@16.14.0):
     dependencies:
@@ -2970,6 +3076,8 @@ snapshots:
 
   camelcase-css@2.0.1: {}
 
+  camelcase@5.3.1: {}
+
   caniuse-lite@1.0.30001775: {}
 
   canvas@2.11.2:
@@ -3002,6 +3110,12 @@ snapshots:
     optional: true
 
   classnames@2.5.1: {}
+
+  cliui@6.0.0:
+    dependencies:
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      wrap-ansi: 6.2.0
 
   clone@2.1.2: {}
 
@@ -3098,6 +3212,8 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
+  decamelize@1.2.0: {}
+
   decompress-response@4.2.1:
     dependencies:
       mimic-response: 2.1.0
@@ -3117,6 +3233,8 @@ snapshots:
 
   didyoumean@1.2.2: {}
 
+  dijkstrajs@1.0.3: {}
+
   dlv@1.1.3: {}
 
   dom-align@1.12.4: {}
@@ -3127,8 +3245,7 @@ snapshots:
 
   electron-to-chromium@1.5.302: {}
 
-  emoji-regex@8.0.0:
-    optional: true
+  emoji-regex@8.0.0: {}
 
   esbuild@0.21.5:
     optionalDependencies:
@@ -3189,6 +3306,11 @@ snapshots:
   fill-range@7.1.1:
     dependencies:
       to-regex-range: 5.0.1
+
+  find-up@4.1.0:
+    dependencies:
+      locate-path: 5.0.0
+      path-exists: 4.0.0
 
   flowbite-datepicker@1.3.2(rollup@4.59.0):
     dependencies:
@@ -3287,6 +3409,8 @@ snapshots:
       '@daybrush/utils': 1.13.0
       '@scena/event-emitter': 1.0.5
 
+  get-caller-file@2.0.5: {}
+
   glob-parent@5.1.2:
     dependencies:
       is-glob: 4.0.3
@@ -3353,8 +3477,7 @@ snapshots:
 
   is-extglob@2.1.1: {}
 
-  is-fullwidth-code-point@3.0.0:
-    optional: true
+  is-fullwidth-code-point@3.0.0: {}
 
   is-glob@4.0.3:
     dependencies:
@@ -3402,6 +3525,10 @@ snapshots:
   lines-and-columns@1.2.4: {}
 
   locate-character@3.0.0: {}
+
+  locate-path@5.0.0:
+    dependencies:
+      p-locate: 4.1.0
 
   lodash-es@4.17.23: {}
 
@@ -3525,11 +3652,23 @@ snapshots:
     dependencies:
       '@daybrush/utils': 1.13.0
 
+  p-limit@2.3.0:
+    dependencies:
+      p-try: 2.2.0
+
+  p-locate@4.1.0:
+    dependencies:
+      p-limit: 2.3.0
+
+  p-try@2.2.0: {}
+
   pako@0.2.9: {}
 
   pako@1.0.11: {}
 
   pako@2.1.0: {}
+
+  path-exists@4.0.0: {}
 
   path-is-absolute@1.0.1:
     optional: true
@@ -3558,6 +3697,8 @@ snapshots:
   pify@2.3.0: {}
 
   pirates@4.0.7: {}
+
+  pngjs@5.0.0: {}
 
   postcss-import@15.1.0(postcss@8.5.6):
     dependencies:
@@ -3602,6 +3743,12 @@ snapshots:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
+
+  qrcode@1.5.4:
+    dependencies:
+      dijkstrajs: 1.0.3
+      pngjs: 5.0.0
+      yargs: 15.4.1
 
   queue-microtask@1.2.3: {}
 
@@ -4046,6 +4193,10 @@ snapshots:
 
   regenerator-runtime@0.11.1: {}
 
+  require-directory@2.1.1: {}
+
+  require-main-filename@2.0.0: {}
+
   resize-observer-polyfill@1.5.1: {}
 
   resolve@1.22.11:
@@ -4137,8 +4288,7 @@ snapshots:
   semver@7.7.4:
     optional: true
 
-  set-blocking@2.0.0:
-    optional: true
+  set-blocking@2.0.0: {}
 
   set-cookie-parser@3.0.1: {}
 
@@ -4176,7 +4326,6 @@ snapshots:
       emoji-regex: 8.0.0
       is-fullwidth-code-point: 3.0.0
       strip-ansi: 6.0.1
-    optional: true
 
   string_decoder@1.3.0:
     dependencies:
@@ -4186,7 +4335,6 @@ snapshots:
   strip-ansi@6.0.1:
     dependencies:
       ansi-regex: 5.0.1
-    optional: true
 
   stylis@4.3.6: {}
 
@@ -4344,6 +4492,8 @@ snapshots:
 
   typescript@5.9.3: {}
 
+  undici-types@7.18.2: {}
+
   undici@5.29.0:
     dependencies:
       '@fastify/busboy': 2.1.1
@@ -4376,17 +4526,18 @@ snapshots:
       react: 16.14.0
       react-dom: 16.14.0(react@16.14.0)
 
-  vite@5.4.21:
+  vite@5.4.21(@types/node@25.5.0):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.6
       rollup: 4.59.0
     optionalDependencies:
+      '@types/node': 25.5.0
       fsevents: 2.3.3
 
-  vitefu@1.1.2(vite@5.4.21):
+  vitefu@1.1.2(vite@5.4.21(@types/node@25.5.0)):
     optionalDependencies:
-      vite: 5.4.21
+      vite: 5.4.21(@types/node@25.5.0)
 
   webidl-conversions@3.0.1:
     optional: true
@@ -4397,13 +4548,23 @@ snapshots:
       webidl-conversions: 3.0.1
     optional: true
 
+  which-module@2.0.1: {}
+
   wide-align@1.1.5:
     dependencies:
       string-width: 4.2.3
     optional: true
 
+  wrap-ansi@6.2.0:
+    dependencies:
+      ansi-styles: 4.3.0
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+
   wrappy@1.0.2:
     optional: true
+
+  y18n@4.0.3: {}
 
   yallist@4.0.0:
     optional: true
@@ -4411,7 +4572,26 @@ snapshots:
   yaml@2.7.0:
     optional: true
 
+  yargs-parser@18.1.3:
+    dependencies:
+      camelcase: 5.3.1
+      decamelize: 1.2.0
+
   yargs-parser@21.1.1: {}
+
+  yargs@15.4.1:
+    dependencies:
+      cliui: 6.0.0
+      decamelize: 1.2.0
+      find-up: 4.1.0
+      get-caller-file: 2.0.5
+      require-directory: 2.1.1
+      require-main-filename: 2.0.0
+      set-blocking: 2.0.0
+      string-width: 4.2.3
+      which-module: 2.0.1
+      y18n: 4.0.3
+      yargs-parser: 18.1.3
 
   zimmerframe@1.1.4: {}
 

@@ -9,6 +9,7 @@
     type TimetableRow,
   } from "../../../../api/api";
   import { page } from "$app/state";
+  import QrOverlay from "$lib/QrOverlay.svelte";
 
   let loading = $state(true);
   let failed_load = $state(false);
@@ -114,7 +115,9 @@
     return unique_names.map((name) => ({
       name,
       flags: items.find((f) => f.name == name)?.flags || "",
-      groups: items.filter((f) => f.name == name).map((r) => groupnames.get(r.group) || ""),
+      groups: items
+        .filter((f) => f.name == name)
+        .map((r) => groupnames.get(r.group) || ""),
     }));
   }
 
@@ -134,17 +137,28 @@
   }
 
   const visibleGroups = $derived(
-    groups_pairings.filter((g) => !g.replacement && enabled_groups.includes(g.id))
+    groups_pairings.filter(
+      (g) => !g.replacement && enabled_groups.includes(g.id),
+    ),
   );
 </script>
 
-<main class="h-screen w-screen flex flex-col overflow-hidden bg-gray-950 text-white">
-
+<QrOverlay
+  url="{typeof window !== 'undefined'
+    ? window.location.origin
+    : ''}/event/{event_id}/timetable"
+/>
+<main
+  class="h-screen w-screen flex flex-col overflow-hidden bg-gray-950 text-white"
+>
   <!-- ── Timetable bar ──────────────────────────────────────────── -->
-  <header class="shrink-0 flex items-center gap-3 border-b border-white/10 px-5 py-2 min-w-0">
-
+  <header
+    class="shrink-0 flex items-center gap-3 border-b border-white/10 px-5 py-2 min-w-0"
+  >
     <!-- Event name -->
-    <span class="shrink-0 text-xs font-semibold uppercase tracking-widest text-white/30">
+    <span
+      class="shrink-0 text-xs font-semibold uppercase tracking-widest text-white/30"
+    >
       {event_name}
     </span>
 
@@ -162,14 +176,26 @@
             <span class="shrink-0 text-white/20 px-0.5">›</span>
           {/if}
 
-          <div class="flex shrink-0 items-baseline gap-1.5 {isActive ? 'text-white' : isNext ? 'text-white/60' : 'text-white/35'}">
+          <div
+            class="flex shrink-0 items-baseline gap-1.5 {isActive
+              ? 'text-white'
+              : isNext
+                ? 'text-white/60'
+                : 'text-white/35'}"
+          >
             <!-- Time / state pill -->
             {#if isActive}
-              <span class="rounded bg-amber-400 px-1.5 py-0.5 text-xs font-bold leading-none text-gray-900">
+              <span
+                class="rounded bg-amber-400 px-1.5 py-0.5 text-xs font-bold leading-none text-gray-900"
+              >
                 Jetzt
               </span>
             {:else}
-              <span class="tabular-nums text-xs {isNext ? 'text-amber-400/80' : 'text-white/30'}">
+              <span
+                class="tabular-nums text-xs {isNext
+                  ? 'text-amber-400/80'
+                  : 'text-white/30'}"
+              >
                 {timeLabel(key)}
               </span>
             {/if}
@@ -177,7 +203,10 @@
             <!-- Entry names -->
             {#each entries as row}
               <span class="font-medium {isActive ? 'text-white' : ''}">
-                {row.name}{#if groupnames.size !== row.groups.length}<span class="ml-1 text-xs opacity-50">({row.groups.sort().join(", ")})</span>{/if}
+                {row.name}{#if groupnames.size !== row.groups.length}<span
+                    class="ml-1 text-xs opacity-50"
+                    >({row.groups.sort().join(", ")})</span
+                  >{/if}
               </span>
             {/each}
           </div>
@@ -195,7 +224,7 @@
   -->
   <div
     class="flex-1 min-h-0 overflow-hidden p-3"
-    style="columns: 4; column-gap: 0.75rem; column-fill: auto;"
+    style="columns: 3; column-gap: 0.75rem; column-fill: auto;"
   >
     {#each visibleGroups as group (group.id)}
       <!-- Header: break-after-avoid keeps it attached to the first pairing row -->
@@ -204,10 +233,14 @@
         style="background-color: {group.color};"
         role="button"
         tabindex="0"
-        ondblclick={() => { enabled_groups = enabled_groups.filter((f) => f != group.id); }}
+        ondblclick={() => {
+          enabled_groups = enabled_groups.filter((f) => f != group.id);
+        }}
       >
         <span class="font-bold text-sm">{group.name}</span>
-        <span class="text-xs font-medium opacity-70">Runde {roundForGroup(group)}</span>
+        <span class="text-xs font-medium opacity-70"
+          >Runde {roundForGroup(group)}</span
+        >
       </div>
 
       {#each pairings.filter((p) => p.group === group.id) as pairing}
@@ -218,35 +251,63 @@
           row carries a visible color marker even when the group header is in a
           previous column.
         -->
-        <div class="flex items-stretch border-b border-white/25 text-sm break-inside-avoid" style="border-left: 3px solid {group.color};">
+        <div
+          class="flex items-stretch border-b border-white/25 text-sm break-inside-avoid"
+          style="border-left: 3px solid {group.color};"
+        >
           <!-- Table number: group-colored background, dark text, vertically centred -->
-          <div class="flex w-10 shrink-0 items-center justify-center text-2xl font-black text-gray-900 tabular-nums" style="background-color: {group.color};">
+          <div
+            class="flex w-10 shrink-0 items-center justify-center text-2xl font-black text-gray-900 tabular-nums"
+            style="background-color: {group.color};"
+          >
             {pairing.table}
           </div>
           <!-- Home team -->
           <div class="flex min-w-0 flex-1 flex-col justify-center px-2 py-1.5">
             <div class="flex min-w-0 items-baseline gap-1">
-              <div class="truncate font-bold leading-tight text-white" style="direction: rtl;">{pairing.team_home ?? "–"}</div>
+              <div
+                class="truncate font-bold leading-tight text-white"
+                style="direction: rtl;"
+              >
+                {pairing.team_home ?? "–"}
+              </div>
               {#if pairing.points_home != null}
-                <span class="shrink-0 tabular-nums text-xs text-white/50">({fmt(pairing.points_home)})</span>
+                <span class="shrink-0 tabular-nums text-xs text-white/50"
+                  >({fmt(pairing.points_home)})</span
+                >
               {/if}
             </div>
             {#if pairing.team_home_org}
-              <div class="truncate text-xs leading-tight text-white/55">{pairing.team_home_org}</div>
+              <div class="truncate text-xs leading-tight text-white/55">
+                {pairing.team_home_org}
+              </div>
             {/if}
           </div>
           <!-- Separator -->
-          <div class="flex w-5 shrink-0 items-center justify-center border-x border-white/15 text-xs font-bold text-white/25">:</div>
+          <div
+            class="flex w-5 shrink-0 items-center justify-center border-x border-white/15 text-xs font-bold text-white/25"
+          >
+            :
+          </div>
           <!-- Guest team -->
           <div class="flex min-w-0 flex-1 flex-col justify-center px-2 py-1.5">
             <div class="flex min-w-0 items-baseline gap-1">
-              <div class="truncate font-bold leading-tight text-white" style="direction: rtl;">{pairing.team_guest ?? "spielfrei"}</div>
+              <div
+                class="truncate font-bold leading-tight text-white"
+                style="direction: rtl;"
+              >
+                {pairing.team_guest ?? "spielfrei"}
+              </div>
               {#if pairing.points_guest != null}
-                <span class="shrink-0 tabular-nums text-xs text-white/50">({fmt(pairing.points_guest)})</span>
+                <span class="shrink-0 tabular-nums text-xs text-white/50"
+                  >({fmt(pairing.points_guest)})</span
+                >
               {/if}
             </div>
             {#if pairing.team_guest_org}
-              <div class="truncate text-xs leading-tight text-white/55">{pairing.team_guest_org}</div>
+              <div class="truncate text-xs leading-tight text-white/55">
+                {pairing.team_guest_org}
+              </div>
             {/if}
           </div>
         </div>
@@ -256,5 +317,4 @@
       <div class="h-2"></div>
     {/each}
   </div>
-
 </main>

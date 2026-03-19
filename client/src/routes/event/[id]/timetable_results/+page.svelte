@@ -8,6 +8,7 @@
     type TimetableRow,
   } from "../../../../api/api";
   import { page } from "$app/state";
+  import QrOverlay from "$lib/QrOverlay.svelte";
 
   let event_name = $state("");
   const event_id = page.params.id || "";
@@ -115,6 +116,7 @@
   );
 </script>
 
+<QrOverlay url="{typeof window !== 'undefined' ? window.location.origin : ''}/event/{event_id}/timetable" />
 <main class="h-screen w-screen flex flex-col overflow-hidden bg-gray-950 text-white">
 
   <!-- ── Timetable bar ──────────────────────────────────────────── -->
