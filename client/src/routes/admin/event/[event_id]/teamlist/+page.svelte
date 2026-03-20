@@ -5,6 +5,7 @@
     getEventOrgs,
     getGroupsForEvent,
     type EventOrg,
+    type Group,
   } from "../../../../../api/api";
   import FetchErrors from "../../../../FetchErrors.svelte";
 
@@ -12,11 +13,14 @@
   let fetch_errors: FetchErrors;
 
   let event_orgs: EventOrg[] = $state([]);
+  let groups: Group[] = $state([]);
   let groupnames = $state(new Map<string, string>());
   let loading = $state(true);
 
   let show_changed = $state(false);
   let show_state   = $state(false);
+  let sort_by_group = $state(false);
+  let show_delimiters = $state(false);
 
   onMount(async () => {
     const resp = await getEventOrgs({ event: event_id }).result;
@@ -28,6 +32,7 @@
 
     const resp_groups = await getGroupsForEvent({ event: event_id }).result;
     if (resp_groups.ok) {
+      groups = resp_groups.data;
       groupnames = new Map(resp_groups.data.map((g) => [g.id, g.name]));
     }
 
@@ -56,6 +61,25 @@
       })
   );
 
+  // Groups sorted by name; within each group, orgs sorted by name; within each
+  // org, teams sorted alphabetically — filtered to only teams in that group.
+  const sortedByGroup = $derived.by(() =>
+    [...groups]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .flatMap((group) => {
+        const orgs = event_orgs
+          .map((eo) => ({
+            event_org: eo,
+            teams: [...eo.teams]
+              .filter((t) => t.group_id === group.id)
+              .sort((a, b) => a.name.localeCompare(b.name)),
+          }))
+          .filter(({ teams }) => teams.length > 0)
+          .sort((a, b) => a.event_org.org.name.localeCompare(b.event_org.org.name));
+        return orgs.length > 0 ? [{ group, orgs }] : [];
+      })
+  );
+
   // Unique "Name <email>" strings for every org that has teams.
   const emailList = $derived.by(() => {
     const seen = new Set<string>();
@@ -81,7 +105,7 @@
 <main class="mx-auto max-w-3xl px-6 py-8">
 
   <!-- Options -->
-  <div class="mb-8 flex flex-wrap gap-6 rounded-xl border border-gray-200 bg-gray-50 px-5 py-3.5">
+  <div class="print:hidden mb-8 flex flex-wrap gap-6 rounded-xl border border-gray-200 bg-gray-50 px-5 py-3.5">
     <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700 select-none">
       <input type="checkbox" bind:checked={show_changed} class="h-4 w-4 rounded border-gray-300 accent-amber-500" />
       Geänderte Teams markieren
@@ -90,6 +114,20 @@
       <input type="checkbox" bind:checked={show_state} class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
       Anwesenheitsstatus anzeigen
     </label>
+    <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700 select-none">
+      <input type="checkbox" bind:checked={sort_by_group} class="h-4 w-4 rounded border-gray-300 accent-purple-600" />
+      Nach Gruppen sortieren
+    </label>
+    <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700 select-none">
+      <input type="checkbox" bind:checked={show_delimiters} class="h-4 w-4 rounded border-gray-300 accent-gray-500" />
+      Trennlinien zwischen Teams
+    </label>
+    <button
+      onclick={() => window.print()}
+      class="ml-auto rounded-lg bg-gray-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
+    >
+      Drucken
+    </button>
   </div>
 
   {#if loading}
@@ -97,6 +135,49 @@
 
   {:else if sortedOrgs.length === 0}
     <p class="text-sm text-gray-400">Keine angemeldeten Teams gefunden.</p>
+
+  {:else if sort_by_group}
+    <!-- ── Per-group sections ───────────────────────────────────────── -->
+    {#each sortedByGroup as { group, orgs }, gi}
+      <section class="{gi > 0 ? 'mt-7 print:mt-0 print:break-before-page' : ''}">
+        <!-- Group heading -->
+        <h2 class="mb-4 border-b-4 pb-1.5 text-lg font-bold text-gray-900" style="border-color: {group.color};">
+          {group.name}
+        </h2>
+
+        <div class="space-y-5 pl-2">
+          {#each orgs as { event_org, teams }}
+            <div>
+              <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-gray-500">
+                {event_org.org.name}
+              </p>
+              <ol class="{show_delimiters ? '' : 'space-y-px'} pl-3">
+                {#each teams as team, j}
+                  {@const absent = show_state && team.presence_state === "absent"}
+                  {@const changed = show_changed && team.changed_since_export}
+                  <li class="flex items-center gap-x-2 text-sm leading-snug
+                    {show_delimiters ? 'border border-gray-300 px-2 py-1.5 -mx-2 ' + (j > 0 ? '-mt-px' : '') : ''}
+                    {changed ? 'bg-amber-50' : ''}">
+                    <span class="w-5 shrink-0 text-right tabular-nums text-gray-400">{j + 1}.</span>
+                    <span class="flex-1 font-medium {absent ? 'line-through text-gray-400' : 'text-gray-900'}">{team.name}</span>
+                    {#if changed}
+                      <span class="rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-900">neu</span>
+                    {/if}
+                    {#if show_state}
+                      {@const icon = presenceIcon(team.presence_state)}
+                      <span class="{icon.class}">{icon.symbol}</span>
+                    {/if}
+                    {#if show_delimiters}
+                      <span class="ml-auto shrink-0 h-5 w-5 border border-gray-400"></span>
+                    {/if}
+                  </li>
+                {/each}
+              </ol>
+            </div>
+          {/each}
+        </div>
+      </section>
+    {/each}
 
   {:else}
     <!-- ── Per-org sections ─────────────────────────────────────────── -->
@@ -118,19 +199,24 @@
               <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-gray-400">
                 {groupName}
               </p>
-              <ol class="space-y-px pl-3">
+              <ol class="{show_delimiters ? '' : 'space-y-px'} pl-3">
                 {#each teams as team, j}
                   {@const absent = show_state && team.presence_state === "absent"}
                   {@const changed = show_changed && team.changed_since_export}
-                  <li class="flex flex-wrap items-baseline gap-x-2 text-sm leading-snug {changed ? 'bg-amber-50 -mx-1 px-1 rounded' : ''}">
+                  <li class="flex items-center gap-x-2 text-sm leading-snug
+                    {show_delimiters ? 'border border-gray-300 px-2 py-1.5 -mx-2 ' + (j > 0 ? '-mt-px' : '') : ''}
+                    {changed ? 'bg-amber-50' : ''}">
                     <span class="w-5 shrink-0 text-right tabular-nums text-gray-400">{j + 1}.</span>
-                    <span class="font-medium {absent ? 'line-through text-gray-400' : 'text-gray-900'}">{team.name}</span>
+                    <span class="flex-1 font-medium {absent ? 'line-through text-gray-400' : 'text-gray-900'}">{team.name}</span>
                     {#if changed}
                       <span class="rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-900">neu</span>
                     {/if}
                     {#if show_state}
                       {@const icon = presenceIcon(team.presence_state)}
                       <span class="{icon.class}">{icon.symbol}</span>
+                    {/if}
+                    {#if show_delimiters}
+                      <span class="ml-auto shrink-0 h-5 w-5 border border-gray-400"></span>
                     {/if}
                   </li>
                 {/each}
@@ -143,8 +229,8 @@
 
     <!-- ── Email list ──────────────────────────────────────────────── -->
     {#if emailList.length > 0}
-      <hr class="my-8 border-gray-200" />
-      <section>
+      <hr class="my-8 border-gray-200 print:hidden" />
+      <section class="print:hidden">
         <h2 class="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-400">
           E-Mail-Empfänger
         </h2>
